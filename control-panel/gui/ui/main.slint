@@ -1,0 +1,87 @@
+import { VerticalBox, HorizontalBox, Palette, StyleMetrics, Button } from "std-widgets.slint";
+import { StatusBar } from "statusbar.slint";
+
+export component AppWindow inherits Window {
+
+    in-out property <bool> lora_attached: true;
+    in-out property <bool> lora_connected: false;
+
+    in-out property <bool> wifi_attached: false;
+    in-out property <bool> wifi_connected: false;
+
+    title: "Communication Module Control Panel";
+    preferred-width: 1200px;
+    preferred-height: 800px;
+    min-width: 400px;
+    min-height: 300px;
+    icon: @image-url("../assets/app_icon.png");
+
+    background: black;
+
+    HorizontalLayout {
+        spacing: 1px;
+
+        Rectangle {
+            background: Palette.background;
+            width: 50%;
+
+            VerticalLayout {
+                lora_status := StatusBar {
+                    subject: "LoRa";
+                    attached: lora_attached;
+                    connected: lora_connected;
+                    instruction: "Pinging...";
+                }
+
+                VerticalLayout {
+                    alignment: LayoutAlignment.start;
+                    padding: 4px;
+                    spacing: 4px;
+
+
+                    Text {
+                        text: "TODO";
+                        horizontal-alignment: center;
+                    }
+
+
+                    Rectangle {}
+                }
+            }
+
+
+        }
+
+        Rectangle {
+            background: Palette.background;
+            width: 50%;
+
+            VerticalLayout {
+                wifi_status := StatusBar {
+                    subject: "WiFi";
+                    attached: wifi_attached;
+                    connected: wifi_connected;
+                    instruction: "First connect via LoRa, then enable WiFi";
+                }
+
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 4px;
+
+
+                    Button {
+                        horizontal-stretch: 0;
+                        vertical-stretch: 0;
+
+                        text: "Dump Data";
+                        enabled: root.wifi_connected;
+
+                        
+                    }
+
+                    Rectangle {}
+                }
+            }
+        }
+    }
+}

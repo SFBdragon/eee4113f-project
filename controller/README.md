@@ -1,3 +1,0 @@
-# Receiver/Controller Software 
-
-TODO
