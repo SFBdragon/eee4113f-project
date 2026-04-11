@@ -2,5 +2,7 @@
 resolver = "3"
 
 members = [
-    "gui",
+    "control-sys",
+    "control-core",
+    "control-gui",
 ]

@@ -1,13 +1,17 @@
 import { VerticalBox, HorizontalBox, Palette, StyleMetrics, Button } from "std-widgets.slint";
 import { StatusBar } from "statusbar.slint";
 
-export component AppWindow inherits Window {
-
+export global GlobalAppState {
     in-out property <bool> lora_attached: true;
     in-out property <bool> lora_connected: false;
 
     in-out property <bool> wifi_attached: false;
     in-out property <bool> wifi_connected: false;
+
+
+}
+
+export component AppWindow inherits Window {
 
     title: "Communication Module Control Panel";
     preferred-width: 1200px;
@@ -28,8 +32,8 @@ export component AppWindow inherits Window {
             VerticalLayout {
                 lora_status := StatusBar {
                     subject: "LoRa";
-                    attached: lora_attached;
-                    connected: lora_connected;
+                    attached: GlobalAppState.lora_attached;
+                    connected: GlobalAppState.lora_connected;
                     instruction: "Pinging...";
                 }
 
@@ -59,8 +63,8 @@ export component AppWindow inherits Window {
             VerticalLayout {
                 wifi_status := StatusBar {
                     subject: "WiFi";
-                    attached: wifi_attached;
-                    connected: wifi_connected;
+                    attached: GlobalAppState.wifi_attached;
+                    connected: GlobalAppState.wifi_connected;
                     instruction: "First connect via LoRa, then enable WiFi";
                 }
 
@@ -74,7 +78,7 @@ export component AppWindow inherits Window {
                         vertical-stretch: 0;
 
                         text: "Dump Data";
-                        enabled: root.wifi_connected;
+                        enabled: GlobalAppState.wifi_connected;
 
                         
                     }

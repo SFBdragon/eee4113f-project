@@ -840,6 +840,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "control-core"
+version = "0.1.0"
+dependencies = [
+ "control-sys",
+]
+
+[[package]]
+name = "control-gui"
+version = "0.1.0"
+dependencies = [
+ "crossbeam-channel",
+ "slint",
+ "slint-build",
+]
+
+[[package]]
+name = "control-sys"
+version = "0.1.0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1775,14 +1798,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c4ee00b289aba7a9e5306d57c2d05499b2e5dc427f84ac708bd2c090212cf3e"
 dependencies = [
  "gl_generator",
-]
-
-[[package]]
-name = "gui"
-version = "0.1.0"
-dependencies = [
- "slint",
- "slint-build",
 ]
 
 [[package]]

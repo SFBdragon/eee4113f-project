@@ -1,12 +1,11 @@
 [package]
-name = "gui"
+name = "control-sys"
 version = "0.1.0"
 edition = "2024"
-publish = false
 build = "build.rs"
+links = "nicdrivers"
 
 [dependencies]
-slint = "1.15.1"
 
 [build-dependencies]
-slint-build = "1.15.1"
+cc = "1"

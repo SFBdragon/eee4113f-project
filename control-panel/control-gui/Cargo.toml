@@ -1,0 +1,13 @@
+[package]
+name = "control-gui"
+version = "0.1.0"
+edition = "2024"
+publish = false
+build = "build.rs"
+
+[dependencies]
+crossbeam-channel = "0.5.15"
+slint = "1.15.1"
+
+[build-dependencies]
+slint-build = "1.15.1"
