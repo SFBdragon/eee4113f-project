@@ -1,0 +1,28 @@
+# --- STM32/CubeIDE Build Artifacts ---
+Debug/
+Release/
+bin/
+obj/
+*.elf
+*.bin
+*.map
+*.list
+*.o
+*.d
+*.su
+*.cyclomatic
+
+# --- CubeIDE/Eclipse Local Settings ---
+.metadata/
+.settings/
+.launch
+*.launch
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Temporary/Backup Files ---
+*~
+*.bak
+*.tmps

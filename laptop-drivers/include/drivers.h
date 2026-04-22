@@ -32,6 +32,9 @@ typedef uintptr_t BufLen;
 #define MAX_LORA_RECV_PACKET_LEN 64
 #define MAX_LORA_SEND_PACKET_LEN 64
 
+// The number of bytes the LoRa CRC should have.
+#define LORA_CRC_BYTES 2
+
 // These are not final. Alter these if necessary.
 #define MAX_WIFI_RECV_PACKET_LEN 1500
 #define MAX_WIFI_SEND_PACKET_LEN 1500
