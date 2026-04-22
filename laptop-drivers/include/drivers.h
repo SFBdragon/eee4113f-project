@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -74,8 +75,10 @@ Status initialize_wifi_module();
 void shutdown_wifi_module();
 
 // Read the memory from [data, data + len) bytes and send it as the data payload for a WiFi packet.
-Status send_wifi_packet(uint8_t *data, BufLen len);
+// `destmac` specified the target MAC address. This may be FF:FF:FF:FF:FF:FF (broadcast) or a device MAC.
+Status send_wifi_packet(uint64_t destmac, uint8_t *data, BufLen len);
 
 // Block until a WiFi packet data payload is received.
 // Writes the payload bytes into `data` and the payload length into `len`.
-Status recv_wifi_packet(uint8_t data[MAX_WIFI_RECV_PACKET_LEN], BufLen *len);
+// Writes the sender's MAC into the low 48 bits of `srcmac`.
+Status recv_wifi_packet(uint64_t *srcmac, uint8_t data[MAX_WIFI_RECV_PACKET_LEN], BufLen *len);
