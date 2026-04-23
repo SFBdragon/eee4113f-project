@@ -25,8 +25,8 @@ unsafe extern "C" {
     pub safe fn initialize_wifi_module() -> Status;
     pub safe fn shutdown_wifi_module();
 
-    pub safe fn send_wifi_packet(data: *const u8, len: usize) -> Status;
-    pub safe fn recv_wifi_packet(data: *mut [u8; MAX_LORA_RECV_PACKET_LEN], len: *mut usize) -> Status;
+    pub safe fn send_wifi_packet(mac_dst: u64, data: *const u8, len: usize) -> Status;
+    pub safe fn recv_wifi_packet(mac_src: u64, data: *mut [u8; MAX_LORA_RECV_PACKET_LEN], len: *mut usize) -> Status;
 }
 
 #[cfg(test)]
