@@ -80,6 +80,22 @@ static void MX_SDMMC1_SD_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+  #include <stdio.h>
+
+  // SETUP FOR SERIAL COMS TO LAPTOP
+  #ifdef __GNUC__
+    #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+  #else
+    #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+  #endif
+
+  PUTCHAR_PROTOTYPE
+  {
+    // Check that your UART handle is named huart3
+    HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    return ch;
+  }
+
 /* USER CODE END 0 */
 
 /**
@@ -136,6 +152,24 @@ int main(void)
   RTC_DateTypeDef sDate = {0};
   uint32_t count = 0; // Incrementing timer
   char oled_buffer[20]; // Buffer to hold the formatted string
+  char oled_SD_buffer[20]; // Buffer to hold the formatted string
+ 
+  // SDMMC TESTING
+  // FATFS TESTING
+
+
+
+  //hsd1.SdCard.BlockSize; //TODO: PRINT TO OLED
+  //sprintf(oled_buffer, "Block Size: %lu", hsd1.SdCard.BlockSize);
+
+  ssd1306_SetCursor(0, 40);
+  //ssd1306_WriteString("hello", Font_11x18, White);
+  ssd1306_WriteString(oled_SD_buffer, Font_7x10, White);
+  ssd1306_UpdateScreen();
+ 
+ 
+ 
+ 
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,31 +186,31 @@ int main(void)
     /* 2. Display Date (Top Line) */
     // Format: DD-MM-20YY
     sprintf(oled_buffer, "Date: %02d-%02d-20%02d", sDate.Date, sDate.Month, sDate.Year);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString(oled_buffer, Font_7x10, White);
+    //ssd1306_SetCursor(0, 0);
+    //ssd1306_WriteString(oled_buffer, Font_7x10, White);
 
     /* 3. Display Time (Middle Line) */
     sprintf(oled_buffer, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
-    ssd1306_SetCursor(0, 15);
-    ssd1306_WriteString(oled_buffer, Font_11x18, White);
+    //ssd1306_SetCursor(0, 15);
+    //ssd1306_WriteString(oled_buffer, Font_11x18, White);
 
     /* 4. Display Counter (Bottom Line) */
     sprintf(oled_buffer, "Count: %lu", count++);
-    ssd1306_SetCursor(0, 40);
+   // ssd1306_SetCursor(0, 40);
    /// ssd1306_WriteString(oled_buffer, Font_7x10, White);
     //ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
 
     /* 5. Refresh Screen */
-    ssd1306_UpdateScreen();
+    //ssd1306_UpdateScreen();
 
     if (__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY)) {
-    ssd1306_SetCursor(0, 40);
-    ssd1306_WriteString("LSE: READY", Font_7x10, White);
+    //ssd1306_SetCursor(0, 40);
+    //ssd1306_WriteString("LSE: READY", Font_7x10, White);
     } else {
-        ssd1306_SetCursor(0, 40);
-        ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
+      //  ssd1306_SetCursor(0, 40);
+        //ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
     }
-    ssd1306_UpdateScreen();
+    //ssd1306_UpdateScreen();
 
     HAL_Delay(2000);
     
@@ -476,8 +510,14 @@ static void MX_SDMMC1_SD_Init(void)
   hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_1B;
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd1.Init.ClockDiv = 2;
+  hsd1.Init.ClockDiv = 128;
   /* USER CODE BEGIN SDMMC1_Init 2 */
+
+  if (HAL_SD_Init(&hsd1) != HAL_OK) {
+     Error_Handler();
+  }
+  
+
 
   /* USER CODE END SDMMC1_Init 2 */
 
@@ -591,7 +631,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(D_GPIO0_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-
+  // SET SD CARD HIGH FOR TESTING : TODO REMOVE
+  HAL_GPIO_WritePin(SD0_PWR_CTRL_GPIO_Port, SD0_PWR_CTRL_Pin, GPIO_PIN_SET);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
