@@ -26,6 +26,8 @@ build/debug/stm32l4xx_it.o: Core/Src/stm32l4xx_it.c Core/Inc/main.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rtc.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rtc_ex.h \
+ Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_sd.h \
+ Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_sdmmc.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_spi.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_spi_ex.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
@@ -61,6 +63,8 @@ Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rtc.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rtc_ex.h:
+Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_sd.h:
+Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_sdmmc.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_spi.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_spi_ex.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h:

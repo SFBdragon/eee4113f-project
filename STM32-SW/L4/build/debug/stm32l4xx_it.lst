@@ -1,4 +1,4 @@
-ARM GAS  /tmp/ccEx29VB.s 			page 1
+ARM GAS  /tmp/cceM2iQA.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
   28:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN TD */
   29:Core/Src/stm32l4xx_it.c **** 
   30:Core/Src/stm32l4xx_it.c **** /* USER CODE END TD */
-ARM GAS  /tmp/ccEx29VB.s 			page 2
+ARM GAS  /tmp/cceM2iQA.s 			page 2
 
 
   31:Core/Src/stm32l4xx_it.c **** 
@@ -88,7 +88,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
   55:Core/Src/stm32l4xx_it.c **** /* USER CODE END 0 */
   56:Core/Src/stm32l4xx_it.c **** 
   57:Core/Src/stm32l4xx_it.c **** /* External variables --------------------------------------------------------*/
-  58:Core/Src/stm32l4xx_it.c **** 
+  58:Core/Src/stm32l4xx_it.c **** extern SD_HandleTypeDef hsd1;
   59:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN EV */
   60:Core/Src/stm32l4xx_it.c **** 
   61:Core/Src/stm32l4xx_it.c **** /* USER CODE END EV */
@@ -118,7 +118,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
   77:Core/Src/stm32l4xx_it.c ****   }
   37              		.loc 1 77 3 view .LVU2
   75:Core/Src/stm32l4xx_it.c ****   {
-ARM GAS  /tmp/ccEx29VB.s 			page 3
+ARM GAS  /tmp/cceM2iQA.s 			page 3
 
 
   38              		.loc 1 75 10 view .LVU3
@@ -178,7 +178,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
   98:Core/Src/stm32l4xx_it.c ****   */
   99:Core/Src/stm32l4xx_it.c **** void MemManage_Handler(void)
  100:Core/Src/stm32l4xx_it.c **** {
-ARM GAS  /tmp/ccEx29VB.s 			page 4
+ARM GAS  /tmp/cceM2iQA.s 			page 4
 
 
   75              		.loc 1 100 1 view -0
@@ -238,7 +238,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
  119:Core/Src/stm32l4xx_it.c ****   {
  107              		.loc 1 119 9 view .LVU15
  108 0000 FEE7     		b	.L8
-ARM GAS  /tmp/ccEx29VB.s 			page 5
+ARM GAS  /tmp/cceM2iQA.s 			page 5
 
 
  109              		.cfi_endproc
@@ -298,7 +298,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
  144              		.loc 1 145 1 view -0
  145              		.cfi_startproc
  146              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  /tmp/ccEx29VB.s 			page 6
+ARM GAS  /tmp/cceM2iQA.s 			page 6
 
 
  147              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -358,7 +358,7 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
  169:Core/Src/stm32l4xx_it.c ****   */
  170:Core/Src/stm32l4xx_it.c **** void PendSV_Handler(void)
  171:Core/Src/stm32l4xx_it.c **** {
-ARM GAS  /tmp/ccEx29VB.s 			page 7
+ARM GAS  /tmp/cceM2iQA.s 			page 7
 
 
  182              		.loc 1 171 1 view -0
@@ -414,38 +414,97 @@ ARM GAS  /tmp/ccEx29VB.s 			page 1
  213 0006 08BD     		pop	{r3, pc}
  214              		.cfi_endproc
  215              	.LFE236:
- 217              		.text
- 218              	.Letext0:
- 219              		.file 2 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
- 220              		.file 3 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
-ARM GAS  /tmp/ccEx29VB.s 			page 8
+ 217              		.section	.text.SDMMC1_IRQHandler,"ax",%progbits
+ 218              		.align	1
+ 219              		.global	SDMMC1_IRQHandler
+ 220              		.syntax unified
+ARM GAS  /tmp/cceM2iQA.s 			page 8
 
 
- 221              		.file 4 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
- 222              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
-ARM GAS  /tmp/ccEx29VB.s 			page 9
+ 221              		.thumb
+ 222              		.thumb_func
+ 224              	SDMMC1_IRQHandler:
+ 225              	.LFB237:
+ 193:Core/Src/stm32l4xx_it.c **** 
+ 194:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
+ 195:Core/Src/stm32l4xx_it.c **** /* STM32L4xx Peripheral Interrupt Handlers                                    */
+ 196:Core/Src/stm32l4xx_it.c **** /* Add here the Interrupt Handlers for the used peripherals.                  */
+ 197:Core/Src/stm32l4xx_it.c **** /* For the available peripheral interrupt handler names,                      */
+ 198:Core/Src/stm32l4xx_it.c **** /* please refer to the startup file (startup_stm32l4xx.s).                    */
+ 199:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
+ 200:Core/Src/stm32l4xx_it.c **** 
+ 201:Core/Src/stm32l4xx_it.c **** /**
+ 202:Core/Src/stm32l4xx_it.c ****   * @brief This function handles SDMMC1 global interrupt.
+ 203:Core/Src/stm32l4xx_it.c ****   */
+ 204:Core/Src/stm32l4xx_it.c **** void SDMMC1_IRQHandler(void)
+ 205:Core/Src/stm32l4xx_it.c **** {
+ 226              		.loc 1 205 1 is_stmt 1 view -0
+ 227              		.cfi_startproc
+ 228              		@ args = 0, pretend = 0, frame = 0
+ 229              		@ frame_needed = 0, uses_anonymous_args = 0
+ 230 0000 08B5     		push	{r3, lr}
+ 231              		.cfi_def_cfa_offset 8
+ 232              		.cfi_offset 3, -8
+ 233              		.cfi_offset 14, -4
+ 206:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SDMMC1_IRQn 0 */
+ 207:Core/Src/stm32l4xx_it.c **** 
+ 208:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SDMMC1_IRQn 0 */
+ 209:Core/Src/stm32l4xx_it.c ****   HAL_SD_IRQHandler(&hsd1);
+ 234              		.loc 1 209 3 view .LVU30
+ 235 0002 0248     		ldr	r0, .L18
+ 236 0004 FFF7FEFF 		bl	HAL_SD_IRQHandler
+ 237              	.LVL1:
+ 210:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SDMMC1_IRQn 1 */
+ 211:Core/Src/stm32l4xx_it.c **** 
+ 212:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SDMMC1_IRQn 1 */
+ 213:Core/Src/stm32l4xx_it.c **** }
+ 238              		.loc 1 213 1 is_stmt 0 view .LVU31
+ 239 0008 08BD     		pop	{r3, pc}
+ 240              	.L19:
+ 241 000a 00BF     		.align	2
+ 242              	.L18:
+ 243 000c 00000000 		.word	hsd1
+ 244              		.cfi_endproc
+ 245              	.LFE237:
+ 247              		.text
+ 248              	.Letext0:
+ 249              		.file 2 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
+ 250              		.file 3 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
+ 251              		.file 4 "Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l476xx.h"
+ 252              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h"
+ 253              		.file 6 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_dma.h"
+ 254              		.file 7 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_sdmmc.h"
+ 255              		.file 8 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_sd.h"
+ 256              		.file 9 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
+ 257              		.file 10 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
+ARM GAS  /tmp/cceM2iQA.s 			page 9
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_it.c
-     /tmp/ccEx29VB.s:21     .text.NMI_Handler:00000000 $t
-     /tmp/ccEx29VB.s:27     .text.NMI_Handler:00000000 NMI_Handler
-     /tmp/ccEx29VB.s:44     .text.HardFault_Handler:00000000 $t
-     /tmp/ccEx29VB.s:50     .text.HardFault_Handler:00000000 HardFault_Handler
-     /tmp/ccEx29VB.s:67     .text.MemManage_Handler:00000000 $t
-     /tmp/ccEx29VB.s:73     .text.MemManage_Handler:00000000 MemManage_Handler
-     /tmp/ccEx29VB.s:90     .text.BusFault_Handler:00000000 $t
-     /tmp/ccEx29VB.s:96     .text.BusFault_Handler:00000000 BusFault_Handler
-     /tmp/ccEx29VB.s:113    .text.UsageFault_Handler:00000000 $t
-     /tmp/ccEx29VB.s:119    .text.UsageFault_Handler:00000000 UsageFault_Handler
-     /tmp/ccEx29VB.s:136    .text.SVC_Handler:00000000 $t
-     /tmp/ccEx29VB.s:142    .text.SVC_Handler:00000000 SVC_Handler
-     /tmp/ccEx29VB.s:155    .text.DebugMon_Handler:00000000 $t
-     /tmp/ccEx29VB.s:161    .text.DebugMon_Handler:00000000 DebugMon_Handler
-     /tmp/ccEx29VB.s:174    .text.PendSV_Handler:00000000 $t
-     /tmp/ccEx29VB.s:180    .text.PendSV_Handler:00000000 PendSV_Handler
-     /tmp/ccEx29VB.s:193    .text.SysTick_Handler:00000000 $t
-     /tmp/ccEx29VB.s:199    .text.SysTick_Handler:00000000 SysTick_Handler
+     /tmp/cceM2iQA.s:21     .text.NMI_Handler:00000000 $t
+     /tmp/cceM2iQA.s:27     .text.NMI_Handler:00000000 NMI_Handler
+     /tmp/cceM2iQA.s:44     .text.HardFault_Handler:00000000 $t
+     /tmp/cceM2iQA.s:50     .text.HardFault_Handler:00000000 HardFault_Handler
+     /tmp/cceM2iQA.s:67     .text.MemManage_Handler:00000000 $t
+     /tmp/cceM2iQA.s:73     .text.MemManage_Handler:00000000 MemManage_Handler
+     /tmp/cceM2iQA.s:90     .text.BusFault_Handler:00000000 $t
+     /tmp/cceM2iQA.s:96     .text.BusFault_Handler:00000000 BusFault_Handler
+     /tmp/cceM2iQA.s:113    .text.UsageFault_Handler:00000000 $t
+     /tmp/cceM2iQA.s:119    .text.UsageFault_Handler:00000000 UsageFault_Handler
+     /tmp/cceM2iQA.s:136    .text.SVC_Handler:00000000 $t
+     /tmp/cceM2iQA.s:142    .text.SVC_Handler:00000000 SVC_Handler
+     /tmp/cceM2iQA.s:155    .text.DebugMon_Handler:00000000 $t
+     /tmp/cceM2iQA.s:161    .text.DebugMon_Handler:00000000 DebugMon_Handler
+     /tmp/cceM2iQA.s:174    .text.PendSV_Handler:00000000 $t
+     /tmp/cceM2iQA.s:180    .text.PendSV_Handler:00000000 PendSV_Handler
+     /tmp/cceM2iQA.s:193    .text.SysTick_Handler:00000000 $t
+     /tmp/cceM2iQA.s:199    .text.SysTick_Handler:00000000 SysTick_Handler
+     /tmp/cceM2iQA.s:218    .text.SDMMC1_IRQHandler:00000000 $t
+     /tmp/cceM2iQA.s:224    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
+     /tmp/cceM2iQA.s:243    .text.SDMMC1_IRQHandler:0000000c $d
 
 UNDEFINED SYMBOLS
 HAL_IncTick
+HAL_SD_IRQHandler
+hsd1

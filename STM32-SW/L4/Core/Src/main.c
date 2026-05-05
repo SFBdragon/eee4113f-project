@@ -18,11 +18,17 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+// OLED Display
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
+
+#include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +55,8 @@ UART_HandleTypeDef huart3;
 
 RTC_HandleTypeDef hrtc;
 
+SD_HandleTypeDef hsd1;
+
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
@@ -64,6 +72,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_I2C2_Init(void);
+static void MX_SDMMC1_SD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -109,6 +118,8 @@ int main(void)
   MX_SPI1_Init();
   MX_RTC_Init();
   MX_I2C2_Init();
+  MX_SDMMC1_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
@@ -118,23 +129,55 @@ int main(void)
 
   // I2C OLED Display
   ssd1306_Init(); 
-  ssd1306_SetCursor(0, 0);                           // x, y pixel position
-  ssd1306_WriteString("Hello!", Font_7x10, White);
+  ssd1306_Fill(Black);
 
-  // Second line (y + font height)
-  ssd1306_SetCursor(0, 12);
-  ssd1306_WriteString("STM32L4", Font_7x10, White);
-
-  // Bigger font
-  ssd1306_SetCursor(0, 30);
-  ssd1306_WriteString("BIG", Font_16x26, White);
-  ssd1306_UpdateScreen();   
+  // Testing LSE RTC
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef sDate = {0};
+  uint32_t count = 0; // Incrementing timer
+  char oled_buffer[20]; // Buffer to hold the formatted string
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
-  {  HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+  { 
+    // Polling WIFI power for now as indicator
+    HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+
+    // Get the current RTC Time to check LSI then LSE
+    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+    /* 2. Display Date (Top Line) */
+    // Format: DD-MM-20YY
+    sprintf(oled_buffer, "Date: %02d-%02d-20%02d", sDate.Date, sDate.Month, sDate.Year);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString(oled_buffer, Font_7x10, White);
+
+    /* 3. Display Time (Middle Line) */
+    sprintf(oled_buffer, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
+    ssd1306_SetCursor(0, 15);
+    ssd1306_WriteString(oled_buffer, Font_11x18, White);
+
+    /* 4. Display Counter (Bottom Line) */
+    sprintf(oled_buffer, "Count: %lu", count++);
+    ssd1306_SetCursor(0, 40);
+   /// ssd1306_WriteString(oled_buffer, Font_7x10, White);
+    //ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
+
+    /* 5. Refresh Screen */
+    ssd1306_UpdateScreen();
+
+    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY)) {
+    ssd1306_SetCursor(0, 40);
+    ssd1306_WriteString("LSE: READY", Font_7x10, White);
+    } else {
+        ssd1306_SetCursor(0, 40);
+        ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
+    }
+    ssd1306_UpdateScreen();
+
     HAL_Delay(2000);
     
     /* USER CODE END WHILE */
@@ -167,8 +210,14 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.MSICalibrationValue = 0;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_11;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+  RCC_OscInitStruct.PLL.PLLM = 1;
+  RCC_OscInitStruct.PLL.PLLN = 40;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV4;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -178,12 +227,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -206,7 +255,7 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 1 */
   hi2c2.Instance = I2C2;
-  hi2c2.Init.Timing = 0x10805D88;
+  hi2c2.Init.Timing = 0x10D19CE4;
   hi2c2.Init.OwnAddress1 = 0;
   hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -407,6 +456,34 @@ static void MX_RTC_Init(void)
 }
 
 /**
+  * @brief SDMMC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SDMMC1_SD_Init(void)
+{
+
+  /* USER CODE BEGIN SDMMC1_Init 0 */
+
+  /* USER CODE END SDMMC1_Init 0 */
+
+  /* USER CODE BEGIN SDMMC1_Init 1 */
+
+  /* USER CODE END SDMMC1_Init 1 */
+  hsd1.Instance = SDMMC1;
+  hsd1.Init.ClockEdge = SDMMC_CLOCK_EDGE_RISING;
+  hsd1.Init.ClockBypass = SDMMC_CLOCK_BYPASS_DISABLE;
+  hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
+  hsd1.Init.BusWide = SDMMC_BUS_WIDE_1B;
+  hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd1.Init.ClockDiv = 2;
+  /* USER CODE BEGIN SDMMC1_Init 2 */
+
+  /* USER CODE END SDMMC1_Init 2 */
+
+}
+
+/**
   * @brief SPI1 Initialization Function
   * @param None
   * @retval None
@@ -428,7 +505,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.DataSize = SPI_DATASIZE_4BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
@@ -462,6 +539,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, Wi_EN_Pin|Wi_RST_Pin|Wi_WAKE_Pin|Wi_GPIO_0_Pin, GPIO_PIN_RESET);
@@ -476,6 +554,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SD_GPIO_INPUT_Pin */
+  GPIO_InitStruct.Pin = SD_GPIO_INPUT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(SD_GPIO_INPUT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : Wi_PWR_CTRL_Pin Lo_PWR_CTRL_Pin SD0_PWR_CTRL_Pin Lo_GPIO_0_Pin
                            Lo_GPIO_1_Pin Lo_GPIO_2_Pin */

@@ -73,6 +73,8 @@ void Error_Handler(void);
 #define Wi_USART2_TX_GPIO_Port GPIOA
 #define Wi_USART2_RX_Pin GPIO_PIN_3
 #define Wi_USART2_RX_GPIO_Port GPIOA
+#define SD_GPIO_INPUT_Pin GPIO_PIN_4
+#define SD_GPIO_INPUT_GPIO_Port GPIOA
 #define SD_SPI1_SCK_Pin GPIO_PIN_5
 #define SD_SPI1_SCK_GPIO_Port GPIOA
 #define SD_SPI1_MISO_Pin GPIO_PIN_6
