@@ -1,4 +1,4 @@
-ARM GAS  /tmp/cceIbaQk.s 			page 1
+ARM GAS  /tmp/ccC5QG1F.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
   28:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   [..]
   29:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     This driver implements a high level communication layer for read and write from/to
   30:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     this memory. The needed STM32 hardware resources (SDMMC and GPIO) are performed by
-ARM GAS  /tmp/cceIbaQk.s 			page 2
+ARM GAS  /tmp/ccC5QG1F.s 			page 2
 
 
   31:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     the user in HAL_SD_MspInit() function (MSP layer).
@@ -118,7 +118,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
   85:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****            SDMMC_CK = SDMMCCLK / (2 * ClockDiv) on STM32L4Rx/STM32L4Sxx devices
   86:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****            SDMMC_CK = SDMMCCLK / (ClockDiv + 2) on other devices
   87:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 3
+ARM GAS  /tmp/ccC5QG1F.s 			page 3
 
 
   88:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         In initialization mode and according to the SD Card standard,
@@ -178,7 +178,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  142:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   [..]
  143:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     (+) You can write to SD card in polling mode by using function HAL_SD_WriteBlocks().
  144:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         This function support only 512-bytes block length (the block size should be
-ARM GAS  /tmp/cceIbaQk.s 			page 4
+ARM GAS  /tmp/ccC5QG1F.s 			page 4
 
 
  145:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         chosen as 512 bytes).
@@ -238,7 +238,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  199:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     (+) __HAL_SD_DMA_ENABLE: Enable the SDMMC DMA transfer
  200:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     (+) __HAL_SD_DMA_DISABLE: Disable the SDMMC DMA transfer
  201:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     (+) __HAL_SD_ENABLE_IT: Enable the SD device interrupt
-ARM GAS  /tmp/cceIbaQk.s 			page 5
+ARM GAS  /tmp/ccC5QG1F.s 			page 5
 
 
  202:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     (+) __HAL_SD_DISABLE_IT: Disable the SD device interrupt
@@ -298,7 +298,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  256:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     Exception done for MspInit/MspDeInit callbacks that can be registered/unregistered
  257:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     in READY or RESET state, thus registered (user) MspInit/DeInit callbacks can be used
  258:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     during the Init/DeInit.
-ARM GAS  /tmp/cceIbaQk.s 			page 6
+ARM GAS  /tmp/ccC5QG1F.s 			page 6
 
 
  259:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     In that case first register the MspInit/MspDeInit user callbacks
@@ -358,7 +358,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  313:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** static uint32_t SD_FindSCR(SD_HandleTypeDef *hsd, uint32_t *pSCR);
  314:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** static void SD_PowerOFF(SD_HandleTypeDef *hsd);
  315:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** static void SD_Write_IT(SD_HandleTypeDef *hsd);
-ARM GAS  /tmp/cceIbaQk.s 			page 7
+ARM GAS  /tmp/ccC5QG1F.s 			page 7
 
 
  316:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** static void SD_Read_IT(SD_HandleTypeDef *hsd);
@@ -418,7 +418,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  370:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  371:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Check the parameters */
  372:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   assert_param(IS_SDMMC_ALL_INSTANCE(hsd->Instance));
-ARM GAS  /tmp/cceIbaQk.s 			page 8
+ARM GAS  /tmp/ccC5QG1F.s 			page 8
 
 
  373:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   assert_param(IS_SDMMC_CLOCK_EDGE(hsd->Init.ClockEdge));
@@ -478,7 +478,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  427:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||
  428:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (HAL_SD_GetCardStatus(hsd, &CardStatus) != HAL_OK)
  429:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
-ARM GAS  /tmp/cceIbaQk.s 			page 9
+ARM GAS  /tmp/ccC5QG1F.s 			page 9
 
 
  430:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     return HAL_ERROR;
@@ -538,7 +538,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  484:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Initialize the SD state */
  485:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   hsd->State = HAL_SD_STATE_READY;
  486:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 10
+ARM GAS  /tmp/ccC5QG1F.s 			page 10
 
 
  487:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   return HAL_OK;
@@ -598,7 +598,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  541:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  542:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if !defined(STM32L4P5xx) && !defined(STM32L4Q5xx) && !defined(STM32L4R5xx) && !defined(STM32L4R7xx
  543:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Disable SDMMC Clock */
-ARM GAS  /tmp/cceIbaQk.s 			page 11
+ARM GAS  /tmp/ccC5QG1F.s 			page 11
 
 
  544:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   __HAL_SD_DISABLE(hsd);
@@ -658,7 +658,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  598:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @param  hsd: Pointer to SD handle
  599:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @retval HAL status
  600:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   */
-ARM GAS  /tmp/cceIbaQk.s 			page 12
+ARM GAS  /tmp/ccC5QG1F.s 			page 12
 
 
  601:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** HAL_StatusTypeDef HAL_SD_DeInit(SD_HandleTypeDef *hsd)
@@ -718,7 +718,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  655:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @retval None
  656:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   */
  657:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** __weak void HAL_SD_MspInit(SD_HandleTypeDef *hsd)
-ARM GAS  /tmp/cceIbaQk.s 			page 13
+ARM GAS  /tmp/ccC5QG1F.s 			page 13
 
 
  658:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** {
@@ -778,7 +778,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  712:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   */
  713:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** HAL_StatusTypeDef HAL_SD_ReadBlocks(SD_HandleTypeDef *hsd, uint8_t *pData, uint32_t BlockAdd, uint3
  714:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****                                     uint32_t Timeout)
-ARM GAS  /tmp/cceIbaQk.s 			page 14
+ARM GAS  /tmp/ccC5QG1F.s 			page 14
 
 
  715:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** {
@@ -838,7 +838,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  769:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  770:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       /* Read Multi Block command */
  771:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       errorstate = SDMMC_CmdReadMultiBlock(hsd->Instance, add);
-ARM GAS  /tmp/cceIbaQk.s 			page 15
+ARM GAS  /tmp/ccC5QG1F.s 			page 15
 
 
  772:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
@@ -898,7 +898,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  826:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  827:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||
  828:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     __SDMMC_CMDTRANS_DISABLE(hsd->Instance);
-ARM GAS  /tmp/cceIbaQk.s 			page 16
+ARM GAS  /tmp/ccC5QG1F.s 			page 16
 
 
  829:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
@@ -958,7 +958,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  883:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Empty FIFO if there is still any data */
  884:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     while ((__HAL_SD_GET_FLAG(hsd, SDMMC_FLAG_RXDAVL)) && (dataremaining > 0U))
  885:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 17
+ARM GAS  /tmp/ccC5QG1F.s 			page 17
 
 
  886:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       data = SDMMC_ReadFIFO(hsd->Instance);
@@ -1018,7 +1018,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  940:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** {
  941:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   SDMMC_DataInitTypeDef config;
  942:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t errorstate;
-ARM GAS  /tmp/cceIbaQk.s 			page 18
+ARM GAS  /tmp/ccC5QG1F.s 			page 18
 
 
  943:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t tickstart = HAL_GetTick();
@@ -1078,7 +1078,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  997:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  998:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     else
  999:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 19
+ARM GAS  /tmp/ccC5QG1F.s 			page 19
 
 
 1000:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_WRITE_SINGLE_BLOCK;
@@ -1138,7 +1138,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1054:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
 1055:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 1056:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Send stop transmission command in case of multiblock write */
-ARM GAS  /tmp/cceIbaQk.s 			page 20
+ARM GAS  /tmp/ccC5QG1F.s 			page 20
 
 
 1057:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     if (__HAL_SD_GET_FLAG(hsd, SDMMC_FLAG_DATAEND) && (NumberOfBlocks > 1U))
@@ -1198,7 +1198,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1111:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->State = HAL_SD_STATE_READY;
 1112:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 1113:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     return HAL_OK;
-ARM GAS  /tmp/cceIbaQk.s 			page 21
+ARM GAS  /tmp/ccC5QG1F.s 			page 21
 
 
 1114:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
@@ -1258,7 +1258,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1168:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       add *= 512U;
 1169:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
 1170:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 22
+ARM GAS  /tmp/ccC5QG1F.s 			page 22
 
 
 1171:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Configure the SD DPSM (Data Path State Machine) */
@@ -1318,7 +1318,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1225:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @brief  Writes block(s) to a specified address in a card. The Data transfer
 1226:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   *         is managed in interrupt mode.
 1227:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @note   This API should be followed by a check on the card state through
-ARM GAS  /tmp/cceIbaQk.s 			page 23
+ARM GAS  /tmp/ccC5QG1F.s 			page 23
 
 
 1228:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   *         HAL_SD_GetCardState().
@@ -1378,7 +1378,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1282:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 1283:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     __SDMMC_CMDTRANS_ENABLE(hsd->Instance);
 1284:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
-ARM GAS  /tmp/cceIbaQk.s 			page 24
+ARM GAS  /tmp/ccC5QG1F.s 			page 24
 
 
 1285:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -1438,7 +1438,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1339:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @note   You could also check the DMA transfer process through the SD Rx
 1340:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   *         interrupt event.
 1341:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @param  hsd: Pointer SD handle
-ARM GAS  /tmp/cceIbaQk.s 			page 25
+ARM GAS  /tmp/ccC5QG1F.s 			page 25
 
 
 1342:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @param  pData: Pointer to the buffer that will contain the received data
@@ -1498,7 +1498,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1396:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_ERROR;
 1397:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
 1398:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     else
-ARM GAS  /tmp/cceIbaQk.s 			page 26
+ARM GAS  /tmp/ccC5QG1F.s 			page 26
 
 
 1399:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -1558,7 +1558,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1453:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->Context = SD_CONTEXT_NONE;
 1454:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         return HAL_ERROR;
 1455:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       }
-ARM GAS  /tmp/cceIbaQk.s 			page 27
+ARM GAS  /tmp/ccC5QG1F.s 			page 27
 
 
 1456:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -1618,7 +1618,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1510:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Initialize data control register */
 1511:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->Instance->DCTRL = 0U;
 1512:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 28
+ARM GAS  /tmp/ccC5QG1F.s 			page 28
 
 
 1513:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||
@@ -1678,7 +1678,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1567:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->ErrorCode |= errorstate;
 1568:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->State = HAL_SD_STATE_READY;
 1569:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
-ARM GAS  /tmp/cceIbaQk.s 			page 29
+ARM GAS  /tmp/ccC5QG1F.s 			page 29
 
 
 1570:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_ERROR;
@@ -1738,7 +1738,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1624:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** HAL_StatusTypeDef HAL_SD_Erase(SD_HandleTypeDef *hsd, uint32_t BlockStartAdd, uint32_t BlockEndAdd)
 1625:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** {
 1626:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t errorstate;
-ARM GAS  /tmp/cceIbaQk.s 			page 30
+ARM GAS  /tmp/ccC5QG1F.s 			page 30
 
 
 1627:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t start_add = BlockStartAdd;
@@ -1798,7 +1798,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1681:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         /* Clear all the static flags */
 1682:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         __HAL_SD_CLEAR_FLAG(hsd, SDMMC_STATIC_FLAGS);
 1683:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->ErrorCode |= errorstate;
-ARM GAS  /tmp/cceIbaQk.s 			page 31
+ARM GAS  /tmp/ccC5QG1F.s 			page 31
 
 
 1684:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->State = HAL_SD_STATE_READY;
@@ -1858,7 +1858,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1738:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
 1739:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     __HAL_SD_CLEAR_FLAG(hsd, SDMMC_FLAG_DATAEND);
 1740:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 32
+ARM GAS  /tmp/ccC5QG1F.s 			page 32
 
 
 1741:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     __HAL_SD_DISABLE_IT(hsd, SDMMC_IT_DATAEND  | SDMMC_IT_DCRCFAIL | SDMMC_IT_DTIMEOUT | \
@@ -1918,7 +1918,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1795:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Instance->IDMACTRL = SDMMC_DISABLE_IDMA;
 1796:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 1797:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       /* Stop Transfer for Write Multi blocks or Read Multi blocks */
-ARM GAS  /tmp/cceIbaQk.s 			page 33
+ARM GAS  /tmp/ccC5QG1F.s 			page 33
 
 
 1798:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       if (((context & SD_CONTEXT_READ_MULTIPLE_BLOCK) != 0U) || ((context & SD_CONTEXT_WRITE_MULTIP
@@ -1978,7 +1978,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1852:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if defined (USE_HAL_SD_REGISTER_CALLBACKS) && (USE_HAL_SD_REGISTER_CALLBACKS == 1U)
 1853:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->TxCpltCallback(hsd);
 1854:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #else
-ARM GAS  /tmp/cceIbaQk.s 			page 34
+ARM GAS  /tmp/ccC5QG1F.s 			page 34
 
 
 1855:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         HAL_SD_TxCpltCallback(hsd);
@@ -2038,7 +2038,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1909:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     __HAL_SD_CLEAR_FLAG(hsd, SDMMC_FLAG_DABORT);
 1910:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
 1911:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     if ((context & SD_CONTEXT_IT) != 0U)
-ARM GAS  /tmp/cceIbaQk.s 			page 35
+ARM GAS  /tmp/ccC5QG1F.s 			page 35
 
 
 1912:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -2098,7 +2098,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1966:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if defined (USE_HAL_SD_REGISTER_CALLBACKS) && (USE_HAL_SD_REGISTER_CALLBACKS == 1U)
 1967:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->AbortCpltCallback(hsd);
 1968:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #else
-ARM GAS  /tmp/cceIbaQk.s 			page 36
+ARM GAS  /tmp/ccC5QG1F.s 			page 36
 
 
 1969:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         HAL_SD_AbortCallback(hsd);
@@ -2158,7 +2158,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2023:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
 2024:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 2025:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
-ARM GAS  /tmp/cceIbaQk.s 			page 37
+ARM GAS  /tmp/ccC5QG1F.s 			page 37
 
 
 2026:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   else
@@ -2218,7 +2218,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2080:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****    */
 2081:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** }
 2082:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 38
+ARM GAS  /tmp/ccC5QG1F.s 			page 38
 
 
 2083:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** /**
@@ -2278,7 +2278,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2137:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 2138:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (pCallback == NULL)
 2139:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
-ARM GAS  /tmp/cceIbaQk.s 			page 39
+ARM GAS  /tmp/ccC5QG1F.s 			page 39
 
 
 2140:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Update the error code */
@@ -2338,7 +2338,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2194:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     switch (CallbackID)
 2195:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
 2196:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       case HAL_SD_MSP_INIT_CB_ID :
-ARM GAS  /tmp/cceIbaQk.s 			page 40
+ARM GAS  /tmp/ccC5QG1F.s 			page 40
 
 
 2197:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->MspInitCallback = pCallback;
@@ -2398,7 +2398,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2251:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
 2252:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       case HAL_SD_TX_CPLT_CB_ID :
 2253:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->TxCpltCallback = HAL_SD_TxCpltCallback;
-ARM GAS  /tmp/cceIbaQk.s 			page 41
+ARM GAS  /tmp/ccC5QG1F.s 			page 41
 
 
 2254:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         break;
@@ -2458,7 +2458,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2308:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
 2309:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 2310:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   else
-ARM GAS  /tmp/cceIbaQk.s 			page 42
+ARM GAS  /tmp/ccC5QG1F.s 			page 42
 
 
 2311:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -2518,7 +2518,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2365:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @param hsd : SD handle
 2366:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @retval status
 2367:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   */
-ARM GAS  /tmp/cceIbaQk.s 			page 43
+ARM GAS  /tmp/ccC5QG1F.s 			page 43
 
 
 2368:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** HAL_StatusTypeDef HAL_SD_UnRegisterTransceiverCallback(SD_HandleTypeDef *hsd)
@@ -2578,7 +2578,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2422:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** HAL_StatusTypeDef HAL_SD_GetCardCID(SD_HandleTypeDef *hsd, HAL_SD_CardCIDTypeDef *pCID)
 2423:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** {
 2424:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCID->ManufacturerID = (uint8_t)((hsd->CID[0] & 0xFF000000U) >> 24U);
-ARM GAS  /tmp/cceIbaQk.s 			page 44
+ARM GAS  /tmp/ccC5QG1F.s 			page 44
 
 
 2425:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -2638,7 +2638,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2479:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCSD->DSRImpl = (uint8_t)((hsd->CSD[1] & 0x00001000U) >> 12U);
 2480:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 2481:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCSD->Reserved2 = 0U; /*!< Reserved */
-ARM GAS  /tmp/cceIbaQk.s 			page 45
+ARM GAS  /tmp/ccC5QG1F.s 			page 45
 
 
 2482:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -2698,7 +2698,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2536:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 2537:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCSD->WriteBlockPaPartial = (uint8_t)((hsd->CSD[3] & 0x00200000U) >> 21U);
 2538:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 46
+ARM GAS  /tmp/ccC5QG1F.s 			page 46
 
 
 2539:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCSD->Reserved3 = 0;
@@ -2758,7 +2758,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2593:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****                                   ((sd_status[1] & 0xFF0000U) >> 8U) | ((sd_status[1] & 0xFF000000U
 2594:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 2595:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     pStatus->SpeedClass = (uint8_t)(sd_status[2] & 0xFFU);
-ARM GAS  /tmp/cceIbaQk.s 			page 47
+ARM GAS  /tmp/ccC5QG1F.s 			page 47
 
 
 2596:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -2818,7 +2818,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2650:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** }
 2651:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 2652:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** /**
-ARM GAS  /tmp/cceIbaQk.s 			page 48
+ARM GAS  /tmp/ccC5QG1F.s 			page 48
 
 
 2653:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @brief  Enables wide bus operation for the requested card if supported by
@@ -2878,7 +2878,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2707:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
 2708:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Clear all the static flags */
 2709:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     __HAL_SD_CLEAR_FLAG(hsd, SDMMC_STATIC_FLAGS);
-ARM GAS  /tmp/cceIbaQk.s 			page 49
+ARM GAS  /tmp/ccC5QG1F.s 			page 49
 
 
 2710:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->State = HAL_SD_STATE_READY;
@@ -2938,7 +2938,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2764:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       else
 2765:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       {
 2766:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         /* No High speed SD card, Max Frequency = 25Mhz */
-ARM GAS  /tmp/cceIbaQk.s 			page 50
+ARM GAS  /tmp/ccC5QG1F.s 			page 50
 
 
 2767:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         if (hsd->Init.ClockDiv == 0U)
@@ -2998,7 +2998,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2821:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 2822:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Change State */
 2823:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   hsd->State = HAL_SD_STATE_READY;
-ARM GAS  /tmp/cceIbaQk.s 			page 51
+ARM GAS  /tmp/ccC5QG1F.s 			page 51
 
 
 2824:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -3058,7 +3058,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2878:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****             status = HAL_ERROR;
 2879:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           }
 2880:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         }
-ARM GAS  /tmp/cceIbaQk.s 			page 52
+ARM GAS  /tmp/ccC5QG1F.s 			page 52
 
 
 2881:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         else
@@ -3118,7 +3118,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2935:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         {
 2936:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           /* Enable High Speed */
 2937:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           if (SD_HighSpeed(hsd) != HAL_SD_ERROR_NONE)
-ARM GAS  /tmp/cceIbaQk.s 			page 53
+ARM GAS  /tmp/ccC5QG1F.s 			page 53
 
 
 2938:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           {
@@ -3178,7 +3178,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2992:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           {
 2993:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****             hsd->ErrorCode |= HAL_SD_ERROR_UNSUPPORTED_FEATURE;
 2994:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****             status = HAL_ERROR;
-ARM GAS  /tmp/cceIbaQk.s 			page 54
+ARM GAS  /tmp/ccC5QG1F.s 			page 54
 
 
 2995:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           }
@@ -3238,7 +3238,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3049:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** HAL_SD_CardStateTypeDef HAL_SD_GetCardState(SD_HandleTypeDef *hsd)
 3050:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** {
 3051:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t cardstate;
-ARM GAS  /tmp/cceIbaQk.s 			page 55
+ARM GAS  /tmp/ccC5QG1F.s 			page 55
 
 
 3052:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t errorstate;
@@ -3298,7 +3298,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3106:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Abort the SD DMA Rx channel */
 3107:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     else if (((context & SD_CONTEXT_READ_SINGLE_BLOCK) != 0U) || ((context & SD_CONTEXT_READ_MULTIP
 3108:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 56
+ARM GAS  /tmp/ccC5QG1F.s 			page 56
 
 
 3109:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       if (HAL_DMA_Abort(hsd->hdmarx) != HAL_OK)
@@ -3358,7 +3358,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3163:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   hsd->State = HAL_SD_STATE_READY;
 3164:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
 3165:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if ((CardState == HAL_SD_CARD_RECEIVING) || (CardState == HAL_SD_CARD_SENDING))
-ARM GAS  /tmp/cceIbaQk.s 			page 57
+ARM GAS  /tmp/ccC5QG1F.s 			page 57
 
 
 3166:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -3418,7 +3418,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3220:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->State = HAL_SD_STATE_READY;
 3221:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->Context = SD_CONTEXT_NONE;
 3222:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     if ((CardState == HAL_SD_CARD_RECEIVING) || (CardState == HAL_SD_CARD_SENDING))
-ARM GAS  /tmp/cceIbaQk.s 			page 58
+ARM GAS  /tmp/ccC5QG1F.s 			page 58
 
 
 3223:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -3478,7 +3478,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
   38              		.loc 1 3267 3 is_stmt 1 view .LVU3
   39 0002 1A68     		ldr	r2, [r3]
   40 0004 D36B     		ldr	r3, [r2, #60]
-ARM GAS  /tmp/cceIbaQk.s 			page 59
+ARM GAS  /tmp/ccC5QG1F.s 			page 59
 
 
   41              	.LVL2:
@@ -3538,7 +3538,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3305:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if (USE_HAL_SD_REGISTER_CALLBACKS == 1)
 3306:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   hsd->RxCpltCallback(hsd);
 3307:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #else
-ARM GAS  /tmp/cceIbaQk.s 			page 60
+ARM GAS  /tmp/ccC5QG1F.s 			page 60
 
 
 3308:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   HAL_SD_RxCpltCallback(hsd);
@@ -3598,7 +3598,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3362:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Clear All flags */
 3363:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   __HAL_SD_CLEAR_FLAG(hsd, SDMMC_STATIC_DATA_FLAGS);
 3364:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 61
+ARM GAS  /tmp/ccC5QG1F.s 			page 61
 
 
 3365:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   CardState = HAL_SD_GetCardState(hsd);
@@ -3658,7 +3658,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3419:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 3420:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   else
 3421:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
-ARM GAS  /tmp/cceIbaQk.s 			page 62
+ARM GAS  /tmp/ccC5QG1F.s 			page 62
 
 
 3422:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if (USE_HAL_SD_REGISTER_CALLBACKS == 1)
@@ -3718,7 +3718,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3476:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 3477:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (hsd->SdCard.CardType != CARD_SECURED)
 3478:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
-ARM GAS  /tmp/cceIbaQk.s 			page 63
+ARM GAS  /tmp/ccC5QG1F.s 			page 63
 
 
 3479:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     /* Get the SD card RCA */
@@ -3778,7 +3778,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
   66              		.cfi_def_cfa_offset 16
   67              		.cfi_offset 4, -16
   68              		.cfi_offset 5, -12
-ARM GAS  /tmp/cceIbaQk.s 			page 64
+ARM GAS  /tmp/ccC5QG1F.s 			page 64
 
 
   69              		.cfi_offset 6, -8
@@ -3838,7 +3838,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3556:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->SdCard.CardVersion = CARD_V2_X;
 3557:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 3558:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 65
+ARM GAS  /tmp/ccC5QG1F.s 			page 65
 
 
 3559:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (hsd->SdCard.CardVersion == CARD_V2_X)
@@ -3898,7 +3898,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3613:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         /* Send CMD11 to switch 1.8V mode */
 3614:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         errorstate = SDMMC_CmdVoltageSwitch(hsd->Instance);
 3615:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         if (errorstate != HAL_SD_ERROR_NONE)
-ARM GAS  /tmp/cceIbaQk.s 			page 66
+ARM GAS  /tmp/ccC5QG1F.s 			page 66
 
 
 3616:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         {
@@ -3958,7 +3958,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3670:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           /* Disable VSWITCH FLAG from SDMMC Peripheral */
 3671:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           hsd->Instance->POWER = 0x13U;
 3672:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 67
+ARM GAS  /tmp/ccC5QG1F.s 			page 67
 
 
 3673:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           /* Clean Status flags */
@@ -4018,7 +4018,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  123 0028 012B     		cmp	r3, #1
  124 002a 0BD0     		beq	.L20
  125              	.L6:
-ARM GAS  /tmp/cceIbaQk.s 			page 68
+ARM GAS  /tmp/ccC5QG1F.s 			page 68
 
 
 3590:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -4078,7 +4078,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3565:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  165              		.loc 1 3565 14 view .LVU43
  166 0050 4FF08053 		mov	r3, #268435456
-ARM GAS  /tmp/cceIbaQk.s 			page 69
+ARM GAS  /tmp/ccC5QG1F.s 			page 69
 
 
  167 0054 1E46     		mov	r6, r3
@@ -4138,7 +4138,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  206              		.loc 1 3581 5 is_stmt 1 view .LVU58
 3581:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  207              		.loc 1 3581 8 is_stmt 0 view .LVU59
-ARM GAS  /tmp/cceIbaQk.s 			page 70
+ARM GAS  /tmp/ccC5QG1F.s 			page 70
 
 
  208 007c 0546     		mov	r5, r0
@@ -4198,7 +4198,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  247              	.L11:
 3682:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
  248              		.loc 1 3682 5 is_stmt 1 view .LVU75
-ARM GAS  /tmp/cceIbaQk.s 			page 71
+ARM GAS  /tmp/ccC5QG1F.s 			page 71
 
 
 3682:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
@@ -4258,7 +4258,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  292              		.loc 1 3695 1 is_stmt 0 view .LVU82
  293 0000 08B5     		push	{r3, lr}
  294              		.cfi_def_cfa_offset 8
-ARM GAS  /tmp/cceIbaQk.s 			page 72
+ARM GAS  /tmp/ccC5QG1F.s 			page 72
 
 
  295              		.cfi_offset 3, -8
@@ -4318,7 +4318,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3729:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Send CMD55 */
 3730:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   errorstate = SDMMC_CmdAppCommand(hsd->Instance, (uint32_t)(hsd->SdCard.RelCardAdd << 16U));
 3731:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (errorstate != HAL_SD_ERROR_NONE)
-ARM GAS  /tmp/cceIbaQk.s 			page 73
+ARM GAS  /tmp/ccC5QG1F.s 			page 73
 
 
 3732:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -4378,7 +4378,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3786:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     return HAL_SD_ERROR_RX_OVERRUN;
 3787:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 3788:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   else
-ARM GAS  /tmp/cceIbaQk.s 			page 74
+ARM GAS  /tmp/ccC5QG1F.s 			page 74
 
 
 3789:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -4438,7 +4438,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3843:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** /**
 3844:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @brief  Enables the SDMMC wide bus mode.
 3845:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @param  hsd: pointer to SD handle
-ARM GAS  /tmp/cceIbaQk.s 			page 75
+ARM GAS  /tmp/ccC5QG1F.s 			page 75
 
 
 3846:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   * @retval error state
@@ -4498,7 +4498,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3900:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if ((SDMMC_GetResponse(hsd->Instance, SDMMC_RESP1) & SDMMC_CARD_LOCKED) == SDMMC_CARD_LOCKED)
 3901:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
 3902:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     return HAL_SD_ERROR_LOCK_UNLOCK_FAILED;
-ARM GAS  /tmp/cceIbaQk.s 			page 76
+ARM GAS  /tmp/ccC5QG1F.s 			page 76
 
 
 3903:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
@@ -4558,7 +4558,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3957:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     return errorstate;
 3958:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
 3959:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 77
+ARM GAS  /tmp/ccC5QG1F.s 			page 77
 
 
 3960:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Send CMD55 APP_CMD with argument as card's RCA */
@@ -4618,7 +4618,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 4014:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
 4015:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     if ((HAL_GetTick() - tickstart) >=  SDMMC_DATATIMEOUT)
 4016:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 78
+ARM GAS  /tmp/ccC5QG1F.s 			page 78
 
 
 4017:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_SD_ERROR_TIMEOUT;
@@ -4678,7 +4678,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  324              		.cfi_def_cfa_offset 24
  325              		.cfi_offset 3, -24
  326              		.cfi_offset 4, -20
-ARM GAS  /tmp/cceIbaQk.s 			page 79
+ARM GAS  /tmp/ccC5QG1F.s 			page 79
 
 
  327              		.cfi_offset 5, -16
@@ -4738,7 +4738,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  350              		.loc 1 4076 7 is_stmt 1 view .LVU98
 4076:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       *tmp = (uint8_t)(data & 0xFFU);
  351              		.loc 1 4076 14 is_stmt 0 view .LVU99
-ARM GAS  /tmp/cceIbaQk.s 			page 80
+ARM GAS  /tmp/ccC5QG1F.s 			page 80
 
 
  352 000a 3868     		ldr	r0, [r7]
@@ -4798,7 +4798,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 4088:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  387              		.loc 1 4088 7 is_stmt 1 view .LVU119
 4088:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
-ARM GAS  /tmp/cceIbaQk.s 			page 81
+ARM GAS  /tmp/ccC5QG1F.s 			page 81
 
 
  388              		.loc 1 4088 20 is_stmt 0 view .LVU120
@@ -4858,7 +4858,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  428              		@ frame_needed = 0, uses_anonymous_args = 0
  429              		.loc 1 4103 1 is_stmt 0 view .LVU131
  430 0000 F0B5     		push	{r4, r5, r6, r7, lr}
-ARM GAS  /tmp/cceIbaQk.s 			page 82
+ARM GAS  /tmp/ccC5QG1F.s 			page 82
 
 
  431              		.cfi_def_cfa_offset 20
@@ -4918,7 +4918,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  455 000a 03B0     		add	sp, sp, #12
  456              		.cfi_remember_state
  457              		.cfi_def_cfa_offset 20
-ARM GAS  /tmp/cceIbaQk.s 			page 83
+ARM GAS  /tmp/ccC5QG1F.s 			page 83
 
 
  458              		@ sp needed
@@ -4978,7 +4978,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  494 0028 0193     		str	r3, [sp, #4]
 4125:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       dataremaining--;
  495              		.loc 1 4125 7 is_stmt 1 view .LVU159
-ARM GAS  /tmp/cceIbaQk.s 			page 84
+ARM GAS  /tmp/ccC5QG1F.s 			page 84
 
 
 4125:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       dataremaining--;
@@ -5038,7 +5038,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  540              	SD_SendSDStatus:
  541              	.LVL62:
  542              	.LFB263:
-ARM GAS  /tmp/cceIbaQk.s 			page 85
+ARM GAS  /tmp/ccC5QG1F.s 			page 85
 
 
 3708:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   SDMMC_DataInitTypeDef config;
@@ -5098,7 +5098,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  582              		.loc 1 3722 16 is_stmt 0 view .LVU188
  583 001c 4021     		movs	r1, #64
  584 001e 2868     		ldr	r0, [r5]
-ARM GAS  /tmp/cceIbaQk.s 			page 86
+ARM GAS  /tmp/ccC5QG1F.s 			page 86
 
 
  585 0020 FFF7FEFF 		bl	SDMMC_CmdBlockLength
@@ -5158,7 +5158,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  621 0040 54E0     		b	.L37
  622              	.L40:
 3738:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   config.DataLength    = 64U;
-ARM GAS  /tmp/cceIbaQk.s 			page 87
+ARM GAS  /tmp/ccC5QG1F.s 			page 87
 
 
  623              		.loc 1 3738 3 is_stmt 1 view .LVU207
@@ -5218,7 +5218,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3748:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  660              		.loc 1 3748 6 is_stmt 0 view .LVU225
  661 0068 0346     		mov	r3, r0
-ARM GAS  /tmp/cceIbaQk.s 			page 88
+ARM GAS  /tmp/ccC5QG1F.s 			page 88
 
 
  662 006a 80B1     		cbz	r0, .L41
@@ -5278,7 +5278,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3758:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
  701              		.loc 1 3758 10 is_stmt 1 view .LVU241
 3758:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
-ARM GAS  /tmp/cceIbaQk.s 			page 89
+ARM GAS  /tmp/ccC5QG1F.s 			page 89
 
 
  702              		.loc 1 3758 11 is_stmt 0 view .LVU242
@@ -5338,7 +5338,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  741              		.loc 1 3799 5 view .LVU257
 3799:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     pData++;
  742              		.loc 1 3799 14 is_stmt 0 view .LVU258
-ARM GAS  /tmp/cceIbaQk.s 			page 90
+ARM GAS  /tmp/ccC5QG1F.s 			page 90
 
 
  743 00c6 FFF7FEFF 		bl	SDMMC_ReadFIFO
@@ -5398,7 +5398,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  784              		.loc 1 3772 14 view .LVU271
  785 00f2 4FF00043 		mov	r3, #-2147483648
  786 00f6 F9E7     		b	.L37
-ARM GAS  /tmp/cceIbaQk.s 			page 91
+ARM GAS  /tmp/ccC5QG1F.s 			page 91
 
 
  787              	.L50:
@@ -5458,7 +5458,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  833              		.loc 1 3948 24 view .LVU281
  834 000c 0646     		mov	r6, r0
  835              	.LVL87:
-ARM GAS  /tmp/cceIbaQk.s 			page 92
+ARM GAS  /tmp/ccC5QG1F.s 			page 92
 
 
 3949:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t tempscr[2U] = {0U, 0U};
@@ -5518,7 +5518,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  876 002c FFF7FEFF 		bl	SDMMC_CmdAppCommand
  877              	.LVL94:
 3962:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
-ARM GAS  /tmp/cceIbaQk.s 			page 93
+ARM GAS  /tmp/ccC5QG1F.s 			page 93
 
 
  878              		.loc 1 3962 3 is_stmt 1 view .LVU296
@@ -5578,7 +5578,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3976:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (errorstate != HAL_SD_ERROR_NONE)
  915              		.loc 1 3976 16 is_stmt 0 view .LVU314
  916 0056 2068     		ldr	r0, [r4]
-ARM GAS  /tmp/cceIbaQk.s 			page 94
+ARM GAS  /tmp/ccC5QG1F.s 			page 94
 
 
  917 0058 FFF7FEFF 		bl	SDMMC_CmdSendSCR
@@ -5638,7 +5638,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 4002:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  956              		.loc 1 4002 5 is_stmt 1 view .LVU330
 4002:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 95
+ARM GAS  /tmp/ccC5QG1F.s 			page 95
 
 
  957              		.loc 1 4002 9 is_stmt 0 view .LVU331
@@ -5698,7 +5698,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  994              		.loc 1 4046 86 view .LVU348
  995 00b2 1302     		lsls	r3, r2, #8
  996 00b4 03F47F03 		and	r3, r3, #16711680
-ARM GAS  /tmp/cceIbaQk.s 			page 96
+ARM GAS  /tmp/ccC5QG1F.s 			page 96
 
 
 4046:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****             ((tempscr[1] & SDMMC_16TO23BITS) >> 8) | ((tempscr[1] & SDMMC_24TO31BITS) >> 24));
@@ -5758,7 +5758,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1034              	.LVL106:
 4024:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  1035              		.loc 1 4024 5 is_stmt 0 view .LVU366
-ARM GAS  /tmp/cceIbaQk.s 			page 97
+ARM GAS  /tmp/ccC5QG1F.s 			page 97
 
 
  1036 00e8 8563     		str	r5, [r0, #56]
@@ -5818,7 +5818,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3849:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t scr[2U] = {0U, 0U};
  1080              		.loc 1 3849 1 is_stmt 0 view .LVU379
  1081 0000 10B5     		push	{r4, lr}
-ARM GAS  /tmp/cceIbaQk.s 			page 98
+ARM GAS  /tmp/ccC5QG1F.s 			page 98
 
 
  1082              		.cfi_def_cfa_offset 8
@@ -5878,7 +5878,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3869:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     if (errorstate != HAL_SD_ERROR_NONE)
  1121              		.loc 1 3869 18 view .LVU395
  1122 002c 0904     		lsls	r1, r1, #16
-ARM GAS  /tmp/cceIbaQk.s 			page 99
+ARM GAS  /tmp/ccC5QG1F.s 			page 99
 
 
  1123 002e 2068     		ldr	r0, [r4]
@@ -5938,7 +5938,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1167              		.thumb_func
  1169              	SD_WideBus_Disable:
  1170              	.LVL122:
-ARM GAS  /tmp/cceIbaQk.s 			page 100
+ARM GAS  /tmp/ccC5QG1F.s 			page 100
 
 
  1171              	.LFB266:
@@ -5998,7 +5998,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1210              		.loc 1 3913 6 is_stmt 0 view .LVU421
  1211 0022 019B     		ldr	r3, [sp, #4]
  1212 0024 13F4803F 		tst	r3, #65536
-ARM GAS  /tmp/cceIbaQk.s 			page 101
+ARM GAS  /tmp/ccC5QG1F.s 			page 101
 
 
  1213 0028 0ED0     		beq	.L83
@@ -6058,7 +6058,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3933:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
  1254              		.loc 1 3933 12 view .LVU435
  1255 004c FAE7     		b	.L80
-ARM GAS  /tmp/cceIbaQk.s 			page 102
+ARM GAS  /tmp/ccC5QG1F.s 			page 102
 
 
  1256              		.cfi_endproc
@@ -6118,7 +6118,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1301              	.L85:
 3841:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  1302              		.loc 1 3841 1 view .LVU447
-ARM GAS  /tmp/cceIbaQk.s 			page 103
+ARM GAS  /tmp/ccC5QG1F.s 			page 103
 
 
  1303 0016 3046     		mov	r0, r6
@@ -6178,7 +6178,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1350              		.section	.text.HAL_SD_MspDeInit,"ax",%progbits
  1351              		.align	1
  1352              		.weak	HAL_SD_MspDeInit
-ARM GAS  /tmp/cceIbaQk.s 			page 104
+ARM GAS  /tmp/ccC5QG1F.s 			page 104
 
 
  1353              		.syntax unified
@@ -6238,7 +6238,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1399              		.loc 1 630 3 is_stmt 1 view .LVU468
  1400 000c FFF7FEFF 		bl	SD_PowerOFF
  1401              	.LVL145:
-ARM GAS  /tmp/cceIbaQk.s 			page 105
+ARM GAS  /tmp/ccC5QG1F.s 			page 105
 
 
  642:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* USE_HAL_SD_REGISTER_CALLBACKS */
@@ -6298,7 +6298,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1447              		.cfi_offset 5, -32
  1448              		.cfi_offset 6, -28
  1449              		.cfi_offset 7, -24
-ARM GAS  /tmp/cceIbaQk.s 			page 106
+ARM GAS  /tmp/ccC5QG1F.s 			page 106
 
 
  1450              		.cfi_offset 8, -20
@@ -6358,7 +6358,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1488              		.loc 1 733 14 is_stmt 0 view .LVU495
  1489 002e 5B46     		mov	r3, fp
  1490 0030 F318     		adds	r3, r6, r3
-ARM GAS  /tmp/cceIbaQk.s 			page 107
+ARM GAS  /tmp/ccC5QG1F.s 			page 107
 
 
  733:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -6418,7 +6418,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1527              		.loc 1 752 5 is_stmt 1 view .LVU513
  752:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     config.TransferDir   = SDMMC_TRANSFER_DIR_TO_SDMMC;
  1528              		.loc 1 752 26 is_stmt 0 view .LVU514
-ARM GAS  /tmp/cceIbaQk.s 			page 108
+ARM GAS  /tmp/ccC5QG1F.s 			page 108
 
 
  1529 0058 9023     		movs	r3, #144
@@ -6478,7 +6478,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1567              		.loc 1 780 5 is_stmt 1 view .LVU530
  780:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  1568              		.loc 1 780 8 is_stmt 0 view .LVU531
-ARM GAS  /tmp/cceIbaQk.s 			page 109
+ARM GAS  /tmp/ccC5QG1F.s 			page 109
 
 
  1569 0080 A0B9     		cbnz	r0, .L124
@@ -6538,7 +6538,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  778:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  1606              		.loc 1 778 20 is_stmt 0 view .LVU549
  1607 00a2 3146     		mov	r1, r6
-ARM GAS  /tmp/cceIbaQk.s 			page 110
+ARM GAS  /tmp/ccC5QG1F.s 			page 110
 
 
  1608 00a4 2868     		ldr	r0, [r5]
@@ -6598,7 +6598,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  816:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       {
  1648              		.loc 1 816 53 discriminator 2 view .LVU564
  1649 00d0 B8F1000F 		cmp	r8, #0
-ARM GAS  /tmp/cceIbaQk.s 			page 111
+ARM GAS  /tmp/ccC5QG1F.s 			page 111
 
 
  1650 00d4 1CD0     		beq	.L112
@@ -6658,7 +6658,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  804:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           tempbuff++;
  1688              		.loc 1 804 21 view .LVU581
  1689 00fc 6370     		strb	r3, [r4, #1]
-ARM GAS  /tmp/cceIbaQk.s 			page 112
+ARM GAS  /tmp/ccC5QG1F.s 			page 112
 
 
  805:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           dataremaining--;
@@ -6718,7 +6718,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1726 0112 4B4A     		ldr	r2, .L130
  1727 0114 9A63     		str	r2, [r3, #56]
  820:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->State = HAL_SD_STATE_READY;
-ARM GAS  /tmp/cceIbaQk.s 			page 113
+ARM GAS  /tmp/ccC5QG1F.s 			page 113
 
 
  1728              		.loc 1 820 9 is_stmt 1 view .LVU600
@@ -6778,7 +6778,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  851:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  1767              		.loc 1 851 5 is_stmt 1 view .LVU616
  851:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 114
+ARM GAS  /tmp/ccC5QG1F.s 			page 114
 
 
  1768              		.loc 1 851 9 is_stmt 0 view .LVU617
@@ -6838,7 +6838,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  889:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       *tempbuff = (uint8_t)((data >> 8U) & 0xFFU);
  1806              		.loc 1 889 7 view .LVU634
  890:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       tempbuff++;
-ARM GAS  /tmp/cceIbaQk.s 			page 115
+ARM GAS  /tmp/ccC5QG1F.s 			page 115
 
 
  1807              		.loc 1 890 7 view .LVU635
@@ -6898,7 +6898,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1842 0188 5346     		mov	r3, r10
  1843 018a C01A     		subs	r0, r0, r3
  900:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       {
-ARM GAS  /tmp/cceIbaQk.s 			page 116
+ARM GAS  /tmp/ccC5QG1F.s 			page 116
 
 
  1844              		.loc 1 900 10 discriminator 1 view .LVU655
@@ -6958,7 +6958,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1882              		.loc 1 838 12 is_stmt 0 view .LVU671
  1883 01b4 0346     		mov	r3, r0
  1884 01b6 0028     		cmp	r0, #0
-ARM GAS  /tmp/cceIbaQk.s 			page 117
+ARM GAS  /tmp/ccC5QG1F.s 			page 117
 
 
  1885 01b8 C3D0     		beq	.L114
@@ -7018,7 +7018,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  1922              		.loc 1 857 7 is_stmt 1 view .LVU688
  857:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_ERROR;
  1923              		.loc 1 857 20 is_stmt 0 view .LVU689
-ARM GAS  /tmp/cceIbaQk.s 			page 118
+ARM GAS  /tmp/ccC5QG1F.s 			page 118
 
 
  1924 01e4 0023     		movs	r3, #0
@@ -7078,7 +7078,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  874:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
  1961              		.loc 1 874 18 is_stmt 0 view .LVU707
  1962 020e 0123     		movs	r3, #1
-ARM GAS  /tmp/cceIbaQk.s 			page 119
+ARM GAS  /tmp/ccC5QG1F.s 			page 119
 
 
  1963 0210 85F83430 		strb	r3, [r5, #52]
@@ -7138,7 +7138,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2002              	.LVL194:
  2003              	.L131:
  924:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 120
+ARM GAS  /tmp/ccC5QG1F.s 			page 120
 
 
  2004              		.loc 1 924 1 view .LVU723
@@ -7198,7 +7198,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2051              		.loc 1 946 3 view .LVU732
  948:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  2052              		.loc 1 948 3 view .LVU733
-ARM GAS  /tmp/cceIbaQk.s 			page 121
+ARM GAS  /tmp/ccC5QG1F.s 			page 121
 
 
  948:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -7258,7 +7258,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  969:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  2090              		.loc 1 969 8 view .LVU751
  2091 0042 012B     		cmp	r3, #1
-ARM GAS  /tmp/cceIbaQk.s 			page 122
+ARM GAS  /tmp/ccC5QG1F.s 			page 122
 
 
  2092 0044 00D0     		beq	.L137
@@ -7318,7 +7318,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2128              		.loc 1 985 11 view .LVU769
  2129 0066 FFF7FEFF 		bl	SDMMC_ConfigData
  2130              	.LVL199:
-ARM GAS  /tmp/cceIbaQk.s 			page 123
+ARM GAS  /tmp/ccC5QG1F.s 			page 123
 
 
  991:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -7378,7 +7378,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  951:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
  2169              		.loc 1 951 12 is_stmt 0 view .LVU786
  2170 008c 4FF00108 		mov	r8, #1
-ARM GAS  /tmp/cceIbaQk.s 			page 124
+ARM GAS  /tmp/ccC5QG1F.s 			page 124
 
 
  2171 0090 AEE0     		b	.L134
@@ -7438,7 +7438,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1010:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
  2211              		.loc 1 1010 7 is_stmt 1 view .LVU801
 1010:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
-ARM GAS  /tmp/cceIbaQk.s 			page 125
+ARM GAS  /tmp/ccC5QG1F.s 			page 125
 
 
  2212              		.loc 1 1010 18 is_stmt 0 view .LVU802
@@ -7498,7 +7498,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1020:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       {
  2251              		.loc 1 1020 55 discriminator 1 view .LVU818
  2252 00e8 002F     		cmp	r7, #0
-ARM GAS  /tmp/cceIbaQk.s 			page 126
+ARM GAS  /tmp/ccC5QG1F.s 			page 126
 
 
  2253 00ea ECD0     		beq	.L142
@@ -7558,7 +7558,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2288              		.loc 1 1034 16 view .LVU837
  2289 0106 43EA0263 		orr	r3, r3, r2, lsl #24
  2290 010a 0193     		str	r3, [sp, #4]
-ARM GAS  /tmp/cceIbaQk.s 			page 127
+ARM GAS  /tmp/ccC5QG1F.s 			page 127
 
 
 1035:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           dataremaining--;
@@ -7618,7 +7618,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2329 0130 0023     		movs	r3, #0
  2330 0132 2B63     		str	r3, [r5, #48]
 1048:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       }
-ARM GAS  /tmp/cceIbaQk.s 			page 128
+ARM GAS  /tmp/ccC5QG1F.s 			page 128
 
 
  2331              		.loc 1 1048 9 is_stmt 1 view .LVU854
@@ -7678,7 +7678,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1094:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  2370              		.loc 1 1094 14 is_stmt 0 view .LVU870
  2371 0160 5A6B     		ldr	r2, [r3, #52]
-ARM GAS  /tmp/cceIbaQk.s 			page 129
+ARM GAS  /tmp/ccC5QG1F.s 			page 129
 
 
 1094:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -7738,7 +7738,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1067:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           hsd->State = HAL_SD_STATE_READY;
  2410              		.loc 1 1067 11 view .LVU887
 1067:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****           hsd->State = HAL_SD_STATE_READY;
-ARM GAS  /tmp/cceIbaQk.s 			page 130
+ARM GAS  /tmp/ccC5QG1F.s 			page 130
 
 
  2411              		.loc 1 1067 14 is_stmt 0 view .LVU888
@@ -7798,7 +7798,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2448 01b8 1AE0     		b	.L134
  2449              	.L158:
 1088:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->ErrorCode |= HAL_SD_ERROR_DATA_CRC_FAIL;
-ARM GAS  /tmp/cceIbaQk.s 			page 131
+ARM GAS  /tmp/ccC5QG1F.s 			page 131
 
 
  2450              		.loc 1 1088 7 is_stmt 1 view .LVU906
@@ -7858,7 +7858,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2487 01e4 AB6B     		ldr	r3, [r5, #56]
 1117:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     return HAL_ERROR;
  2488              		.loc 1 1117 20 view .LVU924
-ARM GAS  /tmp/cceIbaQk.s 			page 132
+ARM GAS  /tmp/ccC5QG1F.s 			page 132
 
 
  2489 01e6 43F00053 		orr	r3, r3, #536870912
@@ -7918,7 +7918,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2537              		.loc 1 1139 3 view .LVU932
 1140:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  2538              		.loc 1 1140 3 view .LVU933
-ARM GAS  /tmp/cceIbaQk.s 			page 133
+ARM GAS  /tmp/ccC5QG1F.s 			page 133
 
 
  2539              	.LVL230:
@@ -7978,7 +7978,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2577 002e 0368     		ldr	r3, [r0]
 1161:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  2578              		.loc 1 1161 26 view .LVU950
-ARM GAS  /tmp/cceIbaQk.s 			page 134
+ARM GAS  /tmp/ccC5QG1F.s 			page 134
 
 
  2579 0030 0021     		movs	r1, #0
@@ -8038,7 +8038,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2615 0050 0223     		movs	r3, #2
  2616 0052 0393     		str	r3, [sp, #12]
 1176:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||
-ARM GAS  /tmp/cceIbaQk.s 			page 135
+ARM GAS  /tmp/ccC5QG1F.s 			page 135
 
 
  2617              		.loc 1 1176 5 is_stmt 1 view .LVU969
@@ -8098,7 +8098,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2655              		.loc 1 1206 7 view .LVU985
 1206:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->State = HAL_SD_STATE_READY;
  2656              		.loc 1 1206 10 is_stmt 0 view .LVU986
-ARM GAS  /tmp/cceIbaQk.s 			page 136
+ARM GAS  /tmp/ccC5QG1F.s 			page 136
 
 
  2657 007c A36B     		ldr	r3, [r4, #56]
@@ -8158,7 +8158,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2694              		.loc 1 1155 14 is_stmt 0 view .LVU1003
  2695 00a2 10E0     		b	.L163
  2696              	.LVL242:
-ARM GAS  /tmp/cceIbaQk.s 			page 137
+ARM GAS  /tmp/ccC5QG1F.s 			page 137
 
 
  2697              	.L166:
@@ -8218,7 +8218,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2742              		.section	.text.HAL_SD_WriteBlocks_IT,"ax",%progbits
  2743              		.align	1
  2744              		.global	HAL_SD_WriteBlocks_IT
-ARM GAS  /tmp/cceIbaQk.s 			page 138
+ARM GAS  /tmp/ccC5QG1F.s 			page 138
 
 
  2745              		.syntax unified
@@ -8278,7 +8278,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2787 0016 0021     		movs	r1, #0
  2788 0018 A163     		str	r1, [r4, #56]
 1254:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 139
+ARM GAS  /tmp/ccC5QG1F.s 			page 139
 
 
  2789              		.loc 1 1254 5 is_stmt 1 view .LVU1027
@@ -8338,7 +8338,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1287:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
  2826              		.loc 1 1287 8 is_stmt 0 view .LVU1045
  2827 003e 012B     		cmp	r3, #1
-ARM GAS  /tmp/cceIbaQk.s 			page 140
+ARM GAS  /tmp/ccC5QG1F.s 			page 140
 
 
  2828 0040 1ED9     		bls	.L180
@@ -8398,7 +8398,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2865              		.loc 1 1308 7 is_stmt 1 view .LVU1062
 1308:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  2866              		.loc 1 1308 14 is_stmt 0 view .LVU1063
-ARM GAS  /tmp/cceIbaQk.s 			page 141
+ARM GAS  /tmp/ccC5QG1F.s 			page 141
 
 
  2867 0066 2CE0     		b	.L177
@@ -8458,7 +8458,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2906              	.LVL262:
 1299:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  2907              		.loc 1 1299 20 view .LVU1079
-ARM GAS  /tmp/cceIbaQk.s 			page 142
+ARM GAS  /tmp/ccC5QG1F.s 			page 142
 
 
  2908 0088 FFF7FEFF 		bl	SDMMC_CmdWriteSingleBlock
@@ -8518,7 +8518,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2945 00ac D36B     		ldr	r3, [r2, #60]
  2946 00ae 43F48243 		orr	r3, r3, #16640
  2947 00b2 43F01A03 		orr	r3, r3, #26
-ARM GAS  /tmp/cceIbaQk.s 			page 143
+ARM GAS  /tmp/ccC5QG1F.s 			page 143
 
 
  2948 00b6 D363     		str	r3, [r2, #60]
@@ -8578,7 +8578,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  2996              		.cfi_offset 5, -24
  2997              		.cfi_offset 6, -20
  2998              		.cfi_offset 7, -16
-ARM GAS  /tmp/cceIbaQk.s 			page 144
+ARM GAS  /tmp/ccC5QG1F.s 			page 144
 
 
  2999              		.cfi_offset 8, -12
@@ -8638,7 +8638,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3037              		.loc 1 1364 8 view .LVU1120
  3038 0024 9842     		cmp	r0, r3
  3039 0026 0BD9     		bls	.L192
-ARM GAS  /tmp/cceIbaQk.s 			page 145
+ARM GAS  /tmp/ccC5QG1F.s 			page 145
 
 
 1366:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_ERROR;
@@ -8698,7 +8698,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3077              		.loc 1 1377 8 is_stmt 0 view .LVU1137
  3078 004c 216C     		ldr	r1, [r4, #64]
 1377:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 146
+ARM GAS  /tmp/ccC5QG1F.s 			page 146
 
 
  3079              		.loc 1 1377 35 view .LVU1138
@@ -8758,7 +8758,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3118              		.loc 1 1390 8 discriminator 1 view .LVU1153
  3119 0080 8146     		mov	r9, r0
  3120 0082 0028     		cmp	r0, #0
-ARM GAS  /tmp/cceIbaQk.s 			page 147
+ARM GAS  /tmp/ccC5QG1F.s 			page 147
 
 
  3121 0084 2FD1     		bne	.L201
@@ -8818,7 +8818,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3158              		.loc 1 1421 7 is_stmt 1 view .LVU1170
 1421:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif /* STM32L4P5xx || STM32L4Q5xx || STM32L4R5xx || STM32L4R7xx || STM32L4R9xx || STM32L4S5xx ||
  3159              		.loc 1 1421 28 is_stmt 0 view .LVU1171
-ARM GAS  /tmp/cceIbaQk.s 			page 148
+ARM GAS  /tmp/ccC5QG1F.s 			page 148
 
 
  3160 00b0 0123     		movs	r3, #1
@@ -8878,7 +8878,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3198 00da 0123     		movs	r3, #1
  3199 00dc 84F83430 		strb	r3, [r4, #52]
 1453:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         return HAL_ERROR;
-ARM GAS  /tmp/cceIbaQk.s 			page 149
+ARM GAS  /tmp/ccC5QG1F.s 			page 149
 
 
  3200              		.loc 1 1453 9 is_stmt 1 view .LVU1188
@@ -8938,7 +8938,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3239              	.LVL287:
  3240              	.L197:
 1458:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****                                SDMMC_IT_DATAEND));
-ARM GAS  /tmp/cceIbaQk.s 			page 150
+ARM GAS  /tmp/ccC5QG1F.s 			page 150
 
 
  3241              		.loc 1 1458 7 is_stmt 1 view .LVU1204
@@ -8998,7 +8998,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3290              		.cfi_def_cfa_offset 20
  3291              		.cfi_offset 4, -20
  3292              		.cfi_offset 5, -16
-ARM GAS  /tmp/cceIbaQk.s 			page 151
+ARM GAS  /tmp/ccC5QG1F.s 			page 151
 
 
  3293              		.cfi_offset 6, -12
@@ -9058,7 +9058,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3331 0022 8B42     		cmp	r3, r1
  3332 0024 2DD8     		bhi	.L216
 1508:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 152
+ARM GAS  /tmp/ccC5QG1F.s 			page 152
 
 
  3333              		.loc 1 1508 5 is_stmt 1 view .LVU1228
@@ -9118,7 +9118,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1529:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  3369              		.loc 1 1529 11 is_stmt 0 view .LVU1247
  3370 0048 5202     		lsls	r2, r2, #9
-ARM GAS  /tmp/cceIbaQk.s 			page 153
+ARM GAS  /tmp/ccC5QG1F.s 			page 153
 
 
  3371              	.LVL296:
@@ -9178,7 +9178,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1570:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  3409              		.loc 1 1570 7 is_stmt 1 view .LVU1264
 1570:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
-ARM GAS  /tmp/cceIbaQk.s 			page 154
+ARM GAS  /tmp/ccC5QG1F.s 			page 154
 
 
  3410              		.loc 1 1570 14 is_stmt 0 view .LVU1265
@@ -9238,7 +9238,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3449              		.loc 1 1561 20 view .LVU1280
  3450 0098 DFE7     		b	.L210
  3451              	.LVL303:
-ARM GAS  /tmp/cceIbaQk.s 			page 155
+ARM GAS  /tmp/ccC5QG1F.s 			page 155
 
 
  3452              	.L211:
@@ -9298,7 +9298,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3492 00ca 84F83430 		strb	r3, [r4, #52]
 1583:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_ERROR;
  3493              		.loc 1 1583 7 is_stmt 1 view .LVU1295
-ARM GAS  /tmp/cceIbaQk.s 			page 156
+ARM GAS  /tmp/ccC5QG1F.s 			page 156
 
 
 1583:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       return HAL_ERROR;
@@ -9358,7 +9358,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3530 00f2 D36B     		ldr	r3, [r2, #60]
  3531 00f4 43F01A03 		orr	r3, r3, #26
  3532 00f8 D363     		str	r3, [r2, #60]
-ARM GAS  /tmp/cceIbaQk.s 			page 157
+ARM GAS  /tmp/ccC5QG1F.s 			page 157
 
 
 1604:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #if !defined(STM32L4P5xx) && !defined(STM32L4Q5xx) && !defined(STM32L4R5xx) && !defined(STM32L4R7xx
@@ -9418,7 +9418,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3582              		.cfi_offset 7, -8
  3583              		.cfi_offset 14, -4
 1626:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t start_add = BlockStartAdd;
-ARM GAS  /tmp/cceIbaQk.s 			page 158
+ARM GAS  /tmp/ccC5QG1F.s 			page 158
 
 
  3584              		.loc 1 1626 3 is_stmt 1 view .LVU1321
@@ -9478,7 +9478,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3621 002c 14D1     		bne	.L223
 1652:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->ErrorCode |= HAL_SD_ERROR_REQUEST_NOT_APPLICABLE;
  3622              		.loc 1 1652 7 is_stmt 1 view .LVU1339
-ARM GAS  /tmp/cceIbaQk.s 			page 159
+ARM GAS  /tmp/ccC5QG1F.s 			page 159
 
 
  3623 002e 0368     		ldr	r3, [r0]
@@ -9538,7 +9538,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1643:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  3660              		.loc 1 1643 14 is_stmt 0 view .LVU1357
  3661 0056 4DE0     		b	.L220
-ARM GAS  /tmp/cceIbaQk.s 			page 160
+ARM GAS  /tmp/ccC5QG1F.s 			page 160
 
 
  3662              	.L223:
@@ -9598,7 +9598,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1678:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       if (errorstate != HAL_SD_ERROR_NONE)
  3700              		.loc 1 1678 20 is_stmt 0 view .LVU1374
  3701 0078 3946     		mov	r1, r7
-ARM GAS  /tmp/cceIbaQk.s 			page 161
+ARM GAS  /tmp/ccC5QG1F.s 			page 161
 
 
  3702 007a 2068     		ldr	r0, [r4]
@@ -9658,7 +9658,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3740 00a6 84F83430 		strb	r3, [r4, #52]
 1664:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  3741              		.loc 1 1664 7 is_stmt 1 view .LVU1391
-ARM GAS  /tmp/cceIbaQk.s 			page 162
+ARM GAS  /tmp/ccC5QG1F.s 			page 162
 
 
 1664:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
@@ -9718,7 +9718,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3780 00cc 0123     		movs	r3, #1
  3781 00ce 84F83430 		strb	r3, [r4, #52]
 1708:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
-ARM GAS  /tmp/cceIbaQk.s 			page 163
+ARM GAS  /tmp/ccC5QG1F.s 			page 163
 
 
  3782              		.loc 1 1708 7 is_stmt 1 view .LVU1408
@@ -9778,7 +9778,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3821              	.L236:
  3822              		.align	2
  3823              	.L235:
-ARM GAS  /tmp/cceIbaQk.s 			page 164
+ARM GAS  /tmp/ccC5QG1F.s 			page 164
 
 
  3824 00f8 FF054000 		.word	4195839
@@ -9838,7 +9838,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3874              	.LFE242:
  3876              		.section	.text.HAL_SD_TxCpltCallback,"ax",%progbits
  3877              		.align	1
-ARM GAS  /tmp/cceIbaQk.s 			page 165
+ARM GAS  /tmp/ccC5QG1F.s 			page 165
 
 
  3878              		.weak	HAL_SD_TxCpltCallback
@@ -9898,7 +9898,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3930              		@ args = 0, pretend = 0, frame = 0
  3931              		@ frame_needed = 0, uses_anonymous_args = 0
  3932              		@ link register save eliminated.
-ARM GAS  /tmp/cceIbaQk.s 			page 166
+ARM GAS  /tmp/ccC5QG1F.s 			page 166
 
 
 2091:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -9958,7 +9958,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  3975              		.loc 1 3297 24 view .LVU1452
  3976 000e 23F00803 		bic	r3, r3, #8
  3977 0012 D362     		str	r3, [r2, #44]
-ARM GAS  /tmp/cceIbaQk.s 			page 167
+ARM GAS  /tmp/ccC5QG1F.s 			page 167
 
 
 3300:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -10018,7 +10018,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4016              		.loc 1 3290 7 is_stmt 1 view .LVU1468
  4017 0040 2046     		mov	r0, r4
  4018              	.LVL345:
-ARM GAS  /tmp/cceIbaQk.s 			page 168
+ARM GAS  /tmp/ccC5QG1F.s 			page 168
 
 
 3290:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif
@@ -10078,7 +10078,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2426:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  4068              		.loc 1 2426 43 is_stmt 0 view .LVU1478
  4069 0006 436F     		ldr	r3, [r0, #116]
-ARM GAS  /tmp/cceIbaQk.s 			page 169
+ARM GAS  /tmp/ccC5QG1F.s 			page 169
 
 
 2426:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -10138,7 +10138,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4104              		.loc 1 2436 3 is_stmt 1 view .LVU1498
 2436:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  4105              		.loc 1 2436 40 is_stmt 0 view .LVU1499
-ARM GAS  /tmp/cceIbaQk.s 			page 170
+ARM GAS  /tmp/ccC5QG1F.s 			page 170
 
 
  4106 0032 D0F88030 		ldr	r3, [r0, #128]
@@ -10198,7 +10198,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4147              	.LFB248:
 2456:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCSD->CSDStruct = (uint8_t)((hsd->CSD[0] & 0xC0000000U) >> 30U);
  4148              		.loc 1 2456 1 is_stmt 1 view -0
-ARM GAS  /tmp/cceIbaQk.s 			page 171
+ARM GAS  /tmp/ccC5QG1F.s 			page 171
 
 
  4149              		.cfi_startproc
@@ -10258,7 +10258,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4184              		.loc 1 2465 14 view .LVU1534
  4185 0024 0A71     		strb	r2, [r1, #4]
 2467:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 172
+ARM GAS  /tmp/ccC5QG1F.s 			page 172
 
 
  4186              		.loc 1 2467 3 is_stmt 1 view .LVU1535
@@ -10318,7 +10318,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4220              		.loc 1 2477 46 is_stmt 0 view .LVU1555
  4221 004c 826E     		ldr	r2, [r0, #104]
 2477:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 173
+ARM GAS  /tmp/ccC5QG1F.s 			page 173
 
 
  4222              		.loc 1 2477 27 view .LVU1556
@@ -10378,7 +10378,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4258 007a DA6E     		ldr	r2, [r3, #108]
 2487:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  4259              		.loc 1 2487 32 view .LVU1575
-ARM GAS  /tmp/cceIbaQk.s 			page 174
+ARM GAS  /tmp/ccC5QG1F.s 			page 174
 
 
  4260 007c C2F3C262 		ubfx	r2, r2, #27, #3
@@ -10438,7 +10438,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4294              		.loc 1 2497 47 view .LVU1595
  4295 00a6 0132     		adds	r2, r2, #1
 2497:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->SdCard.BlockNbr *= (1UL << ((pCSD->DeviceSizeMul & 0x07U) + 2U));
-ARM GAS  /tmp/cceIbaQk.s 			page 175
+ARM GAS  /tmp/ccC5QG1F.s 			page 175
 
 
  4296              		.loc 1 2497 27 view .LVU1596
@@ -10498,7 +10498,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4332 00d4 DA6E     		ldr	r2, [r3, #108]
 2523:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  4333              		.loc 1 2523 23 view .LVU1615
-ARM GAS  /tmp/cceIbaQk.s 			page 176
+ARM GAS  /tmp/ccC5QG1F.s 			page 176
 
 
  4334 00d6 C2F38032 		ubfx	r2, r2, #14, #1
@@ -10558,7 +10558,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4368              		.loc 1 2533 23 view .LVU1635
  4369 00fc C2F38262 		ubfx	r2, r2, #26, #3
 2533:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 177
+ARM GAS  /tmp/ccC5QG1F.s 			page 177
 
 
  4370              		.loc 1 2533 21 view .LVU1636
@@ -10618,7 +10618,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2545:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  4405              		.loc 1 2545 39 is_stmt 0 view .LVU1656
  4406 0130 1A6F     		ldr	r2, [r3, #112]
-ARM GAS  /tmp/cceIbaQk.s 			page 178
+ARM GAS  /tmp/ccC5QG1F.s 			page 178
 
 
 2545:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -10678,7 +10678,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4441 0162 1B6F     		ldr	r3, [r3, #112]
  4442              	.LVL352:
 2555:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
-ARM GAS  /tmp/cceIbaQk.s 			page 179
+ARM GAS  /tmp/ccC5QG1F.s 			page 179
 
 
  4443              		.loc 1 2555 19 view .LVU1677
@@ -10738,7 +10738,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2509:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->SdCard.LogBlockNbr = hsd->SdCard.BlockNbr;
  4480              		.loc 1 2509 26 view .LVU1695
  4481 018e 5A65     		str	r2, [r3, #84]
-ARM GAS  /tmp/cceIbaQk.s 			page 180
+ARM GAS  /tmp/ccC5QG1F.s 			page 180
 
 
 2510:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->SdCard.BlockSize = 512U;
@@ -10798,7 +10798,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4520              		.cfi_endproc
  4521              	.LFE248:
  4523              		.section	.text.SD_InitCard,"ax",%progbits
-ARM GAS  /tmp/cceIbaQk.s 			page 181
+ARM GAS  /tmp/ccC5QG1F.s 			page 181
 
 
  4524              		.align	1
@@ -10858,7 +10858,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4566              	.L257:
 3467:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  4567              		.loc 1 3467 3 is_stmt 1 view .LVU1725
-ARM GAS  /tmp/cceIbaQk.s 			page 182
+ARM GAS  /tmp/ccC5QG1F.s 			page 182
 
 
 3467:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -10918,7 +10918,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4605              		.loc 1 3492 22 is_stmt 0 view .LVU1742
  4606 0044 0421     		movs	r1, #4
  4607 0046 2068     		ldr	r0, [r4]
-ARM GAS  /tmp/cceIbaQk.s 			page 183
+ARM GAS  /tmp/ccC5QG1F.s 			page 183
 
 
  4608 0048 FFF7FEFF 		bl	SDMMC_GetResponse
@@ -10978,7 +10978,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3508:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (errorstate != HAL_SD_ERROR_NONE)
  4648              		.loc 1 3508 3 is_stmt 1 view .LVU1757
 3508:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (errorstate != HAL_SD_ERROR_NONE)
-ARM GAS  /tmp/cceIbaQk.s 			page 184
+ARM GAS  /tmp/ccC5QG1F.s 			page 184
 
 
  4649              		.loc 1 3508 82 is_stmt 0 view .LVU1758
@@ -11038,7 +11038,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4688              		.loc 1 3462 22 is_stmt 0 view .LVU1773
  4689 00a2 0821     		movs	r1, #8
  4690 00a4 2068     		ldr	r0, [r4]
-ARM GAS  /tmp/cceIbaQk.s 			page 185
+ARM GAS  /tmp/ccC5QG1F.s 			page 185
 
 
  4691 00a6 FFF7FEFF 		bl	SDMMC_GetResponse
@@ -11098,7 +11098,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4734              		.cfi_endproc
  4735              	.LFE260:
  4737              		.section	.text.HAL_SD_InitCard,"ax",%progbits
-ARM GAS  /tmp/cceIbaQk.s 			page 186
+ARM GAS  /tmp/ccC5QG1F.s 			page 186
 
 
  4738              		.align	1
@@ -11158,7 +11158,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4778              		.loc 1 511 3 is_stmt 1 view .LVU1799
  511:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   /* Init Clock should be less or equal to 400Khz*/
  4779              		.loc 1 511 28 is_stmt 0 view .LVU1800
-ARM GAS  /tmp/cceIbaQk.s 			page 187
+ARM GAS  /tmp/ccC5QG1F.s 			page 187
 
 
  4780 0010 0893     		str	r3, [sp, #32]
@@ -11218,7 +11218,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  521:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #else
  4820              		.loc 1 521 47 view .LVU1815
  4821 0038 B31E     		subs	r3, r6, #2
-ARM GAS  /tmp/cceIbaQk.s 			page 188
+ARM GAS  /tmp/ccC5QG1F.s 			page 188
 
 
  521:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #else
@@ -11278,7 +11278,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  562:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  4862              		.loc 1 562 31 is_stmt 0 view .LVU1830
  4863 0072 1848     		ldr	r0, .L272+4
-ARM GAS  /tmp/cceIbaQk.s 			page 189
+ARM GAS  /tmp/ccC5QG1F.s 			page 189
 
 
  4864 0074 B0FBF3F0 		udiv	r0, r0, r3
@@ -11338,7 +11338,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  575:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  4902              		.loc 1 575 3 is_stmt 1 view .LVU1847
  575:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
-ARM GAS  /tmp/cceIbaQk.s 			page 190
+ARM GAS  /tmp/ccC5QG1F.s 			page 190
 
 
  4903              		.loc 1 575 6 is_stmt 0 view .LVU1848
@@ -11398,7 +11398,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4941 00c2 A36B     		ldr	r3, [r4, #56]
  588:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->State = HAL_SD_STATE_READY;
  4942              		.loc 1 588 20 view .LVU1865
-ARM GAS  /tmp/cceIbaQk.s 			page 191
+ARM GAS  /tmp/ccC5QG1F.s 			page 191
 
 
  4943 00c4 0343     		orrs	r3, r3, r0
@@ -11458,7 +11458,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  4989              		.loc 1 2573 3 view .LVU1875
  4990              	.LVL405:
 2575:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   if (errorstate != HAL_SD_ERROR_NONE)
-ARM GAS  /tmp/cceIbaQk.s 			page 192
+ARM GAS  /tmp/ccC5QG1F.s 			page 192
 
 
  4991              		.loc 1 2575 3 view .LVU1876
@@ -11518,7 +11518,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2616:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  5029              		.loc 1 2616 6 is_stmt 0 view .LVU1893
  5030 002c 30B1     		cbz	r0, .L277
-ARM GAS  /tmp/cceIbaQk.s 			page 193
+ARM GAS  /tmp/ccC5QG1F.s 			page 193
 
 
 2619:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     hsd->ErrorCode = errorstate;
@@ -11578,7 +11578,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5069 004a C2F34013 		ubfx	r3, r2, #5, #1
 2588:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  5070              		.loc 1 2588 26 view .LVU1910
-ARM GAS  /tmp/cceIbaQk.s 			page 194
+ARM GAS  /tmp/ccC5QG1F.s 			page 194
 
 
  5071 004e 6370     		strb	r3, [r4, #1]
@@ -11638,7 +11638,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5107 007e C3F30722 		ubfx	r2, r3, #8, #8
 2597:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  5108              		.loc 1 2597 30 view .LVU1929
-ARM GAS  /tmp/cceIbaQk.s 			page 195
+ARM GAS  /tmp/ccC5QG1F.s 			page 195
 
 
  5109 0082 6272     		strb	r2, [r4, #9]
@@ -11698,7 +11698,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5146              		.cfi_endproc
  5147              	.LFE249:
  5149              		.section	.text.HAL_SD_GetCardInfo,"ax",%progbits
-ARM GAS  /tmp/cceIbaQk.s 			page 196
+ARM GAS  /tmp/ccC5QG1F.s 			page 196
 
 
  5150              		.align	1
@@ -11758,7 +11758,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2642:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCardInfo->LogBlockNbr  = (uint32_t)(hsd->SdCard.LogBlockNbr);
  5189              		.loc 1 2642 3 is_stmt 1 view .LVU1963
 2642:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   pCardInfo->LogBlockNbr  = (uint32_t)(hsd->SdCard.LogBlockNbr);
-ARM GAS  /tmp/cceIbaQk.s 			page 197
+ARM GAS  /tmp/ccC5QG1F.s 			page 197
 
 
  5190              		.loc 1 2642 51 is_stmt 0 view .LVU1964
@@ -11818,7 +11818,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5234              		.cfi_def_cfa_offset 56
  5235 0004 0446     		mov	r4, r0
  5236 0006 0D46     		mov	r5, r1
-ARM GAS  /tmp/cceIbaQk.s 			page 198
+ARM GAS  /tmp/ccC5QG1F.s 			page 198
 
 
 2665:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   uint32_t errorstate;
@@ -11878,7 +11878,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 2680:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  5272              		.loc 1 2680 7 is_stmt 1 view .LVU1996
 2680:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
-ARM GAS  /tmp/cceIbaQk.s 			page 199
+ARM GAS  /tmp/ccC5QG1F.s 			page 199
 
 
  5273              		.loc 1 2680 10 is_stmt 0 view .LVU1997
@@ -11938,7 +11938,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5313              	.L285:
 2706:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  5314              		.loc 1 2706 3 is_stmt 1 view .LVU2012
-ARM GAS  /tmp/cceIbaQk.s 			page 200
+ARM GAS  /tmp/ccC5QG1F.s 			page 200
 
 
 2706:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -11998,7 +11998,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5353              	.LVL429:
 2819:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
  5354              		.loc 1 2819 12 is_stmt 0 view .LVU2029
-ARM GAS  /tmp/cceIbaQk.s 			page 201
+ARM GAS  /tmp/ccC5QG1F.s 			page 201
 
 
  5355 0080 0123     		movs	r3, #1
@@ -12058,7 +12058,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5394 00a2 0592     		str	r2, [sp, #20]
 2723:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       Init.BusWide             = WideMode;
  5395              		.loc 1 2723 7 is_stmt 1 view .LVU2045
-ARM GAS  /tmp/cceIbaQk.s 			page 202
+ARM GAS  /tmp/ccC5QG1F.s 			page 202
 
 
 2723:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       Init.BusWide             = WideMode;
@@ -12118,7 +12118,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5432              	.L292:
 2803:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  5433              		.loc 1 2803 7 is_stmt 1 view .LVU2064
-ARM GAS  /tmp/cceIbaQk.s 			page 203
+ARM GAS  /tmp/ccC5QG1F.s 			page 203
 
 
 2803:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
@@ -12178,7 +12178,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5477              		.cfi_endproc
  5478              	.LFE251:
  5480              		.section	.text.HAL_SD_Init,"ax",%progbits
-ARM GAS  /tmp/cceIbaQk.s 			page 204
+ARM GAS  /tmp/ccC5QG1F.s 			page 204
 
 
  5481              		.align	1
@@ -12238,7 +12238,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5520 000e 84F83430 		strb	r3, [r4, #52]
  416:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  5521              		.loc 1 416 3 is_stmt 1 view .LVU2092
-ARM GAS  /tmp/cceIbaQk.s 			page 205
+ARM GAS  /tmp/ccC5QG1F.s 			page 205
 
 
  416:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -12298,7 +12298,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  472:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  5562              		.loc 1 472 6 discriminator 1 view .LVU2107
  5563 003c 38B9     		cbnz	r0, .L306
-ARM GAS  /tmp/cceIbaQk.s 			page 206
+ARM GAS  /tmp/ccC5QG1F.s 			page 206
 
 
  479:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
@@ -12358,7 +12358,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5608              		.loc 1 3050 1 is_stmt 1 view -0
  5609              		.cfi_startproc
  5610              		@ args = 0, pretend = 0, frame = 8
-ARM GAS  /tmp/cceIbaQk.s 			page 207
+ARM GAS  /tmp/ccC5QG1F.s 			page 207
 
 
  5611              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -12418,7 +12418,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5649              	.LVL456:
 3064:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** 
  5650              		.loc 1 3064 1 view .LVU2136
-ARM GAS  /tmp/cceIbaQk.s 			page 208
+ARM GAS  /tmp/ccC5QG1F.s 			page 208
 
 
  5651 001e 02B0     		add	sp, sp, #8
@@ -12478,7 +12478,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5694              	.LVL460:
 3325:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  5695              		.loc 1 3325 3 is_stmt 1 view .LVU2150
-ARM GAS  /tmp/cceIbaQk.s 			page 209
+ARM GAS  /tmp/ccC5QG1F.s 			page 209
 
 
 3325:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -12538,7 +12538,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5736 0036 FFF7FEFF 		bl	HAL_SD_GetCardState
  5737              	.LVL467:
 3336:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
-ARM GAS  /tmp/cceIbaQk.s 			page 210
+ARM GAS  /tmp/ccC5QG1F.s 			page 210
 
 
  5738              		.loc 1 3336 5 is_stmt 1 view .LVU2165
@@ -12598,7 +12598,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5782              		.thumb_func
  5784              	SD_DMATxAbort:
  5785              	.LVL473:
-ARM GAS  /tmp/cceIbaQk.s 			page 211
+ARM GAS  /tmp/ccC5QG1F.s 			page 211
 
 
  5786              	.LFB258:
@@ -12658,7 +12658,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5824              		.loc 1 3368 6 view .LVU2192
  5825 001e 0128     		cmp	r0, #1
  5826 0020 05D9     		bls	.L330
-ARM GAS  /tmp/cceIbaQk.s 			page 212
+ARM GAS  /tmp/ccC5QG1F.s 			page 212
 
 
  5827              	.LVL478:
@@ -12718,7 +12718,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5870              		.thumb_func
  5872              	SD_DMARxAbort:
  5873              	.LVL484:
-ARM GAS  /tmp/cceIbaQk.s 			page 213
+ARM GAS  /tmp/ccC5QG1F.s 			page 213
 
 
  5874              	.LFB259:
@@ -12778,7 +12778,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5912              		.loc 1 3407 6 view .LVU2220
  5913 001e 0128     		cmp	r0, #1
  5914 0020 05D9     		bls	.L336
-ARM GAS  /tmp/cceIbaQk.s 			page 214
+ARM GAS  /tmp/ccC5QG1F.s 			page 214
 
 
  5915              	.LVL489:
@@ -12838,7 +12838,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  5958              		.thumb
  5959              		.thumb_func
  5961              	HAL_SD_IRQHandler:
-ARM GAS  /tmp/cceIbaQk.s 			page 215
+ARM GAS  /tmp/ccC5QG1F.s 			page 215
 
 
  5962              	.LVL495:
@@ -12898,7 +12898,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6002 0024 2268     		ldr	r2, [r4]
  6003 0026 D36B     		ldr	r3, [r2, #60]
  6004 0028 23F44143 		bic	r3, r3, #49408
-ARM GAS  /tmp/cceIbaQk.s 			page 216
+ARM GAS  /tmp/ccC5QG1F.s 			page 216
 
 
  6005 002c 23F03A03 		bic	r3, r3, #58
@@ -12958,7 +12958,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6044 0060 9A63     		str	r2, [r3, #56]
 1771:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
  6045              		.loc 1 1771 7 view .LVU2262
-ARM GAS  /tmp/cceIbaQk.s 			page 217
+ARM GAS  /tmp/ccC5QG1F.s 			page 217
 
 
 1771:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
@@ -13018,7 +13018,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6086              	.LVL505:
  6087 008e E4E7     		b	.L343
  6088              	.LVL506:
-ARM GAS  /tmp/cceIbaQk.s 			page 218
+ARM GAS  /tmp/ccC5QG1F.s 			page 218
 
 
  6089              	.L345:
@@ -13078,7 +13078,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6128 00c2 FFF7FEFF 		bl	HAL_SD_TxCpltCallback
  6129              	.LVL510:
  6130 00c6 DBE7     		b	.L337
-ARM GAS  /tmp/cceIbaQk.s 			page 219
+ARM GAS  /tmp/ccC5QG1F.s 			page 219
 
 
  6131              	.LVL511:
@@ -13138,7 +13138,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6170              		.loc 1 1871 8 is_stmt 1 view .LVU2306
 1871:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****                              SDMMC_FLAG_DCRCFAIL | SDMMC_FLAG_DTIMEOUT | SDMMC_FLAG_RXOVERR | SDMMC
  6171              		.loc 1 1871 12 is_stmt 0 view .LVU2307
-ARM GAS  /tmp/cceIbaQk.s 			page 220
+ARM GAS  /tmp/ccC5QG1F.s 			page 220
 
 
  6172 00f0 5A6B     		ldr	r2, [r3, #52]
@@ -13198,7 +13198,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 1886:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  6209              		.loc 1 1886 10 is_stmt 0 view .LVU2325
  6210 0120 A26B     		ldr	r2, [r4, #56]
-ARM GAS  /tmp/cceIbaQk.s 			page 221
+ARM GAS  /tmp/ccC5QG1F.s 			page 221
 
 
 1886:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
@@ -13258,7 +13258,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6249              		.loc 1 1911 8 is_stmt 0 view .LVU2341
  6250 0154 15F0080F 		tst	r5, #8
  6251 0158 18D1     		bne	.L362
-ARM GAS  /tmp/cceIbaQk.s 			page 222
+ARM GAS  /tmp/ccC5QG1F.s 			page 222
 
 
 1922:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     {
@@ -13318,7 +13318,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6292              	.L362:
 1914:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
  6293              		.loc 1 1914 7 is_stmt 1 view .LVU2356
-ARM GAS  /tmp/cceIbaQk.s 			page 223
+ARM GAS  /tmp/ccC5QG1F.s 			page 223
 
 
 1914:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       hsd->Context = SD_CONTEXT_NONE;
@@ -13378,7 +13378,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6334              	.L356:
 1963:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->State = HAL_SD_STATE_READY;
  6335              		.loc 1 1963 9 view .LVU2371
-ARM GAS  /tmp/cceIbaQk.s 			page 224
+ARM GAS  /tmp/ccC5QG1F.s 			page 224
 
 
 1963:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****         hsd->State = HAL_SD_STATE_READY;
@@ -13438,7 +13438,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6381              		.loc 1 3074 3 is_stmt 1 view .LVU2382
 3076:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif
  6382              		.loc 1 3076 3 view .LVU2383
-ARM GAS  /tmp/cceIbaQk.s 			page 225
+ARM GAS  /tmp/ccC5QG1F.s 			page 225
 
 
 3076:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c **** #endif
@@ -13498,7 +13498,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6423 0046 16D0     		beq	.L368
  6424              	.L367:
 3101:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       {
-ARM GAS  /tmp/cceIbaQk.s 			page 226
+ARM GAS  /tmp/ccC5QG1F.s 			page 226
 
 
  6425              		.loc 1 3101 7 is_stmt 1 view .LVU2398
@@ -13558,7 +13558,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6463              		.loc 1 3131 3 is_stmt 1 view .LVU2414
 3131:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  6464              		.loc 1 3131 10 is_stmt 0 view .LVU2415
-ARM GAS  /tmp/cceIbaQk.s 			page 227
+ARM GAS  /tmp/ccC5QG1F.s 			page 227
 
 
  6465 006e A36B     		ldr	r3, [r4, #56]
@@ -13618,7 +13618,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6504 0096 2068     		ldr	r0, [r4]
  6505              	.LVL539:
 3129:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   }
-ARM GAS  /tmp/cceIbaQk.s 			page 228
+ARM GAS  /tmp/ccC5QG1F.s 			page 228
 
 
  6506              		.loc 1 3129 22 view .LVU2431
@@ -13678,7 +13678,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6553 0018 CB62     		str	r3, [r1, #44]
 3185:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
  6554              		.loc 1 3185 3 view .LVU2441
-ARM GAS  /tmp/cceIbaQk.s 			page 229
+ARM GAS  /tmp/ccC5QG1F.s 			page 229
 
 
 3185:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****   {
@@ -13738,7 +13738,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3196:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****       }
  6592              		.loc 1 3196 21 is_stmt 0 view .LVU2459
  6593 0044 0020     		movs	r0, #0
-ARM GAS  /tmp/cceIbaQk.s 			page 230
+ARM GAS  /tmp/ccC5QG1F.s 			page 230
 
 
  6594 0046 E063     		str	r0, [r4, #60]
@@ -13798,7 +13798,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6633              		.loc 1 3217 5 is_stmt 1 view .LVU2474
  6634 006c 0368     		ldr	r3, [r0]
  6635 006e 40F23A52 		movw	r2, #1338
-ARM GAS  /tmp/cceIbaQk.s 			page 231
+ARM GAS  /tmp/ccC5QG1F.s 			page 231
 
 
  6636              	.LVL551:
@@ -13858,7 +13858,7 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
 3224:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_sd.c ****     }
  6674              		.loc 1 3224 24 view .LVU2491
  6675 0092 FFF7FEFF 		bl	SDMMC_CmdStopTransfer
-ARM GAS  /tmp/cceIbaQk.s 			page 232
+ARM GAS  /tmp/ccC5QG1F.s 			page 232
 
 
  6676              	.LVL557:
@@ -13905,113 +13905,113 @@ ARM GAS  /tmp/cceIbaQk.s 			page 1
  6713              		.file 10 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc_ex.h"
  6714              		.file 11 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
  6715              		.file 12 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
-ARM GAS  /tmp/cceIbaQk.s 			page 233
+ARM GAS  /tmp/ccC5QG1F.s 			page 233
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_hal_sd.c
-     /tmp/cceIbaQk.s:21     .text.SD_DMATransmitCplt:00000000 $t
-     /tmp/cceIbaQk.s:26     .text.SD_DMATransmitCplt:00000000 SD_DMATransmitCplt
-     /tmp/cceIbaQk.s:52     .text.SD_PowerON:00000000 $t
-     /tmp/cceIbaQk.s:57     .text.SD_PowerON:00000000 SD_PowerON
-     /tmp/cceIbaQk.s:275    .text.SD_PowerON:000000c4 $d
-     /tmp/cceIbaQk.s:280    .text.SD_PowerOFF:00000000 $t
-     /tmp/cceIbaQk.s:285    .text.SD_PowerOFF:00000000 SD_PowerOFF
-     /tmp/cceIbaQk.s:310    .text.SD_Read_IT:00000000 $t
-     /tmp/cceIbaQk.s:315    .text.SD_Read_IT:00000000 SD_Read_IT
-     /tmp/cceIbaQk.s:417    .text.SD_Write_IT:00000000 $t
-     /tmp/cceIbaQk.s:422    .text.SD_Write_IT:00000000 SD_Write_IT
-     /tmp/cceIbaQk.s:535    .text.SD_SendSDStatus:00000000 $t
-     /tmp/cceIbaQk.s:540    .text.SD_SendSDStatus:00000000 SD_SendSDStatus
-     /tmp/cceIbaQk.s:803    .text.SD_FindSCR:00000000 $t
-     /tmp/cceIbaQk.s:808    .text.SD_FindSCR:00000000 SD_FindSCR
-     /tmp/cceIbaQk.s:1068   .text.SD_WideBus_Enable:00000000 $t
-     /tmp/cceIbaQk.s:1073   .text.SD_WideBus_Enable:00000000 SD_WideBus_Enable
-     /tmp/cceIbaQk.s:1164   .text.SD_WideBus_Disable:00000000 $t
-     /tmp/cceIbaQk.s:1169   .text.SD_WideBus_Disable:00000000 SD_WideBus_Disable
-     /tmp/cceIbaQk.s:1260   .text.SD_SendStatus:00000000 $t
-     /tmp/cceIbaQk.s:1265   .text.SD_SendStatus:00000000 SD_SendStatus
-     /tmp/cceIbaQk.s:1330   .text.HAL_SD_MspInit:00000000 $t
-     /tmp/cceIbaQk.s:1336   .text.HAL_SD_MspInit:00000000 HAL_SD_MspInit
-     /tmp/cceIbaQk.s:1351   .text.HAL_SD_MspDeInit:00000000 $t
-     /tmp/cceIbaQk.s:1357   .text.HAL_SD_MspDeInit:00000000 HAL_SD_MspDeInit
-     /tmp/cceIbaQk.s:1372   .text.HAL_SD_DeInit:00000000 $t
-     /tmp/cceIbaQk.s:1378   .text.HAL_SD_DeInit:00000000 HAL_SD_DeInit
-     /tmp/cceIbaQk.s:1430   .text.HAL_SD_ReadBlocks:00000000 $t
-     /tmp/cceIbaQk.s:1436   .text.HAL_SD_ReadBlocks:00000000 HAL_SD_ReadBlocks
-     /tmp/cceIbaQk.s:2007   .text.HAL_SD_ReadBlocks:00000240 $d
-     /tmp/cceIbaQk.s:2012   .text.HAL_SD_WriteBlocks:00000000 $t
-     /tmp/cceIbaQk.s:2018   .text.HAL_SD_WriteBlocks:00000000 HAL_SD_WriteBlocks
-     /tmp/cceIbaQk.s:2507   .text.HAL_SD_WriteBlocks:000001f8 $d
-     /tmp/cceIbaQk.s:2512   .text.HAL_SD_ReadBlocks_IT:00000000 $t
-     /tmp/cceIbaQk.s:2518   .text.HAL_SD_ReadBlocks_IT:00000000 HAL_SD_ReadBlocks_IT
-     /tmp/cceIbaQk.s:2738   .text.HAL_SD_ReadBlocks_IT:000000cc $d
-     /tmp/cceIbaQk.s:2743   .text.HAL_SD_WriteBlocks_IT:00000000 $t
-     /tmp/cceIbaQk.s:2749   .text.HAL_SD_WriteBlocks_IT:00000000 HAL_SD_WriteBlocks_IT
-     /tmp/cceIbaQk.s:2974   .text.HAL_SD_WriteBlocks_IT:000000c8 $d
-     /tmp/cceIbaQk.s:2979   .text.HAL_SD_ReadBlocks_DMA:00000000 $t
-     /tmp/cceIbaQk.s:2985   .text.HAL_SD_ReadBlocks_DMA:00000000 HAL_SD_ReadBlocks_DMA
-     /tmp/cceIbaQk.s:3268   .text.HAL_SD_ReadBlocks_DMA:00000124 $d
-     /tmp/cceIbaQk.s:3945   .text.SD_DMAReceiveCplt:00000000 SD_DMAReceiveCplt
-     /tmp/cceIbaQk.s:5665   .text.SD_DMAError:00000000 SD_DMAError
-     /tmp/cceIbaQk.s:3275   .text.HAL_SD_WriteBlocks_DMA:00000000 $t
-     /tmp/cceIbaQk.s:3281   .text.HAL_SD_WriteBlocks_DMA:00000000 HAL_SD_WriteBlocks_DMA
-     /tmp/cceIbaQk.s:3555   .text.HAL_SD_WriteBlocks_DMA:00000108 $d
-     /tmp/cceIbaQk.s:3562   .text.HAL_SD_Erase:00000000 $t
-     /tmp/cceIbaQk.s:3568   .text.HAL_SD_Erase:00000000 HAL_SD_Erase
-     /tmp/cceIbaQk.s:3824   .text.HAL_SD_Erase:000000f8 $d
-     /tmp/cceIbaQk.s:3829   .text.HAL_SD_GetState:00000000 $t
-     /tmp/cceIbaQk.s:3835   .text.HAL_SD_GetState:00000000 HAL_SD_GetState
-     /tmp/cceIbaQk.s:3853   .text.HAL_SD_GetError:00000000 $t
-     /tmp/cceIbaQk.s:3859   .text.HAL_SD_GetError:00000000 HAL_SD_GetError
-     /tmp/cceIbaQk.s:3877   .text.HAL_SD_TxCpltCallback:00000000 $t
-ARM GAS  /tmp/cceIbaQk.s 			page 234
+     /tmp/ccC5QG1F.s:21     .text.SD_DMATransmitCplt:00000000 $t
+     /tmp/ccC5QG1F.s:26     .text.SD_DMATransmitCplt:00000000 SD_DMATransmitCplt
+     /tmp/ccC5QG1F.s:52     .text.SD_PowerON:00000000 $t
+     /tmp/ccC5QG1F.s:57     .text.SD_PowerON:00000000 SD_PowerON
+     /tmp/ccC5QG1F.s:275    .text.SD_PowerON:000000c4 $d
+     /tmp/ccC5QG1F.s:280    .text.SD_PowerOFF:00000000 $t
+     /tmp/ccC5QG1F.s:285    .text.SD_PowerOFF:00000000 SD_PowerOFF
+     /tmp/ccC5QG1F.s:310    .text.SD_Read_IT:00000000 $t
+     /tmp/ccC5QG1F.s:315    .text.SD_Read_IT:00000000 SD_Read_IT
+     /tmp/ccC5QG1F.s:417    .text.SD_Write_IT:00000000 $t
+     /tmp/ccC5QG1F.s:422    .text.SD_Write_IT:00000000 SD_Write_IT
+     /tmp/ccC5QG1F.s:535    .text.SD_SendSDStatus:00000000 $t
+     /tmp/ccC5QG1F.s:540    .text.SD_SendSDStatus:00000000 SD_SendSDStatus
+     /tmp/ccC5QG1F.s:803    .text.SD_FindSCR:00000000 $t
+     /tmp/ccC5QG1F.s:808    .text.SD_FindSCR:00000000 SD_FindSCR
+     /tmp/ccC5QG1F.s:1068   .text.SD_WideBus_Enable:00000000 $t
+     /tmp/ccC5QG1F.s:1073   .text.SD_WideBus_Enable:00000000 SD_WideBus_Enable
+     /tmp/ccC5QG1F.s:1164   .text.SD_WideBus_Disable:00000000 $t
+     /tmp/ccC5QG1F.s:1169   .text.SD_WideBus_Disable:00000000 SD_WideBus_Disable
+     /tmp/ccC5QG1F.s:1260   .text.SD_SendStatus:00000000 $t
+     /tmp/ccC5QG1F.s:1265   .text.SD_SendStatus:00000000 SD_SendStatus
+     /tmp/ccC5QG1F.s:1330   .text.HAL_SD_MspInit:00000000 $t
+     /tmp/ccC5QG1F.s:1336   .text.HAL_SD_MspInit:00000000 HAL_SD_MspInit
+     /tmp/ccC5QG1F.s:1351   .text.HAL_SD_MspDeInit:00000000 $t
+     /tmp/ccC5QG1F.s:1357   .text.HAL_SD_MspDeInit:00000000 HAL_SD_MspDeInit
+     /tmp/ccC5QG1F.s:1372   .text.HAL_SD_DeInit:00000000 $t
+     /tmp/ccC5QG1F.s:1378   .text.HAL_SD_DeInit:00000000 HAL_SD_DeInit
+     /tmp/ccC5QG1F.s:1430   .text.HAL_SD_ReadBlocks:00000000 $t
+     /tmp/ccC5QG1F.s:1436   .text.HAL_SD_ReadBlocks:00000000 HAL_SD_ReadBlocks
+     /tmp/ccC5QG1F.s:2007   .text.HAL_SD_ReadBlocks:00000240 $d
+     /tmp/ccC5QG1F.s:2012   .text.HAL_SD_WriteBlocks:00000000 $t
+     /tmp/ccC5QG1F.s:2018   .text.HAL_SD_WriteBlocks:00000000 HAL_SD_WriteBlocks
+     /tmp/ccC5QG1F.s:2507   .text.HAL_SD_WriteBlocks:000001f8 $d
+     /tmp/ccC5QG1F.s:2512   .text.HAL_SD_ReadBlocks_IT:00000000 $t
+     /tmp/ccC5QG1F.s:2518   .text.HAL_SD_ReadBlocks_IT:00000000 HAL_SD_ReadBlocks_IT
+     /tmp/ccC5QG1F.s:2738   .text.HAL_SD_ReadBlocks_IT:000000cc $d
+     /tmp/ccC5QG1F.s:2743   .text.HAL_SD_WriteBlocks_IT:00000000 $t
+     /tmp/ccC5QG1F.s:2749   .text.HAL_SD_WriteBlocks_IT:00000000 HAL_SD_WriteBlocks_IT
+     /tmp/ccC5QG1F.s:2974   .text.HAL_SD_WriteBlocks_IT:000000c8 $d
+     /tmp/ccC5QG1F.s:2979   .text.HAL_SD_ReadBlocks_DMA:00000000 $t
+     /tmp/ccC5QG1F.s:2985   .text.HAL_SD_ReadBlocks_DMA:00000000 HAL_SD_ReadBlocks_DMA
+     /tmp/ccC5QG1F.s:3268   .text.HAL_SD_ReadBlocks_DMA:00000124 $d
+     /tmp/ccC5QG1F.s:3945   .text.SD_DMAReceiveCplt:00000000 SD_DMAReceiveCplt
+     /tmp/ccC5QG1F.s:5665   .text.SD_DMAError:00000000 SD_DMAError
+     /tmp/ccC5QG1F.s:3275   .text.HAL_SD_WriteBlocks_DMA:00000000 $t
+     /tmp/ccC5QG1F.s:3281   .text.HAL_SD_WriteBlocks_DMA:00000000 HAL_SD_WriteBlocks_DMA
+     /tmp/ccC5QG1F.s:3555   .text.HAL_SD_WriteBlocks_DMA:00000108 $d
+     /tmp/ccC5QG1F.s:3562   .text.HAL_SD_Erase:00000000 $t
+     /tmp/ccC5QG1F.s:3568   .text.HAL_SD_Erase:00000000 HAL_SD_Erase
+     /tmp/ccC5QG1F.s:3824   .text.HAL_SD_Erase:000000f8 $d
+     /tmp/ccC5QG1F.s:3829   .text.HAL_SD_GetState:00000000 $t
+     /tmp/ccC5QG1F.s:3835   .text.HAL_SD_GetState:00000000 HAL_SD_GetState
+     /tmp/ccC5QG1F.s:3853   .text.HAL_SD_GetError:00000000 $t
+     /tmp/ccC5QG1F.s:3859   .text.HAL_SD_GetError:00000000 HAL_SD_GetError
+     /tmp/ccC5QG1F.s:3877   .text.HAL_SD_TxCpltCallback:00000000 $t
+ARM GAS  /tmp/ccC5QG1F.s 			page 234
 
 
-     /tmp/cceIbaQk.s:3883   .text.HAL_SD_TxCpltCallback:00000000 HAL_SD_TxCpltCallback
-     /tmp/cceIbaQk.s:3898   .text.HAL_SD_RxCpltCallback:00000000 $t
-     /tmp/cceIbaQk.s:3904   .text.HAL_SD_RxCpltCallback:00000000 HAL_SD_RxCpltCallback
-     /tmp/cceIbaQk.s:3919   .text.HAL_SD_ErrorCallback:00000000 $t
-     /tmp/cceIbaQk.s:3925   .text.HAL_SD_ErrorCallback:00000000 HAL_SD_ErrorCallback
-     /tmp/cceIbaQk.s:3940   .text.SD_DMAReceiveCplt:00000000 $t
-     /tmp/cceIbaQk.s:4027   .text.HAL_SD_AbortCallback:00000000 $t
-     /tmp/cceIbaQk.s:4033   .text.HAL_SD_AbortCallback:00000000 HAL_SD_AbortCallback
-     /tmp/cceIbaQk.s:4048   .text.HAL_SD_GetCardCID:00000000 $t
-     /tmp/cceIbaQk.s:4054   .text.HAL_SD_GetCardCID:00000000 HAL_SD_GetCardCID
-     /tmp/cceIbaQk.s:4139   .text.HAL_SD_GetCardCSD:00000000 $t
-     /tmp/cceIbaQk.s:4145   .text.HAL_SD_GetCardCSD:00000000 HAL_SD_GetCardCSD
-     /tmp/cceIbaQk.s:4519   .text.HAL_SD_GetCardCSD:000001b4 $d
-     /tmp/cceIbaQk.s:4524   .text.SD_InitCard:00000000 $t
-     /tmp/cceIbaQk.s:4529   .text.SD_InitCard:00000000 SD_InitCard
-     /tmp/cceIbaQk.s:4738   .text.HAL_SD_InitCard:00000000 $t
-     /tmp/cceIbaQk.s:4744   .text.HAL_SD_InitCard:00000000 HAL_SD_InitCard
-     /tmp/cceIbaQk.s:4957   .text.HAL_SD_InitCard:000000d0 $d
-     /tmp/cceIbaQk.s:4964   .text.HAL_SD_GetCardStatus:00000000 $t
-     /tmp/cceIbaQk.s:4970   .text.HAL_SD_GetCardStatus:00000000 HAL_SD_GetCardStatus
-     /tmp/cceIbaQk.s:5145   .text.HAL_SD_GetCardStatus:000000a8 $d
-     /tmp/cceIbaQk.s:5150   .text.HAL_SD_GetCardInfo:00000000 $t
-     /tmp/cceIbaQk.s:5156   .text.HAL_SD_GetCardInfo:00000000 HAL_SD_GetCardInfo
-     /tmp/cceIbaQk.s:5214   .text.HAL_SD_ConfigWideBusOperation:00000000 $t
-     /tmp/cceIbaQk.s:5220   .text.HAL_SD_ConfigWideBusOperation:00000000 HAL_SD_ConfigWideBusOperation
-     /tmp/cceIbaQk.s:5474   .text.HAL_SD_ConfigWideBusOperation:000000f4 $d
-     /tmp/cceIbaQk.s:5481   .text.HAL_SD_Init:00000000 $t
-     /tmp/cceIbaQk.s:5487   .text.HAL_SD_Init:00000000 HAL_SD_Init
-     /tmp/cceIbaQk.s:5599   .text.HAL_SD_GetCardState:00000000 $t
-     /tmp/cceIbaQk.s:5605   .text.HAL_SD_GetCardState:00000000 HAL_SD_GetCardState
-     /tmp/cceIbaQk.s:5660   .text.SD_DMAError:00000000 $t
-     /tmp/cceIbaQk.s:5774   .text.SD_DMAError:0000005c $d
-     /tmp/cceIbaQk.s:5779   .text.SD_DMATxAbort:00000000 $t
-     /tmp/cceIbaQk.s:5784   .text.SD_DMATxAbort:00000000 SD_DMATxAbort
-     /tmp/cceIbaQk.s:5867   .text.SD_DMARxAbort:00000000 $t
-     /tmp/cceIbaQk.s:5872   .text.SD_DMARxAbort:00000000 SD_DMARxAbort
-     /tmp/cceIbaQk.s:5955   .text.HAL_SD_IRQHandler:00000000 $t
-     /tmp/cceIbaQk.s:5961   .text.HAL_SD_IRQHandler:00000000 HAL_SD_IRQHandler
-     /tmp/cceIbaQk.s:6356   .text.HAL_SD_IRQHandler:000001d8 $d
-     /tmp/cceIbaQk.s:6362   .text.HAL_SD_Abort:00000000 $t
-     /tmp/cceIbaQk.s:6368   .text.HAL_SD_Abort:00000000 HAL_SD_Abort
-     /tmp/cceIbaQk.s:6520   .text.HAL_SD_Abort_IT:00000000 $t
-     /tmp/cceIbaQk.s:6526   .text.HAL_SD_Abort_IT:00000000 HAL_SD_Abort_IT
-     /tmp/cceIbaQk.s:6698   .text.HAL_SD_Abort_IT:000000a8 $d
+     /tmp/ccC5QG1F.s:3883   .text.HAL_SD_TxCpltCallback:00000000 HAL_SD_TxCpltCallback
+     /tmp/ccC5QG1F.s:3898   .text.HAL_SD_RxCpltCallback:00000000 $t
+     /tmp/ccC5QG1F.s:3904   .text.HAL_SD_RxCpltCallback:00000000 HAL_SD_RxCpltCallback
+     /tmp/ccC5QG1F.s:3919   .text.HAL_SD_ErrorCallback:00000000 $t
+     /tmp/ccC5QG1F.s:3925   .text.HAL_SD_ErrorCallback:00000000 HAL_SD_ErrorCallback
+     /tmp/ccC5QG1F.s:3940   .text.SD_DMAReceiveCplt:00000000 $t
+     /tmp/ccC5QG1F.s:4027   .text.HAL_SD_AbortCallback:00000000 $t
+     /tmp/ccC5QG1F.s:4033   .text.HAL_SD_AbortCallback:00000000 HAL_SD_AbortCallback
+     /tmp/ccC5QG1F.s:4048   .text.HAL_SD_GetCardCID:00000000 $t
+     /tmp/ccC5QG1F.s:4054   .text.HAL_SD_GetCardCID:00000000 HAL_SD_GetCardCID
+     /tmp/ccC5QG1F.s:4139   .text.HAL_SD_GetCardCSD:00000000 $t
+     /tmp/ccC5QG1F.s:4145   .text.HAL_SD_GetCardCSD:00000000 HAL_SD_GetCardCSD
+     /tmp/ccC5QG1F.s:4519   .text.HAL_SD_GetCardCSD:000001b4 $d
+     /tmp/ccC5QG1F.s:4524   .text.SD_InitCard:00000000 $t
+     /tmp/ccC5QG1F.s:4529   .text.SD_InitCard:00000000 SD_InitCard
+     /tmp/ccC5QG1F.s:4738   .text.HAL_SD_InitCard:00000000 $t
+     /tmp/ccC5QG1F.s:4744   .text.HAL_SD_InitCard:00000000 HAL_SD_InitCard
+     /tmp/ccC5QG1F.s:4957   .text.HAL_SD_InitCard:000000d0 $d
+     /tmp/ccC5QG1F.s:4964   .text.HAL_SD_GetCardStatus:00000000 $t
+     /tmp/ccC5QG1F.s:4970   .text.HAL_SD_GetCardStatus:00000000 HAL_SD_GetCardStatus
+     /tmp/ccC5QG1F.s:5145   .text.HAL_SD_GetCardStatus:000000a8 $d
+     /tmp/ccC5QG1F.s:5150   .text.HAL_SD_GetCardInfo:00000000 $t
+     /tmp/ccC5QG1F.s:5156   .text.HAL_SD_GetCardInfo:00000000 HAL_SD_GetCardInfo
+     /tmp/ccC5QG1F.s:5214   .text.HAL_SD_ConfigWideBusOperation:00000000 $t
+     /tmp/ccC5QG1F.s:5220   .text.HAL_SD_ConfigWideBusOperation:00000000 HAL_SD_ConfigWideBusOperation
+     /tmp/ccC5QG1F.s:5474   .text.HAL_SD_ConfigWideBusOperation:000000f4 $d
+     /tmp/ccC5QG1F.s:5481   .text.HAL_SD_Init:00000000 $t
+     /tmp/ccC5QG1F.s:5487   .text.HAL_SD_Init:00000000 HAL_SD_Init
+     /tmp/ccC5QG1F.s:5599   .text.HAL_SD_GetCardState:00000000 $t
+     /tmp/ccC5QG1F.s:5605   .text.HAL_SD_GetCardState:00000000 HAL_SD_GetCardState
+     /tmp/ccC5QG1F.s:5660   .text.SD_DMAError:00000000 $t
+     /tmp/ccC5QG1F.s:5774   .text.SD_DMAError:0000005c $d
+     /tmp/ccC5QG1F.s:5779   .text.SD_DMATxAbort:00000000 $t
+     /tmp/ccC5QG1F.s:5784   .text.SD_DMATxAbort:00000000 SD_DMATxAbort
+     /tmp/ccC5QG1F.s:5867   .text.SD_DMARxAbort:00000000 $t
+     /tmp/ccC5QG1F.s:5872   .text.SD_DMARxAbort:00000000 SD_DMARxAbort
+     /tmp/ccC5QG1F.s:5955   .text.HAL_SD_IRQHandler:00000000 $t
+     /tmp/ccC5QG1F.s:5961   .text.HAL_SD_IRQHandler:00000000 HAL_SD_IRQHandler
+     /tmp/ccC5QG1F.s:6356   .text.HAL_SD_IRQHandler:000001d8 $d
+     /tmp/ccC5QG1F.s:6362   .text.HAL_SD_Abort:00000000 $t
+     /tmp/ccC5QG1F.s:6368   .text.HAL_SD_Abort:00000000 HAL_SD_Abort
+     /tmp/ccC5QG1F.s:6520   .text.HAL_SD_Abort_IT:00000000 $t
+     /tmp/ccC5QG1F.s:6526   .text.HAL_SD_Abort_IT:00000000 HAL_SD_Abort_IT
+     /tmp/ccC5QG1F.s:6698   .text.HAL_SD_Abort_IT:000000a8 $d
 
 UNDEFINED SYMBOLS
 SDMMC_CmdGoIdleState
@@ -14025,7 +14025,7 @@ SDMMC_WriteFIFO
 HAL_GetTick
 SDMMC_CmdBlockLength
 SDMMC_ConfigData
-ARM GAS  /tmp/cceIbaQk.s 			page 235
+ARM GAS  /tmp/ccC5QG1F.s 			page 235
 
 
 SDMMC_CmdStatusRegister

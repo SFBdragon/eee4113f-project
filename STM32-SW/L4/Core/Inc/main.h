@@ -103,12 +103,6 @@ void Error_Handler(void);
 #define Wi_WAKE_GPIO_Port GPIOC
 #define Wi_GPIO_0_Pin GPIO_PIN_7
 #define Wi_GPIO_0_GPIO_Port GPIOC
-#define D_USART1_CK_Pin GPIO_PIN_8
-#define D_USART1_CK_GPIO_Port GPIOA
-#define D_USART1_TX_Pin GPIO_PIN_9
-#define D_USART1_TX_GPIO_Port GPIOA
-#define D_USART1_RX_Pin GPIO_PIN_10
-#define D_USART1_RX_GPIO_Port GPIOA
 #define D_wakeup_Pin GPIO_PIN_11
 #define D_wakeup_GPIO_Port GPIOA
 #define D_GPIO0_Pin GPIO_PIN_12
