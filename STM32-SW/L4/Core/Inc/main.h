@@ -95,10 +95,6 @@ void Error_Handler(void);
 #define Lo_GPIO_1_GPIO_Port GPIOB
 #define Lo_GPIO_2_Pin GPIO_PIN_12
 #define Lo_GPIO_2_GPIO_Port GPIOB
-#define Lo_GPIO_3_Pin GPIO_PIN_13
-#define Lo_GPIO_3_GPIO_Port GPIOB
-#define Lo_RESET_GPIO_Pin GPIO_PIN_14
-#define Lo_RESET_GPIO_GPIO_Port GPIOB
 #define Wi_WAKE_Pin GPIO_PIN_6
 #define Wi_WAKE_GPIO_Port GPIOC
 #define Wi_GPIO_0_Pin GPIO_PIN_7
