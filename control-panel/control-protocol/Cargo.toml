@@ -1,0 +1,12 @@
+[package]
+name = "control-protocol"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+test-utils = []
+
+[dependencies]
+# no_std crate that links against C files
+control-sys = { path = "../control-sys" }
+
