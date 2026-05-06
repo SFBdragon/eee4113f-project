@@ -1,0 +1,20 @@
+[package]
+name = "control-protocol-static"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+# Build a C-compatible static library.
+crate-type = ["staticlib"]
+
+[features]
+
+[dependencies]
+control-protocol = { path = "../control-protocol" }
+panic-halt = "0.2"
+
+[profile.release]
+panic = "abort"
+
+[profile.dev]
+panic = "abort"

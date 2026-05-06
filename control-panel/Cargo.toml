@@ -5,4 +5,5 @@ members = [
     "control-sys",
     "control-core",
     "control-gui",
+    "control-protocol", "control-protocol-static",
 ]

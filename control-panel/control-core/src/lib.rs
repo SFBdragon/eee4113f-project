@@ -1,6 +1,10 @@
 
 mod drivers;
-mod lora;
+pub mod lora;
+pub mod wifi;
+mod crc;
+
+
 
 
 pub fn add(left: u64, right: u64) -> u64 {

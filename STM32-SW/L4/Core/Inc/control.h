@@ -1,5 +1,6 @@
 // transmission.h
 
+#include <cstdint>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -30,6 +31,7 @@ typedef struct {
     // metadata
     // metadata
     // metadata
+    uint32_t blk;
     // len?
     uint16_t len;
     // crc?
