@@ -180,8 +180,8 @@ int main(void)
     HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
 
       char oled_buffer[20]; 
-    sprintf(oled_buffer, "SD Blk: %lu", hsd1.SdCard.BlockSize);
-    ssd1306_SetCursor(0, 0);
+    sprintf(oled_buffer, "SD Blk2: %lu", hsd1.SdCard.BlockSize);
+    ssd1306_SetCursor(2, 0);
     ssd1306_WriteString(oled_buffer, Font_7x10, White);
       
  
@@ -484,13 +484,20 @@ static void MX_SDMMC1_SD_Init(void)
   hsd1.Init.ClockEdge = SDMMC_CLOCK_EDGE_RISING;
   hsd1.Init.ClockBypass = SDMMC_CLOCK_BYPASS_DISABLE;
   hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
-  hsd1.Init.BusWide = SDMMC_BUS_WIDE_1B;
+  hsd1.Init.BusWide = SDMMC_BUS_WIDE_4B;
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
   hsd1.Init.ClockDiv = 2;
   /* USER CODE BEGIN SDMMC1_Init 2 */
 
+  // First init with 1B bust, SD card not initialising with 4 bits
+  hsd1.Init.BusWide = SDMMC_BUS_WIDE_1B;
   if (HAL_SD_Init(&hsd1) != HAL_OK) {
      Error_Handler();
+  }
+  
+  // Now switch to 4 bit mode
+  if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK) {
+    Error_Handler();
   }
   
 
