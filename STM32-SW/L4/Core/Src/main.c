@@ -179,38 +179,14 @@ int main(void)
     // Polling WIFI power for now as indicator
     HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
 
-    // Get the current RTC Time to check LSI then LSE
-    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
-    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
-
-    /* 2. Display Date (Top Line) */
-    // Format: DD-MM-20YY
-    sprintf(oled_buffer, "Date: %02d-%02d-20%02d", sDate.Date, sDate.Month, sDate.Year);
-    //ssd1306_SetCursor(0, 0);
-    //ssd1306_WriteString(oled_buffer, Font_7x10, White);
-
-    /* 3. Display Time (Middle Line) */
-    sprintf(oled_buffer, "%02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
-    //ssd1306_SetCursor(0, 15);
-    //ssd1306_WriteString(oled_buffer, Font_11x18, White);
-
-    /* 4. Display Counter (Bottom Line) */
-    sprintf(oled_buffer, "Count: %lu", count++);
-   // ssd1306_SetCursor(0, 40);
-   /// ssd1306_WriteString(oled_buffer, Font_7x10, White);
-    //ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
-
+      char oled_buffer[20]; 
+    sprintf(oled_buffer, "SD Blk: %lu", hsd1.SdCard.BlockSize);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString(oled_buffer, Font_7x10, White);
+      
+ 
     /* 5. Refresh Screen */
-    //ssd1306_UpdateScreen();
-
-    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY)) {
-    //ssd1306_SetCursor(0, 40);
-    //ssd1306_WriteString("LSE: READY", Font_7x10, White);
-    } else {
-      //  ssd1306_SetCursor(0, 40);
-        //ssd1306_WriteString("LSE: FAIL", Font_7x10, White);
-    }
-    //ssd1306_UpdateScreen();
+    ssd1306_UpdateScreen();
 
     HAL_Delay(2000);
     
@@ -510,7 +486,7 @@ static void MX_SDMMC1_SD_Init(void)
   hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_1B;
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd1.Init.ClockDiv = 128;
+  hsd1.Init.ClockDiv = 2;
   /* USER CODE BEGIN SDMMC1_Init 2 */
 
   if (HAL_SD_Init(&hsd1) != HAL_OK) {
