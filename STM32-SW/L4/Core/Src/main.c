@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "fatfs.h"
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -60,7 +61,8 @@ SD_HandleTypeDef hsd1;
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-
+uint32_t total_sd_uptime = 0; // Total time SD card has been active, in seconds
+const char total_uptime_filename[] = "uptime.dat";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -182,11 +184,59 @@ int main(void)
       char oled_buffer[20]; 
     sprintf(oled_buffer, "SD Blk2: %lu", hsd1.SdCard.BlockSize);
     ssd1306_SetCursor(2, 0);
-    ssd1306_WriteString(oled_buffer, Font_7x10, White);
+    //ssd1306_WriteString(oled_buffer, Font_7x10, White);
       
  
     /* 5. Refresh Screen */
     ssd1306_UpdateScreen();
+
+    FATFS SDFatFS;  
+    FIL MyFile;     
+  /* --- String Shifter Test --- */
+char test_string[16];   // Buffer to hold the data
+char oled_msg[20];
+const char* filename = "test.txt";
+UINT br, bw;
+
+// 1. Mount the SD Card
+if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
+    
+    // 2. Try to open and READ the existing string
+    if (f_open(&MyFile, filename, FA_READ) == FR_OK) {
+        f_read(&MyFile, test_string, 5, &br); // Read first 5 chars
+        test_string[br] = '\0';               // Null terminate
+        f_close(&MyFile);
+
+        // 3. MODIFY: Rotate the string (e.g., ABCDE -> BCDEA)
+        char first = test_string[0];
+        for(int i = 0; i < 4; i++) {
+            test_string[i] = test_string[i+1];
+        }
+        test_string[4] = first;
+        
+        sprintf(oled_msg, "Read: %s", test_string);
+    } else {
+        // 4. INITIALIZE: If file doesn't exist, create it with "ABCDE"
+        strcpy(test_string, "ABCDE");
+        sprintf(oled_msg, "Init: ABCDE");
+    }
+
+    // 5. WRITE the modified string back to the card
+    if (f_open(&MyFile, filename, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
+        f_write(&MyFile, test_string, 5, &bw);
+        f_close(&MyFile);
+    }
+} else {
+    sprintf(oled_msg, "Mount Fail");
+}
+
+// 6. Output to OLED
+ssd1306_Fill(Black);
+ssd1306_SetCursor(0, 0);
+ssd1306_WriteString(oled_msg, Font_7x10, White);
+ssd1306_UpdateScreen();
+
+
 
     HAL_Delay(2000);
     
