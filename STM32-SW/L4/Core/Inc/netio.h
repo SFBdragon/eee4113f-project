@@ -5,6 +5,8 @@
 // Shaun will wirete code files to implement parts of this interface.
 // e.g. `protocol.c`
 
+#pragma once
+
 #include <stdint.h>
 
 
@@ -28,7 +30,7 @@ typedef uint16_t BufLen;
 // Note that LoRa packets range from pings and status information to control
 // messages, so a fixed-length is unlikely to be a good idea.
 // I'm hoping that I can fit all the message lengths into less than 256 bytes
-// or break up the messages across multiple packets. 
+// or break up the messages across multiple packets.
 #define MAX_LORA_RECV_PACKET_LEN 64
 #define MAX_LORA_SEND_PACKET_LEN 64
 
@@ -79,7 +81,7 @@ Status power_down_wifi();
 short send_wifi_packet(uint64_t macdst, uint8_t *data, uint16_t len);
 
 // Provide the least recent unread packet in memory [data, data + len).
-// 
+//
 // Shaun defines this function. Tamryn calls it.
 // Shaun will avoid having Shaun's error conditions affect Tam's code,
 // thus an error code is not returned here.

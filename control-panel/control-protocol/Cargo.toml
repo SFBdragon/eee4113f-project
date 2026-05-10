@@ -7,6 +7,3 @@ edition = "2024"
 test-utils = []
 
 [dependencies]
-# no_std crate that links against C files
-control-sys = { path = "../control-sys" }
-

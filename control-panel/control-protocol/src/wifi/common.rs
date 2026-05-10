@@ -1,14 +1,16 @@
 //! common.rs — shared frame definitions, constants, seq arithmetic
 //! no_std, no alloc
 
-use crate::{CrcFn, byteutils::{first, last, write_buf, write_int}, call_crc_fn};
-
+use crate::{
+    CrcFn,
+    byteutils::{first, last, write_buf, write_int},
+    call_crc_fn,
+};
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-
 /// Maximum payload size we can give to the link-layer.
-pub const MAX_DATAGRAM: usize = control_sys::MAX_WIFI_SEND_PACKET_LEN;
+pub const MAX_DATAGRAM: usize = crate::phy::MAX_WIFI_SEND_PACKET_LEN;
 /// CRC length.
 pub const CRC_LEN: usize = 2;
 /// Number of bytes of overhead per non-ACK datagram.
@@ -22,33 +24,23 @@ pub const SEQ_SPACE: usize = 1 << SeqNumType::BITS;
 pub const MAX_WINDOW: usize = 32;
 pub type WindowBitMap = u32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Mac(u64);
-impl Mac {
-    pub fn bcast() -> Self {
-        Self(0x0000FFFF_FFFFFFFF)
-    }
-
-    pub fn to_u64(&self) -> u64 {
-        self.0
-    }
-}
-impl From<u64> for Mac {
-    fn from(value: u64) -> Self {
-        Mac(value & 0x0000FFFF_FFFFFFFF)
-    }
-}
+pub const PING_PERIOD_MS: usize = 1000;
+pub const PING_MISSED_THRESH: usize = 3;
 
 // ── Flags ────────────────────────────────────────────────────────────────────
+
+// A connectionless ping. This is used to test the reachability of WiFi.
+// This should not affect any connection state.
+pub const FLAG_PING: u8 = 0b0000_0001;
 
 /// Sync the receiver's sequence tracking.
 /// This creates a new connection effectively.
 /// Because the current implementation only supports one active connection,
 /// this will cause the receiver to drop the previous connection state, so
 /// finish up the previous transmission first (close out with FIN).
-pub const FLAG_SYN: u8 = 0b0000_0001;
+pub const FLAG_SYN: u8 = 0b0000_0010;
 /// The end flag. The end of a message. Facilitates fragmentation and reassembly.
-/// 
+///
 /// Each message implicitly starts after the previous END.
 /// An END on consecutive messages means a single-frame message was sent.
 pub const FLAG_END: u8 = 0b0000_1000;
@@ -123,21 +115,29 @@ impl<'a> DataFrame<'a> {
 
     /// Parse from raw bytes. Validates CRC. Returns None on malformed input.
     pub fn parse(buf: &'a [u8], crc_fn: CrcFn) -> Result<Self, ParseError> {
-        if buf.len() < 3 + CRC_LEN { return Err(ParseError::TooShortToParse); }
+        if buf.len() < 3 + CRC_LEN {
+            return Err(ParseError::TooShortToParse);
+        }
 
         let (rem, flags) = first!(u8, buf);
-        if flags & (FLAG_ACK | FLAG_RST) != 0 { return Err(ParseError::WrongType); }
-        
+        if flags & (FLAG_ACK | FLAG_RST) != 0 {
+            return Err(ParseError::WrongType);
+        }
+
         let (rem, seq) = first!(u8, rem);
         let (rem, len) = first!(u8, rem);
 
-        let expected_len = 3 + len as usize + CRC_LEN;
-        if buf.len() != expected_len { return Err(ParseError::BadLength); }
+        let expected_len = len as usize + DG_OVERHEAD;
+        if buf.len() != expected_len {
+            return Err(ParseError::BadLength);
+        }
 
         let (body, crc) = last!(u16, buf);
 
         // Validate CRC over header + payload
-        if call_crc_fn(crc_fn, body) != crc { return Err(ParseError::BadCrc); }
+        if call_crc_fn(crc_fn, body) != crc {
+            return Err(ParseError::BadCrc);
+        }
 
         Ok(DataFrame {
             flags,
@@ -158,7 +158,7 @@ pub struct AckFrame {
 
     /// Set bits indicate successfully received packets.
     /// Unset bits indicate no reception of the packet.
-    /// 
+    ///
     /// Each bit index corresponds to the packets' offesets from recv_base.
     pub bitmap: WindowBitMap,
 }
@@ -171,20 +171,32 @@ impl AckFrame {
     /// This tells the sender that we are prepared to connect with them,
     /// and they can start sending us data from `seq` as specified in the SYN frame.
     pub fn syn(seq: u8) -> Self {
-        AckFrame { flags: FLAG_ACK | FLAG_SYN, ack_base: seq, bitmap: 0 }
+        AckFrame {
+            flags: FLAG_ACK | FLAG_SYN,
+            ack_base: seq,
+            bitmap: 0,
+        }
     }
-    
+
     /// Create a reset (RST) ack frame.
     /// This tells the sender that we don't have a connection with them and
     /// they need to connect (send a SYN) before we accept data from them.
     pub fn rst() -> Self {
-        AckFrame { flags: FLAG_ACK | FLAG_RST, ack_base: 0, bitmap: 0 }
+        AckFrame {
+            flags: FLAG_ACK | FLAG_RST,
+            ack_base: 0,
+            bitmap: 0,
+        }
     }
 
     /// Create a normal ack frame.
     /// This tells the sender what data we have received.
     pub fn ack(ack_base: u8, bitmap: WindowBitMap) -> Self {
-        AckFrame { flags: FLAG_ACK, ack_base, bitmap }
+        AckFrame {
+            flags: FLAG_ACK,
+            ack_base,
+            bitmap,
+        }
     }
 
     /// Writes `ACK_SIZE` bytes to `buf`.
@@ -208,18 +220,28 @@ impl AckFrame {
     }
 
     pub fn parse(buf: &[u8], crc_fn: CrcFn) -> Result<Self, ParseError> {
-        if buf.len() < ACK_SIZE { return Err(ParseError::TooShortToParse); }
+        if buf.len() < ACK_SIZE {
+            return Err(ParseError::TooShortToParse);
+        }
 
         let (rem, flags) = first!(u8, buf);
-        if flags & FLAG_ACK == 0 { return Err(ParseError::WrongType); }
+        if flags & FLAG_ACK == 0 {
+            return Err(ParseError::WrongType);
+        }
 
         let (rem, ack_base) = first!(u8, rem);
         let (_, bitmap) = first!(WindowBitMap, rem);
         let (rx_body, rx_crc) = last!(u16, buf);
 
-        if call_crc_fn(crc_fn, rx_body) != rx_crc { return Err(ParseError::BadCrc); }
+        if call_crc_fn(crc_fn, rx_body) != rx_crc {
+            return Err(ParseError::BadCrc);
+        }
 
-        Ok(AckFrame { flags, ack_base, bitmap })
+        Ok(AckFrame {
+            flags,
+            ack_base,
+            bitmap,
+        })
     }
 }
 
@@ -246,7 +268,12 @@ pub mod test_utils {
     /// Serialize a DATA frame manually, bypassing the Sender state machine.
     pub fn make_data_frame(seq: u8, flags: u8, payload: &[u8]) -> Vec<u8> {
         let mut buf = [0u8; MAX_DATAGRAM];
-        let frame = DataFrame { flags, seq, len: payload.len() as u8, payload };
+        let frame = DataFrame {
+            flags,
+            seq,
+            len: payload.len() as u8,
+            payload,
+        };
         let len = frame.serialize(&mut buf, test_crc);
         buf[..len].to_vec()
     }
@@ -256,23 +283,27 @@ pub mod test_utils {
     }
 
     pub fn make_ack_with_base(ack_base: u8, bitmap: WindowBitMap) -> AckFrame {
-        AckFrame { flags: FLAG_ACK, ack_base, bitmap }
+        AckFrame {
+            flags: FLAG_ACK,
+            ack_base,
+            bitmap,
+        }
     }
 
     pub fn noop_timer_set(_ms: u32) {}
     pub fn noop_timer_cancel() {}
-    pub fn time_zero() -> u32 { 0 }
+    pub fn time_zero() -> u32 {
+        0
+    }
 }
 
 #[cfg(test)]
 pub mod tests {
 
-    use super::*;
     use super::test_utils::*;
+    use super::*;
 
     // Test frame serialisation/deserialisation, CRC gating, seq arithmetic.
-
-
 
     // =========================================================================
     // common — seq arithmetic
@@ -315,8 +346,8 @@ pub mod tests {
     fn seq_in_window_wraparound() {
         // Window base = 250, window = 64: covers 250..=255 and 0..=57
         assert!(seq_in_window(255, 250, 64));
-        assert!(seq_in_window(0,   250, 64));
-        assert!(seq_in_window(57,  250, 64));
+        assert!(seq_in_window(0, 250, 64));
+        assert!(seq_in_window(57, 250, 64));
         assert!(!seq_in_window(58, 250, 64));
         assert!(!seq_in_window(249, 250, 64));
     }
@@ -385,7 +416,10 @@ pub mod tests {
     fn data_frame_parse_rejects_truncated() {
         let raw = make_data_frame(0, 0, b"abc");
         // Feed only the header, no payload, no CRC
-        assert_eq!(DataFrame::parse(&raw[..3], test_crc), Err(ParseError::TooShortToParse));
+        assert_eq!(
+            DataFrame::parse(&raw[..3], test_crc),
+            Err(ParseError::TooShortToParse)
+        );
     }
 
     #[test]
@@ -419,7 +453,10 @@ pub mod tests {
         let mut bytes = make_ack(1).to_bytes(test_crc);
         bytes[0] &= !FLAG_ACK; // clear the ACK bit
         // CRC will also be wrong, but the flags are checked first
-        assert_eq!(AckFrame::parse(&bytes, test_crc), Err(ParseError::WrongType));
+        assert_eq!(
+            AckFrame::parse(&bytes, test_crc),
+            Err(ParseError::WrongType)
+        );
     }
 
     #[test]
@@ -432,6 +469,9 @@ pub mod tests {
     #[test]
     fn ack_frame_parse_rejects_truncated() {
         let bytes = make_ack(0).to_bytes(test_crc);
-        assert_eq!(AckFrame::parse(&bytes[..(ACK_SIZE - 1)], test_crc), Err(ParseError::TooShortToParse));
+        assert_eq!(
+            AckFrame::parse(&bytes[..(ACK_SIZE - 1)], test_crc),
+            Err(ParseError::TooShortToParse)
+        );
     }
 }
