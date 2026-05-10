@@ -1,16 +1,6 @@
 #![no_std]
 
-pub type Status = i32;
-
-pub const MAX_LORA_RECV_PACKET_LEN: usize = 64;
-pub const MAX_LORA_SEND_PACKET_LEN: usize = 64;
-
-pub const MAX_WIFI_RECV_PACKET_LEN: usize = 255;
-pub const MAX_WIFI_SEND_PACKET_LEN: usize = 255;
-
-pub const STATUS_SUCCESSFUL: Status = 0;
-pub const STATUS_RECEIVE_TIMEOUT: Status = -3;
-pub const STATUS_MODULE_DETACHED: Status = -5;
+use control_protocol::phy::*;
 
 unsafe extern "C" {
     pub safe fn is_lora_module_attached() -> bool;
@@ -21,8 +11,11 @@ unsafe extern "C" {
     pub safe fn get_lora_byterate() -> u32;
 
     pub safe fn send_lora_packet(data: *const u8, len: usize) -> Status;
-    pub safe fn recv_lora_packet(data: *mut [u8; MAX_LORA_RECV_PACKET_LEN], len: *mut usize, timeout_ms: u32) -> Status;
-
+    pub safe fn recv_lora_packet(
+        data: *mut [u8; MAX_LORA_RECV_PACKET_LEN],
+        len: *mut usize,
+        timeout_ms: u32,
+    ) -> Status;
 
     pub safe fn is_wifi_module_attached() -> bool;
 
@@ -30,7 +23,11 @@ unsafe extern "C" {
     pub safe fn shutdown_wifi_module();
 
     pub safe fn send_wifi_packet(dst_mac: u64, data: *const u8, len: u16) -> Status;
-    pub safe fn recv_wifi_packet(src_mac: *mut u64, data: *mut [u8; MAX_WIFI_RECV_PACKET_LEN], len: *mut u16) -> Status;
+    pub safe fn recv_wifi_packet(
+        src_mac: *mut u64,
+        data: *mut [u8; MAX_WIFI_RECV_PACKET_LEN],
+        len: *mut u16,
+    ) -> Status;
 }
 
 #[cfg(test)]

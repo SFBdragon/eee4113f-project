@@ -1,0 +1,57 @@
+export component RingBufferWidget inherits Rectangle {
+    in property <float> p_overwritable_1;
+    in property <float> p_preserved_1;
+    in property <float> p_free_2;
+    in property <float> p_overwritable_2;
+    in property <float> p_preserved_2;
+
+    height: 40px;
+
+    // 1st free
+    Rectangle {
+        x: 0px;
+        width: parent.width * p_overwritable_1;
+        height: parent.height;
+        background: #444444;
+    }
+
+    // 1st overwritable
+    Rectangle {
+        x: parent.width * p_overwritable_1;
+        width: parent.width * (p_preserved_1 - p_overwritable_1);
+        height: parent.height;
+        background: #e67e22;
+    }
+
+    // 1st readable
+    Rectangle {
+        x: parent.width * p_preserved_1;
+        width: parent.width * (p_free_2 - p_preserved_1);
+        height: parent.height;
+        background: #27ae60;
+    }
+
+    // 2nd free
+    Rectangle {
+        x: parent.width * p_free_2;
+        width: parent.width * (p_overwritable_2 - p_free_2);
+        height: parent.height;
+        background: #444444;
+    }
+
+    // 2st overwritable
+    Rectangle {
+        x: parent.width * p_overwritable_2;
+        width: parent.width * (p_preserved_2 - p_overwritable_2);
+        height: parent.height;
+        background: #e67e22;
+    }
+
+    // 2st readable
+    Rectangle {
+        x: parent.width * p_preserved_2;
+        width: parent.width * (1.0 - p_preserved_2);
+        height: parent.height;
+        background: #27ae60;
+    }
+}
