@@ -50,6 +50,9 @@ volatile uint32_t tail = 0; // Read by Main Loop
 
 volatile uint8_t wake_up_flag = 0;
 
+uint8_t writeBuf[512];
+uint8_t readBuf[512];
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -69,8 +72,6 @@ DMA_HandleTypeDef hdma_usart1_rx;
 RTC_HandleTypeDef hrtc;
 
 SD_HandleTypeDef hsd1;
-DMA_HandleTypeDef hdma_sdmmc1_rx;
-DMA_HandleTypeDef hdma_sdmmc1_tx;
 
 SPI_HandleTypeDef hspi1;
 
@@ -95,6 +96,7 @@ static void MX_USART1_UART_Init(void);
 static void UART_SendString(UART_HandleTypeDef *huart, char *str);
 static uint32_t get_dma_head(void);
 static void Print_SD_Details(void);
+static void SD_RawWriteTest(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -167,6 +169,7 @@ int main(void)
 
   // Start UART RX in DMA Circular mode
   // The DMA hardware will automatically wrap around to the start of ring_buffer
+  SD_RawWriteTest();
   Print_SD_Details();
   
   /*
@@ -239,7 +242,12 @@ if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
   while (1)
   { 
 
-        HAL_Delay(10000); // Wait 10 seconds
+
+    FRESULT res = f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE);
+    char dbg[32];
+    snprintf(dbg, sizeof(dbg), "f_open res: %d\r\n", res);
+    UART_SendString(&huart3, dbg);
+    //HAL_Delay(3000); // Wait 10 seconds
     total_uptime += 10; // Increment uptime by the delay interval
 
     // Write updated uptime back to SD card
@@ -598,11 +606,11 @@ static void MX_SDMMC1_SD_Init(void)
   hsd1.Init.ClockBypass = SDMMC_CLOCK_BYPASS_DISABLE;
   hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_4B;
-  hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd1.Init.ClockDiv = 118;
+  hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
+  hsd1.Init.ClockDiv = 0;
   /* USER CODE BEGIN SDMMC1_Init 2 */
 
-  // First init with 1B bust, SD card not initialising with 4 bits
+  // First init with 1B bust, SD card not initifalising with 4 bits
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_1B;
   if (HAL_SD_Init(&hsd1) != HAL_OK) {
      Error_Handler();
@@ -669,18 +677,11 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
-  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Channel5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 14, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
-  /* DMA2_Channel4_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Channel4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Channel4_IRQn);
-  /* DMA2_Channel5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Channel5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Channel5_IRQn);
 
 }
 
@@ -744,7 +745,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(D_GPIO0_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 10, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 14, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
@@ -801,6 +802,76 @@ void Print_SD_Details(void) {
 
     // Send the formatted string via your UART function
     UART_SendString(&huart3, msg);
+}
+
+// Direct SDMMC write/read-back test — no FatFS involved
+void SD_RawWriteTest(void) {
+    char uart[64];
+
+    // Fill write buffer with known pattern
+    for (int i = 0; i < 512; i++) {
+        writeBuf[i] = (uint8_t)(i & 0xFF);
+    }
+    memset(readBuf, 0xAA, sizeof(readBuf)); // fill read buf with garbage first
+
+    UART_SendString(&huart3, "\r\n--- RAW HAL SD TEST ---\r\n");
+
+    // --- WRITE ---
+    HAL_StatusTypeDef wStat = HAL_SD_WriteBlocks(&hsd1, writeBuf, 100, 1, 5000);
+    snprintf(uart, sizeof(uart), "WriteBlocks: %s (%d)\r\n",
+             wStat == HAL_OK ? "HAL_OK" : "FAILED", wStat);
+    UART_SendString(&huart3, uart);
+
+    if (wStat != HAL_OK) {
+        // Dump SD error state for more detail
+        HAL_SD_CardStateTypeDef state = HAL_SD_GetCardState(&hsd1);
+        snprintf(uart, sizeof(uart), "Card state after write: %d\r\n", (int)state);
+        UART_SendString(&huart3, uart);
+
+        uint32_t sdErr = hsd1.ErrorCode;    // FAILS WITH SDMMC_ERROR_CMD_CRC_FAIL implying signal integrity issue. 
+        snprintf(uart, sizeof(uart), "SD ErrorCode: 0x%08lX\r\n", (unsigned long)sdErr);
+        UART_SendString(&huart3, uart);
+        return;
+    }
+
+
+    // --- WAIT for card to finish ---
+    uint32_t t = HAL_GetTick();
+    while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+        if (HAL_GetTick() - t > 2000) {
+            UART_SendString(&huart3, "Timeout waiting for card after write!\r\n");
+            return;
+        }
+    }
+    UART_SendString(&huart3, "Card ready after write.\r\n");
+
+    // --- READ BACK ---
+    HAL_StatusTypeDef rStat = HAL_SD_ReadBlocks(&hsd1, readBuf, 100, 1, 2000);
+    snprintf(uart, sizeof(uart), "ReadBlocks:  %s (%d)\r\n",
+             rStat == HAL_OK ? "HAL_OK" : "FAILED", rStat);
+    UART_SendString(&huart3, uart);
+
+    if (rStat != HAL_OK) return;
+
+    // Wait for card again
+    t = HAL_GetTick();
+    while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+        if (HAL_GetTick() - t > 2000) {
+            UART_SendString(&huart3, "Timeout waiting for card after read!\r\n");
+            return;
+        }
+    }
+
+    // --- VERIFY ---
+    int mismatches = 0;
+    for (int i = 0; i < 512; i++) {
+        if (readBuf[i] != writeBuf[i]) mismatches++;
+    }
+
+    snprintf(uart, sizeof(uart), "Verify: %s (%d mismatches)\r\n",
+             mismatches == 0 ? "PASS" : "FAIL", mismatches);
+    UART_SendString(&huart3, uart);
+    UART_SendString(&huart3, "--- END RAW TEST ---\r\n\r\n");
 }
 /* USER CODE END 4 */
 
