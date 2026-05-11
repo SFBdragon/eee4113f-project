@@ -61,7 +61,7 @@ volatile uint8_t wake_up_flag = 0;
 I2C_HandleTypeDef hi2c2;
 
 UART_HandleTypeDef hlpuart1;
-USART_HandleTypeDef husart1;
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart1_rx;
@@ -69,12 +69,14 @@ DMA_HandleTypeDef hdma_usart1_rx;
 RTC_HandleTypeDef hrtc;
 
 SD_HandleTypeDef hsd1;
+DMA_HandleTypeDef hdma_sdmmc1_rx;
+DMA_HandleTypeDef hdma_sdmmc1_tx;
 
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
-uint32_t total_sd_uptime = 0; // Total time SD card has been active, in seconds
-const char total_uptime_filename[] = "uptime.dat";
+uint32_t total_uptime; // Total time SD card has been active, in seconds
+const char total_uptime_filename[] = "UPTIME.txt";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,9 +90,11 @@ static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_SDMMC1_SD_Init(void);
-static void MX_USART1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 static void UART_SendString(UART_HandleTypeDef *huart, char *str);
+static uint32_t get_dma_head(void);
+static void Print_SD_Details(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -152,17 +156,82 @@ int main(void)
   MX_I2C2_Init();
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
-  MX_USART1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(Wi_EN_GPIO_Port, Wi_EN_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_SET);
 
+  UART_SendString(&huart3, "SETUP\r\n");
 
+  // Start UART RX in DMA Circular mode
+  // The DMA hardware will automatically wrap around to the start of ring_buffer
+  Print_SD_Details();
+  
+  /*
 
- 
- 
+// --- Read uptime ONCE before the loop ---
+if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
+    UART_SendString(&huart3, "SD Card Mounted Successfully!\r\n");
+
+    if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
+        char readBuf[16] = {0};
+        UINT bytesRead = 0;
+
+        if (f_read(&SDFile, readBuf, sizeof(readBuf) - 1, &bytesRead) == FR_OK && bytesRead > 0) {
+            readBuf[bytesRead] = '\0'; // Null-terminate
+            total_uptime = (uint32_t)strtoul(readBuf, NULL, 10); // FIX: parse ASCII -> uint32
+            UART_SendString(&huart3, "Read uptime from SD card successfully.\r\n");
+        } else {
+            UART_SendString(&huart3, "Failed to read uptime from SD card.\r\n");
+            total_uptime = 0;
+        }
+        f_close(&SDFile);
+
+    } else {
+        UART_SendString(&huart3, "Uptime file not found. Starting with uptime = 0.\r\n");
+        total_uptime = 0;
+    }
+    // Leave mounted for the loop
+
+} else {
+    UART_SendString(&huart3, "Failed to Mount SD Card.\r\n");
+    total_uptime = 0;
+}
+*/
+
+// --- Diagnostic block - add temporarily after successful mount ---
+if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
+    UART_SendString(&huart3, "SD Card Mounted Successfully!\r\n");
+
+    // 1. Check free space (fails if FAT type mismatch or read-only)
+    DWORD freeClusters;
+    FATFS *pFatFs;
+    char diagBuf[64];
+
+    if (f_getfree(SDPath, &freeClusters, &pFatFs) == FR_OK) {
+        uint32_t freeKB = freeClusters * pFatFs->csize * (pFatFs->csize / 1024);
+        snprintf(diagBuf, sizeof(diagBuf), "Free space: %lu KB\r\n", (unsigned long)freeKB);
+        UART_SendString(&huart3, diagBuf);
+    } else {
+        UART_SendString(&huart3, "f_getfree FAILED - possible FAT type or config issue\r\n");
+    }
+
+    // 2. Try creating a brand new test file
+    FRESULT res = f_open(&SDFile, "TEST.txt", FA_CREATE_ALWAYS | FA_WRITE);
+    snprintf(diagBuf, sizeof(diagBuf), "f_open TEST.txt result: %d\r\n", res);
+    UART_SendString(&huart3, diagBuf);
+
+    if (res == FR_OK) {
+        UINT bw;
+        FRESULT wres = f_write(&SDFile, "hello", 5, &bw);
+        snprintf(diagBuf, sizeof(diagBuf), "f_write result: %d, bytes: %u\r\n", wres, bw);
+        UART_SendString(&huart3, diagBuf);
+        f_close(&SDFile);
+    }
+}
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -170,19 +239,35 @@ int main(void)
   while (1)
   { 
 
-    if (wake_up_flag) {
-      // Handle wake-up event (e.g., read from SD card, update display, etc.)
-     // UART_SendString(&huart2, "D_WAKE Triggered!\r\n");
-      wake_up_flag = 0; // Reset flag after handling
+        HAL_Delay(10000); // Wait 10 seconds
+    total_uptime += 10; // Increment uptime by the delay interval
+
+    // Write updated uptime back to SD card
+    if (f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        char writeBuf[16] = {0};
+        UINT bytesWritten = 0;
+
+        // FIX: Write ASCII text, not raw binary
+        int len = snprintf(writeBuf, sizeof(writeBuf), "%lu\r\n", (unsigned long)total_uptime);
+
+        if (f_write(&SDFile, writeBuf, (UINT)len, &bytesWritten) == FR_OK && bytesWritten == (UINT)len) {
+            UART_SendString(&huart3, "Uptime written to SD card.\r\n");
+        } else {
+            UART_SendString(&huart3, "Failed to write uptime.\r\n");
+        }
+
+        f_sync(&SDFile);  // Flush to card — critical for FAT reliability
+        f_close(&SDFile);
+
+    } else {
+        UART_SendString(&huart3, "Failed to open uptime file for writing.\r\n");
     }
+  
     // Polling WIFI power for now as indicator
   HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
    //  UART_SendString(&huart3, "Hello from EndeavourOS via UART3!\r\n");
    
-// Serial output code:
-    char msg[] = "Hello from STSM32!\r\n";
-    HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 100);  
-    HAL_Delay(2000);
+    HAL_Delay(10000); // Toggle every 1 second
     
     /* USER CODE END WHILE */
 
@@ -329,7 +414,7 @@ static void MX_LPUART1_UART_Init(void)
   * @param None
   * @retval None
   */
-static void MX_USART1_Init(void)
+static void MX_USART1_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART1_Init 0 */
@@ -339,16 +424,17 @@ static void MX_USART1_Init(void)
   /* USER CODE BEGIN USART1_Init 1 */
 
   /* USER CODE END USART1_Init 1 */
-  husart1.Instance = USART1;
-  husart1.Init.BaudRate = 115200;
-  husart1.Init.WordLength = USART_WORDLENGTH_8B;
-  husart1.Init.StopBits = USART_STOPBITS_1;
-  husart1.Init.Parity = USART_PARITY_NONE;
-  husart1.Init.Mode = USART_MODE_TX_RX;
-  husart1.Init.CLKPolarity = USART_POLARITY_LOW;
-  husart1.Init.CLKPhase = USART_PHASE_1EDGE;
-  husart1.Init.CLKLastBit = USART_LASTBIT_DISABLE;
-  if (HAL_USART_Init(&husart1) != HAL_OK)
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -513,7 +599,7 @@ static void MX_SDMMC1_SD_Init(void)
   hsd1.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_4B;
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd1.Init.ClockDiv = 2;
+  hsd1.Init.ClockDiv = 118;
   /* USER CODE BEGIN SDMMC1_Init 2 */
 
   // First init with 1B bust, SD card not initialising with 4 bits
@@ -523,9 +609,11 @@ static void MX_SDMMC1_SD_Init(void)
   }
   
   // Now switch to 4 bit mode
-  if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK) {
+ if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK) {
     Error_Handler();
-  }
+ }
+
+  UART_SendString(&huart3, "SD CARD INIT\r\n");
   
 
 
@@ -581,11 +669,18 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Channel5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 5, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA2_Channel4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel4_IRQn);
+  /* DMA2_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel5_IRQn);
 
 }
 
@@ -679,6 +774,33 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
        wake_up_flag = 1; // Set flag to indicate wake-up event occurred 
        HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
     }
+}
+
+uint32_t get_dma_head(void) {
+    // __HAL_DMA_GET_COUNTER returns remaining items; subtract from size to get current index
+    return RING_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+}
+
+void Print_SD_Details(void) {
+    char msg[128]; // Increased buffer size to fit all details
+
+    // Formatting multiple variables into one string
+    // %lu is used for 32-bit unsigned integers (uint32_t)
+    int len = sprintf(msg, 
+        "\r\n--- SD Card Info ---\r\n"
+        "Version:   %lu\r\n"
+        "Block Size: %lu bytes\r\n"
+        "Block Nbr:  %lu\r\n"
+        "Total Size: %lu KB\r\n"
+        "--------------------\r\n",
+        (uint32_t)hsd1.SdCard.CardVersion,
+        (uint32_t)hsd1.SdCard.BlockSize,
+        (uint32_t)hsd1.SdCard.BlockNbr,
+        (uint32_t)(hsd1.SdCard.BlockNbr * hsd1.SdCard.BlockSize / 1024) // Calculated Size
+    );
+
+    // Send the formatted string via your UART function
+    UART_SendString(&huart3, msg);
 }
 /* USER CODE END 4 */
 
