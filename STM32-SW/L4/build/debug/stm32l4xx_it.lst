@@ -1,4 +1,4 @@
-ARM GAS  /tmp/ccYPPkgT.s 			page 1
+ARM GAS  /tmp/ccDjAqkV.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
   28:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN TD */
   29:Core/Src/stm32l4xx_it.c **** 
   30:Core/Src/stm32l4xx_it.c **** /* USER CODE END TD */
-ARM GAS  /tmp/ccYPPkgT.s 			page 2
+ARM GAS  /tmp/ccDjAqkV.s 			page 2
 
 
   31:Core/Src/stm32l4xx_it.c **** 
@@ -88,7 +88,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
   55:Core/Src/stm32l4xx_it.c **** /* USER CODE END 0 */
   56:Core/Src/stm32l4xx_it.c **** 
   57:Core/Src/stm32l4xx_it.c **** /* External variables --------------------------------------------------------*/
-  58:Core/Src/stm32l4xx_it.c **** extern SD_HandleTypeDef hsd1;
+  58:Core/Src/stm32l4xx_it.c **** extern DMA_HandleTypeDef hdma_usart1_rx;
   59:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN EV */
   60:Core/Src/stm32l4xx_it.c **** 
   61:Core/Src/stm32l4xx_it.c **** /* USER CODE END EV */
@@ -118,7 +118,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
   77:Core/Src/stm32l4xx_it.c ****   }
   37              		.loc 1 77 3 view .LVU2
   75:Core/Src/stm32l4xx_it.c ****   {
-ARM GAS  /tmp/ccYPPkgT.s 			page 3
+ARM GAS  /tmp/ccDjAqkV.s 			page 3
 
 
   38              		.loc 1 75 10 view .LVU3
@@ -178,7 +178,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
   98:Core/Src/stm32l4xx_it.c ****   */
   99:Core/Src/stm32l4xx_it.c **** void MemManage_Handler(void)
  100:Core/Src/stm32l4xx_it.c **** {
-ARM GAS  /tmp/ccYPPkgT.s 			page 4
+ARM GAS  /tmp/ccDjAqkV.s 			page 4
 
 
   75              		.loc 1 100 1 view -0
@@ -238,7 +238,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
  119:Core/Src/stm32l4xx_it.c ****   {
  107              		.loc 1 119 9 view .LVU15
  108 0000 FEE7     		b	.L8
-ARM GAS  /tmp/ccYPPkgT.s 			page 5
+ARM GAS  /tmp/ccDjAqkV.s 			page 5
 
 
  109              		.cfi_endproc
@@ -298,7 +298,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
  144              		.loc 1 145 1 view -0
  145              		.cfi_startproc
  146              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  /tmp/ccYPPkgT.s 			page 6
+ARM GAS  /tmp/ccDjAqkV.s 			page 6
 
 
  147              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -358,7 +358,7 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
  169:Core/Src/stm32l4xx_it.c ****   */
  170:Core/Src/stm32l4xx_it.c **** void PendSV_Handler(void)
  171:Core/Src/stm32l4xx_it.c **** {
-ARM GAS  /tmp/ccYPPkgT.s 			page 7
+ARM GAS  /tmp/ccDjAqkV.s 			page 7
 
 
  182              		.loc 1 171 1 view -0
@@ -414,16 +414,16 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
  213 0006 08BD     		pop	{r3, pc}
  214              		.cfi_endproc
  215              	.LFE236:
- 217              		.section	.text.SDMMC1_IRQHandler,"ax",%progbits
+ 217              		.section	.text.DMA1_Channel5_IRQHandler,"ax",%progbits
  218              		.align	1
- 219              		.global	SDMMC1_IRQHandler
+ 219              		.global	DMA1_Channel5_IRQHandler
  220              		.syntax unified
-ARM GAS  /tmp/ccYPPkgT.s 			page 8
+ARM GAS  /tmp/ccDjAqkV.s 			page 8
 
 
  221              		.thumb
  222              		.thumb_func
- 224              	SDMMC1_IRQHandler:
+ 224              	DMA1_Channel5_IRQHandler:
  225              	.LFB237:
  193:Core/Src/stm32l4xx_it.c **** 
  194:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
@@ -434,9 +434,9 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
  199:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
  200:Core/Src/stm32l4xx_it.c **** 
  201:Core/Src/stm32l4xx_it.c **** /**
- 202:Core/Src/stm32l4xx_it.c ****   * @brief This function handles SDMMC1 global interrupt.
+ 202:Core/Src/stm32l4xx_it.c ****   * @brief This function handles DMA1 channel5 global interrupt.
  203:Core/Src/stm32l4xx_it.c ****   */
- 204:Core/Src/stm32l4xx_it.c **** void SDMMC1_IRQHandler(void)
+ 204:Core/Src/stm32l4xx_it.c **** void DMA1_Channel5_IRQHandler(void)
  205:Core/Src/stm32l4xx_it.c **** {
  226              		.loc 1 205 1 is_stmt 1 view -0
  227              		.cfi_startproc
@@ -446,65 +446,108 @@ ARM GAS  /tmp/ccYPPkgT.s 			page 1
  231              		.cfi_def_cfa_offset 8
  232              		.cfi_offset 3, -8
  233              		.cfi_offset 14, -4
- 206:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SDMMC1_IRQn 0 */
+ 206:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN DMA1_Channel5_IRQn 0 */
  207:Core/Src/stm32l4xx_it.c **** 
- 208:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SDMMC1_IRQn 0 */
- 209:Core/Src/stm32l4xx_it.c ****   HAL_SD_IRQHandler(&hsd1);
+ 208:Core/Src/stm32l4xx_it.c ****   /* USER CODE END DMA1_Channel5_IRQn 0 */
+ 209:Core/Src/stm32l4xx_it.c ****   HAL_DMA_IRQHandler(&hdma_usart1_rx);
  234              		.loc 1 209 3 view .LVU30
  235 0002 0248     		ldr	r0, .L18
- 236 0004 FFF7FEFF 		bl	HAL_SD_IRQHandler
+ 236 0004 FFF7FEFF 		bl	HAL_DMA_IRQHandler
  237              	.LVL1:
- 210:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SDMMC1_IRQn 1 */
+ 210:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
  211:Core/Src/stm32l4xx_it.c **** 
- 212:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SDMMC1_IRQn 1 */
+ 212:Core/Src/stm32l4xx_it.c ****   /* USER CODE END DMA1_Channel5_IRQn 1 */
  213:Core/Src/stm32l4xx_it.c **** }
  238              		.loc 1 213 1 is_stmt 0 view .LVU31
  239 0008 08BD     		pop	{r3, pc}
  240              	.L19:
  241 000a 00BF     		.align	2
  242              	.L18:
- 243 000c 00000000 		.word	hsd1
+ 243 000c 00000000 		.word	hdma_usart1_rx
  244              		.cfi_endproc
  245              	.LFE237:
- 247              		.text
- 248              	.Letext0:
- 249              		.file 2 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
- 250              		.file 3 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
- 251              		.file 4 "Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l476xx.h"
- 252              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h"
- 253              		.file 6 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_dma.h"
- 254              		.file 7 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_sdmmc.h"
- 255              		.file 8 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_sd.h"
- 256              		.file 9 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
- 257              		.file 10 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
-ARM GAS  /tmp/ccYPPkgT.s 			page 9
+ 247              		.section	.text.EXTI15_10_IRQHandler,"ax",%progbits
+ 248              		.align	1
+ 249              		.global	EXTI15_10_IRQHandler
+ 250              		.syntax unified
+ 251              		.thumb
+ 252              		.thumb_func
+ 254              	EXTI15_10_IRQHandler:
+ 255              	.LFB238:
+ 214:Core/Src/stm32l4xx_it.c **** 
+ 215:Core/Src/stm32l4xx_it.c **** /**
+ 216:Core/Src/stm32l4xx_it.c ****   * @brief This function handles EXTI line[15:10] interrupts.
+ 217:Core/Src/stm32l4xx_it.c ****   */
+ARM GAS  /tmp/ccDjAqkV.s 			page 9
+
+
+ 218:Core/Src/stm32l4xx_it.c **** void EXTI15_10_IRQHandler(void)
+ 219:Core/Src/stm32l4xx_it.c **** {
+ 256              		.loc 1 219 1 is_stmt 1 view -0
+ 257              		.cfi_startproc
+ 258              		@ args = 0, pretend = 0, frame = 0
+ 259              		@ frame_needed = 0, uses_anonymous_args = 0
+ 260 0000 08B5     		push	{r3, lr}
+ 261              		.cfi_def_cfa_offset 8
+ 262              		.cfi_offset 3, -8
+ 263              		.cfi_offset 14, -4
+ 220:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+ 221:Core/Src/stm32l4xx_it.c **** 
+ 222:Core/Src/stm32l4xx_it.c ****   /* USER CODE END EXTI15_10_IRQn 0 */
+ 223:Core/Src/stm32l4xx_it.c ****   HAL_GPIO_EXTI_IRQHandler(D_WAKE_Pin);
+ 264              		.loc 1 223 3 view .LVU33
+ 265 0002 4FF40060 		mov	r0, #2048
+ 266 0006 FFF7FEFF 		bl	HAL_GPIO_EXTI_IRQHandler
+ 267              	.LVL2:
+ 224:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+ 225:Core/Src/stm32l4xx_it.c **** 
+ 226:Core/Src/stm32l4xx_it.c ****   /* USER CODE END EXTI15_10_IRQn 1 */
+ 227:Core/Src/stm32l4xx_it.c **** }
+ 268              		.loc 1 227 1 is_stmt 0 view .LVU34
+ 269 000a 08BD     		pop	{r3, pc}
+ 270              		.cfi_endproc
+ 271              	.LFE238:
+ 273              		.text
+ 274              	.Letext0:
+ 275              		.file 2 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
+ 276              		.file 3 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
+ 277              		.file 4 "Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l476xx.h"
+ 278              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h"
+ 279              		.file 6 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_dma.h"
+ 280              		.file 7 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_gpio.h"
+ 281              		.file 8 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
+ 282              		.file 9 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
+ARM GAS  /tmp/ccDjAqkV.s 			page 10
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_it.c
-     /tmp/ccYPPkgT.s:21     .text.NMI_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:27     .text.NMI_Handler:00000000 NMI_Handler
-     /tmp/ccYPPkgT.s:44     .text.HardFault_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:50     .text.HardFault_Handler:00000000 HardFault_Handler
-     /tmp/ccYPPkgT.s:67     .text.MemManage_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:73     .text.MemManage_Handler:00000000 MemManage_Handler
-     /tmp/ccYPPkgT.s:90     .text.BusFault_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:96     .text.BusFault_Handler:00000000 BusFault_Handler
-     /tmp/ccYPPkgT.s:113    .text.UsageFault_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:119    .text.UsageFault_Handler:00000000 UsageFault_Handler
-     /tmp/ccYPPkgT.s:136    .text.SVC_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:142    .text.SVC_Handler:00000000 SVC_Handler
-     /tmp/ccYPPkgT.s:155    .text.DebugMon_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:161    .text.DebugMon_Handler:00000000 DebugMon_Handler
-     /tmp/ccYPPkgT.s:174    .text.PendSV_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:180    .text.PendSV_Handler:00000000 PendSV_Handler
-     /tmp/ccYPPkgT.s:193    .text.SysTick_Handler:00000000 $t
-     /tmp/ccYPPkgT.s:199    .text.SysTick_Handler:00000000 SysTick_Handler
-     /tmp/ccYPPkgT.s:218    .text.SDMMC1_IRQHandler:00000000 $t
-     /tmp/ccYPPkgT.s:224    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
-     /tmp/ccYPPkgT.s:243    .text.SDMMC1_IRQHandler:0000000c $d
+     /tmp/ccDjAqkV.s:21     .text.NMI_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:27     .text.NMI_Handler:00000000 NMI_Handler
+     /tmp/ccDjAqkV.s:44     .text.HardFault_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:50     .text.HardFault_Handler:00000000 HardFault_Handler
+     /tmp/ccDjAqkV.s:67     .text.MemManage_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:73     .text.MemManage_Handler:00000000 MemManage_Handler
+     /tmp/ccDjAqkV.s:90     .text.BusFault_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:96     .text.BusFault_Handler:00000000 BusFault_Handler
+     /tmp/ccDjAqkV.s:113    .text.UsageFault_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:119    .text.UsageFault_Handler:00000000 UsageFault_Handler
+     /tmp/ccDjAqkV.s:136    .text.SVC_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:142    .text.SVC_Handler:00000000 SVC_Handler
+     /tmp/ccDjAqkV.s:155    .text.DebugMon_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:161    .text.DebugMon_Handler:00000000 DebugMon_Handler
+     /tmp/ccDjAqkV.s:174    .text.PendSV_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:180    .text.PendSV_Handler:00000000 PendSV_Handler
+     /tmp/ccDjAqkV.s:193    .text.SysTick_Handler:00000000 $t
+     /tmp/ccDjAqkV.s:199    .text.SysTick_Handler:00000000 SysTick_Handler
+     /tmp/ccDjAqkV.s:218    .text.DMA1_Channel5_IRQHandler:00000000 $t
+     /tmp/ccDjAqkV.s:224    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
+     /tmp/ccDjAqkV.s:243    .text.DMA1_Channel5_IRQHandler:0000000c $d
+     /tmp/ccDjAqkV.s:248    .text.EXTI15_10_IRQHandler:00000000 $t
+     /tmp/ccDjAqkV.s:254    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
 
 UNDEFINED SYMBOLS
 HAL_IncTick
-HAL_SD_IRQHandler
-hsd1
+HAL_DMA_IRQHandler
+hdma_usart1_rx
+HAL_GPIO_EXTI_IRQHandler

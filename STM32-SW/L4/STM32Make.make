@@ -108,6 +108,8 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_usart.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_usart_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_sdmmc.c \
 FATFS/App/fatfs.c \
 FATFS/Target/bsp_driver_sd.c \

@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "fatfs.h"
-#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -28,6 +27,7 @@
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
 
+#include <string.h>
 #include <stdio.h>
 
 /* USER CODE END Includes */
@@ -39,6 +39,16 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define RING_BUFFER_SIZE (64 * 1024) // 64KB
+#define SD_BLOCK_SIZE    (4096)      // 4KB burst (8 sectors)
+
+uint8_t ring_buffer[RING_BUFFER_SIZE];
+uint8_t dma_transfer_buffer[SD_BLOCK_SIZE] __attribute__((aligned(32))); 
+
+volatile uint32_t head = 0; // Written by UART ISR
+volatile uint32_t tail = 0; // Read by Main Loop
+
+volatile uint8_t wake_up_flag = 0;
 
 /* USER CODE END PD */
 
@@ -51,8 +61,10 @@
 I2C_HandleTypeDef hi2c2;
 
 UART_HandleTypeDef hlpuart1;
+USART_HandleTypeDef husart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 RTC_HandleTypeDef hrtc;
 
@@ -68,6 +80,7 @@ const char total_uptime_filename[] = "uptime.dat";
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_LPUART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
@@ -75,6 +88,7 @@ static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_SDMMC1_SD_Init(void);
+static void MX_USART1_Init(void);
 /* USER CODE BEGIN PFP */
 static void UART_SendString(UART_HandleTypeDef *huart, char *str);
 /* USER CODE END PFP */
@@ -93,7 +107,6 @@ static void UART_SendString(UART_HandleTypeDef *huart, char *str);
 
   PUTCHAR_PROTOTYPE
   {
-    // Check that your UART handle is named huart3
     HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
     return ch;
   }
@@ -130,6 +143,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_LPUART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
@@ -138,6 +152,7 @@ int main(void)
   MX_I2C2_Init();
   MX_SDMMC1_SD_Init();
   MX_FATFS_Init();
+  MX_USART1_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
@@ -154,54 +169,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   { 
-    // Polling WIFI power for now as indicator
-    HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
 
-    //FATFS SDFatFS;  
-    //FIL MyFile;     
-  /* --- String Shifter Test --- */
-
-    //const char* filename = "test.txt";
-    //UINT br, bw;
-
-    // 1. Mount the SD Card
-    /*
-    if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
-        
-        // 2. Try to open and READ the existing string
-        if (f_open(&MyFile, filename, FA_READ) == FR_OK) {
-            f_read(&MyFile, test_string, 5, &br); // Read first 5 chars
-            test_string[br] = '\0';               // Null terminate
-            f_close(&MyFile);
-
-            // 3. MODIFY: Rotate the string (e.g., ABCDE -> BCDEA)
-            char first = test_string[0];
-            for(int i = 0; i < 4; i++) {
-                test_string[i] = test_string[i+1];
-            }
-            test_string[4] = first;
-            
-            sprintf(oled_msg, "Read: %s", test_string);
-        } else {
-            // 4. INITIALIZE: If file doesn't exist, create it with "ABCDE"
-            strcpy(test_string, "ABCDE");
-            sprintf(oled_msg, "Init: ABCfDE");
-        }
-
-        // 5. WRITE the modified string back to the card
-        if (f_open(&MyFile, filename, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
-            f_write(&MyFile, test_string, 5, &bw);
-            f_close(&MyFile);
-        }
-    } else {
-        sprintf(oled_msg, "Mount Fail");
+    if (wake_up_flag) {
+      // Handle wake-up event (e.g., read from SD card, update display, etc.)
+     // UART_SendString(&huart2, "D_WAKE Triggered!\r\n");
+      wake_up_flag = 0; // Reset flag after handling
     }
-    */
-
-
-
+    // Polling WIFI power for now as indicator
+  HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+   //  UART_SendString(&huart3, "Hello from EndeavourOS via UART3!\r\n");
+   
 // Serial output code:
-    char msg[] = "Hello from STM32!\r\n";
+    char msg[] = "Hello from STSM32!\r\n";
     HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 100);  
     HAL_Delay(2000);
     
@@ -261,7 +240,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_1);
 }
 
 /**
@@ -343,6 +321,40 @@ static void MX_LPUART1_UART_Init(void)
   /* USER CODE BEGIN LPUART1_Init 2 */
 
   /* USER CODE END LPUART1_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  husart1.Instance = USART1;
+  husart1.Init.BaudRate = 115200;
+  husart1.Init.WordLength = USART_WORDLENGTH_8B;
+  husart1.Init.StopBits = USART_STOPBITS_1;
+  husart1.Init.Parity = USART_PARITY_NONE;
+  husart1.Init.Mode = USART_MODE_TX_RX;
+  husart1.Init.CLKPolarity = USART_POLARITY_LOW;
+  husart1.Init.CLKPhase = USART_PHASE_1EDGE;
+  husart1.Init.CLKLastBit = USART_LASTBIT_DISABLE;
+  if (HAL_USART_Init(&husart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
@@ -562,6 +574,22 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -608,25 +636,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : D_wakeup_Pin */
-  GPIO_InitStruct.Pin = D_wakeup_Pin;
+  /*Configure GPIO pin : D_WAKE_Pin */
+  GPIO_InitStruct.Pin = D_WAKE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(D_wakeup_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(D_WAKE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : D_GPIO0_Pin */
   GPIO_InitStruct.Pin = D_GPIO0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(D_GPIO0_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 10, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   // SET SD CARD HIGH FOR TESTING : TODO REMOVE
@@ -642,6 +666,19 @@ static void MX_GPIO_Init(void)
  */
 static void UART_SendString(UART_HandleTypeDef *huart, char *str) {
     HAL_UART_Transmit(huart, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+}
+
+// Interrupt handler that triggers RX data
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  // NB CANTT SEND TO UART FROM WITHIN
+
+    if (GPIO_Pin == D_WAKE_Pin) // Ensure it's the right pin
+    {
+        // --- DO SOMETHING HERE ---
+       wake_up_flag = 1; // Set flag to indicate wake-up event occurred 
+       HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+    }
 }
 /* USER CODE END 4 */
 
