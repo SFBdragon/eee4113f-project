@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -29,6 +28,8 @@
 
 #include <string.h>
 #include <stdio.h>
+
+#include "SD_IO.h"
 
 /* USER CODE END Includes */
 
@@ -50,8 +51,8 @@ volatile uint32_t tail = 0; // Read by Main Loop
 
 volatile uint8_t wake_up_flag = 0;
 
-uint8_t writeBuf[512];
-uint8_t readBuf[512];
+static uint8_t writeBuf[512];
+static uint8_t readBuf[512];
 
 /* USER CODE END PD */
 
@@ -72,12 +73,15 @@ DMA_HandleTypeDef hdma_usart1_rx;
 RTC_HandleTypeDef hrtc;
 
 SD_HandleTypeDef hsd1;
+DMA_HandleTypeDef hdma_sdmmc1_rx;
+DMA_HandleTypeDef hdma_sdmmc1_tx;
 
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
 uint32_t total_uptime; // Total time SD card has been active, in seconds
 const char total_uptime_filename[] = "UPTIME.txt";
+uint8_t rxBuf[512];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,7 +97,7 @@ static void MX_I2C2_Init(void);
 static void MX_SDMMC1_SD_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-static void UART_SendString(UART_HandleTypeDef *huart, char *str);
+void UART_SendString(UART_HandleTypeDef *huart, char *str);
 static uint32_t get_dma_head(void);
 static void Print_SD_Details(void);
 static void SD_RawWriteTest(void);
@@ -157,7 +161,6 @@ int main(void)
   MX_RTC_Init();
   MX_I2C2_Init();
   MX_SDMMC1_SD_Init();
-  MX_FATFS_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
@@ -169,71 +172,13 @@ int main(void)
 
   // Start UART RX in DMA Circular mode
   // The DMA hardware will automatically wrap around to the start of ring_buffer
-  SD_RawWriteTest();
+  //SD_RawWriteTest();    // NB KEEP THIS COMMENTED OUT worked BECAUSE IT DESTROYS SECTOR 100 BOOT
   Print_SD_Details();
+  SD_IO_Init(&huart3); 
+
+  total_uptime = SD_ReadUptime();
   
-  /*
 
-// --- Read uptime ONCE before the loop ---
-if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
-    UART_SendString(&huart3, "SD Card Mounted Successfully!\r\n");
-
-    if (f_open(&SDFile, total_uptime_filename, FA_OPEN_EXISTING | FA_READ) == FR_OK) {
-        char readBuf[16] = {0};
-        UINT bytesRead = 0;
-
-        if (f_read(&SDFile, readBuf, sizeof(readBuf) - 1, &bytesRead) == FR_OK && bytesRead > 0) {
-            readBuf[bytesRead] = '\0'; // Null-terminate
-            total_uptime = (uint32_t)strtoul(readBuf, NULL, 10); // FIX: parse ASCII -> uint32
-            UART_SendString(&huart3, "Read uptime from SD card successfully.\r\n");
-        } else {
-            UART_SendString(&huart3, "Failed to read uptime from SD card.\r\n");
-            total_uptime = 0;
-        }
-        f_close(&SDFile);
-
-    } else {
-        UART_SendString(&huart3, "Uptime file not found. Starting with uptime = 0.\r\n");
-        total_uptime = 0;
-    }
-    // Leave mounted for the loop
-
-} else {
-    UART_SendString(&huart3, "Failed to Mount SD Card.\r\n");
-    total_uptime = 0;
-}
-*/
-
-// --- Diagnostic block - add temporarily after successful mount ---
-if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
-    UART_SendString(&huart3, "SD Card Mounted Successfully!\r\n");
-
-    // 1. Check free space (fails if FAT type mismatch or read-only)
-    DWORD freeClusters;
-    FATFS *pFatFs;
-    char diagBuf[64];
-
-    if (f_getfree(SDPath, &freeClusters, &pFatFs) == FR_OK) {
-        uint32_t freeKB = freeClusters * pFatFs->csize * (pFatFs->csize / 1024);
-        snprintf(diagBuf, sizeof(diagBuf), "Free space: %lu KB\r\n", (unsigned long)freeKB);
-        UART_SendString(&huart3, diagBuf);
-    } else {
-        UART_SendString(&huart3, "f_getfree FAILED - possible FAT type or config issue\r\n");
-    }
-
-    // 2. Try creating a brand new test file
-    FRESULT res = f_open(&SDFile, "TEST.txt", FA_CREATE_ALWAYS | FA_WRITE);
-    snprintf(diagBuf, sizeof(diagBuf), "f_open TEST.txt result: %d\r\n", res);
-    UART_SendString(&huart3, diagBuf);
-
-    if (res == FR_OK) {
-        UINT bw;
-        FRESULT wres = f_write(&SDFile, "hello", 5, &bw);
-        snprintf(diagBuf, sizeof(diagBuf), "f_write result: %d, bytes: %u\r\n", wres, bw);
-        UART_SendString(&huart3, diagBuf);
-        f_close(&SDFile);
-    }
-}
 
   /* USER CODE END 2 */
 
@@ -241,41 +186,13 @@ if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
   /* USER CODE BEGIN WHILE */
   while (1)
   { 
-
-
-    FRESULT res = f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE);
-    char dbg[32];
-    snprintf(dbg, sizeof(dbg), "f_open res: %d\r\n", res);
-    UART_SendString(&huart3, dbg);
-    //HAL_Delay(3000); // Wait 10 seconds
-    total_uptime += 10; // Increment uptime by the delay interval
-
-    // Write updated uptime back to SD card
-    if (f_open(&SDFile, total_uptime_filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-        char writeBuf[16] = {0};
-        UINT bytesWritten = 0;
-
-        // FIX: Write ASCII text, not raw binary
-        int len = snprintf(writeBuf, sizeof(writeBuf), "%lu\r\n", (unsigned long)total_uptime);
-
-        if (f_write(&SDFile, writeBuf, (UINT)len, &bytesWritten) == FR_OK && bytesWritten == (UINT)len) {
-            UART_SendString(&huart3, "Uptime written to SD card.\r\n");
-        } else {
-            UART_SendString(&huart3, "Failed to write uptime.\r\n");
-        }
-
-        f_sync(&SDFile);  // Flush to card — critical for FAT reliability
-        f_close(&SDFile);
-
-    } else {
-        UART_SendString(&huart3, "Failed to open uptime file for writing.\r\n");
-    }
   
-    // Polling WIFI power for now as indicator
-  HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
-   //  UART_SendString(&huart3, "Hello from EndeavourOS via UART3!\r\n");
-   
-    HAL_Delay(10000); // Toggle every 1 second
+    total_uptime += 10;
+    SD_WriteUptime(total_uptime);
+    HAL_GPIO_WritePin(Lo_GPIO_0_GPIO_Port,Lo_GPIO_0_Pin, GPIO_PIN_SET);
+    HAL_Delay(2000);
+    HAL_GPIO_WritePin(Lo_GPIO_0_GPIO_Port,Lo_GPIO_0_Pin, GPIO_PIN_RESET);
+    HAL_Delay(10000);
     
     /* USER CODE END WHILE */
 
@@ -608,6 +525,14 @@ static void MX_SDMMC1_SD_Init(void)
   hsd1.Init.BusWide = SDMMC_BUS_WIDE_4B;
   hsd1.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_ENABLE;
   hsd1.Init.ClockDiv = 0;
+  if (HAL_SD_Init(&hsd1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN SDMMC1_Init 2 */
 
   // First init with 1B bust, SD card not initifalising with 4 bits
@@ -677,11 +602,18 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Channel5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 14, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA2_Channel4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel4_IRQn);
+  /* DMA2_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Channel5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Channel5_IRQn);
 
 }
 
@@ -760,7 +692,7 @@ static void MX_GPIO_Init(void)
  * @param huart: Pointer to the UART handle (e.g., &huart3)
  * @param str: The string to be sent
  */
-static void UART_SendString(UART_HandleTypeDef *huart, char *str) {
+void UART_SendString(UART_HandleTypeDef *huart, char *str) {
     HAL_UART_Transmit(huart, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
 
@@ -802,6 +734,8 @@ void Print_SD_Details(void) {
 
     // Send the formatted string via your UART function
     UART_SendString(&huart3, msg);
+    UART_SendString(&huart3, "end of setup test\r\n");
+
 }
 
 // Direct SDMMC write/read-back test — no FatFS involved
@@ -873,6 +807,8 @@ void SD_RawWriteTest(void) {
     UART_SendString(&huart3, uart);
     UART_SendString(&huart3, "--- END RAW TEST ---\r\n\r\n");
 }
+
+
 /* USER CODE END 4 */
 
 /**

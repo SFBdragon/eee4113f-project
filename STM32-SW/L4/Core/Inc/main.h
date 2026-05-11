@@ -31,7 +31,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+void UART_SendString(UART_HandleTypeDef *huart, char *str);
+extern UART_HandleTypeDef huart3;
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
