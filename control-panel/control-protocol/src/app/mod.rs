@@ -7,7 +7,7 @@ macro_rules! read_next {
                 *$pos += chunk.len();
                 <$t>::from_le_bytes(*chunk)
             })
-            .ok_or(ParseError::NotEnoughBytes)
+            .ok_or(crate::app::ParseError::NotEnoughBytes)
     }};
 }
 

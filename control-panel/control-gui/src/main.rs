@@ -9,6 +9,8 @@ use crossbeam_channel::Receiver;
 use slint::ToSharedString;
 use tracing::{debug, error, info, info_span, warn};
 
+mod colour_bar;
+mod db;
 mod utils;
 
 slint::include_modules!();
@@ -56,17 +58,15 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let app_window = AppWindow::new().unwrap();
-
     let (controller, mock) = control_core::Controller::mocked();
 
     info!(%controller.addr, "Controller address selected.");
 
+    let app_window = AppWindow::new().unwrap();
+
     app_window
         .global::<GlobalAppState>()
         .set_controller_addr(controller.addr.to_raw() as i32);
-
-    {}
 
     {
         let lora_commands = controller.lora_commands.clone();
@@ -168,6 +168,16 @@ fn main() {
         thread::spawn(move || wifi_events_handler(events, ui_handle));
     }
 
+    let a = LoRaAddr::from_raw(0x33AD);
+    let db_conn = db::Database::open().unwrap();
+    db_conn.add_address(a);
+    for i in 60..80 {
+        db_conn.write_block(a, i, b"hello");
+    }
+    for i in 0..5 {
+        db_conn.write_block(a, i + (1 << 32), b"hello");
+    }
+
     app_window.run().unwrap();
 }
 
@@ -229,6 +239,13 @@ fn lora_events_handler(lora_events: Receiver<LoraEvent>, ui_handle: slint::Weak<
                             .set_storage_total(state.storage_info.total_blocks as _);
                         ui.global::<ModuleState>()
                             .set_storage_available_begin(state.storage_info.available_begin as _);
+                        ui.global::<ModuleState>()
+                            .set_storage_available_end(state.storage_info.available_end as _);
+                        ui.global::<ModuleState>().set_storage_overwriteable_upto(
+                            state.storage_info.overwritable_end as _,
+                        );
+                        ui.global::<ModuleState>()
+                            .set_storage_generation(state.storage_info.generation as _);
 
                         let ring_points = utils::RingBufferPoints::from_storage_info(
                             &state.storage_info,
@@ -263,6 +280,11 @@ fn lora_events_handler(lora_events: Receiver<LoraEvent>, ui_handle: slint::Weak<
                         ui.global::<ModuleState>().set_wifi_data_dumping(
                             state.status_flags & LoRaModuleState::STATUS_WIFI_DUMPING != 0,
                         );
+
+                        let addr = ui.global::<GlobalAppState>().get_lora_module_addr();
+                        let addr = LoRaAddr::from_str(&addr).unwrap();
+                        let db_conn = db::Database::open().unwrap();
+                        redraw_download_bar(&ui, addr, &db_conn);
                     }
                 }
             }
@@ -294,14 +316,20 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
                     WiFiEvent::Attached => {
                         ui.global::<GlobalAppState>().set_wifi_attached(true);
                         ui.global::<GlobalAppState>().set_wifi_connected(false);
-                        ui.global::<GlobalAppState>()
-                            .set_wifi_connected_mac("Not Connected".into());
                     }
                     WiFiEvent::Detached => {
                         ui.global::<GlobalAppState>().set_wifi_attached(false);
                         ui.global::<GlobalAppState>().set_wifi_connected(false);
-                        ui.global::<GlobalAppState>()
-                            .set_wifi_connected_mac("Not Connected".into());
+                    }
+                    WiFiEvent::Ping((mac, addr)) => {
+                        if ui.global::<GlobalAppState>().get_lora_module_addr()
+                            == format!("{}", addr)
+                        {
+                            ui.global::<GlobalAppState>()
+                                .set_wifi_connected_mac(mac.to_shared_string());
+                            //
+                            ui.invoke_on_wifi_recv();
+                        }
                     }
                     WiFiEvent::Connected(mac) => {
                         ui.global::<GlobalAppState>().set_wifi_connected(true);
@@ -310,24 +338,84 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
                     }
                     WiFiEvent::Disconnected(_mac) => {
                         ui.global::<GlobalAppState>().set_wifi_connected(false);
-                        ui.global::<GlobalAppState>()
-                            .set_wifi_connected_mac(format!("Not Connected").into());
                     }
-                    WiFiEvent::ReceiveMessage(_) => {
-                        // This is over a connection.
+                    WiFiEvent::ReceiveMessage(message) => {
+                        // Indicate that the connection is active and such.
                         ui.invoke_on_wifi_recv();
-                    }
-                    WiFiEvent::Ping(addr) => {
-                        if ui.global::<GlobalAppState>().get_lora_module_addr()
-                            == format!("{}", addr)
-                        {
-                            //
-                            ui.invoke_on_wifi_recv();
-                        }
+
+                        // Save the block to the database.
+                        let addr = ui.global::<GlobalAppState>().get_lora_module_addr();
+                        let addr = LoRaAddr::from_str(&addr).unwrap();
+
+                        let end = ui.global::<ModuleState>().get_storage_available_end();
+                        let generation = ui.global::<ModuleState>().get_storage_generation();
+
+                        let (block_index, block) =
+                            message.split_first_chunk::<{ size_of::<u32>() }>().unwrap();
+                        let block_index = u32::from_le_bytes(*block_index);
+
+                        let block_id = to_block_id(block_index, end as u32, generation as u16);
+
+                        let db_conn = db::Database::open().unwrap();
+                        db_conn.write_block(addr, block_id, block).unwrap();
+
+                        // Update the downloaded blocks visualization.
+                        redraw_download_bar(&ui, addr, &db_conn);
                     }
                 }
             }
         })
         .unwrap();
     }
+}
+
+fn to_block_id(index: u32, end: u32, generation: u16) -> u64 {
+    if index <= end {
+        ((generation as u64) << u32::BITS) + index as u64
+    } else {
+        (((generation - 1) as u64) << u32::BITS) + index as u64
+    }
+}
+
+fn redraw_download_bar(ui_handle: &AppWindow, addr: LoRaAddr, db: &db::Database) {
+    let total = ui_handle.global::<ModuleState>().get_storage_total();
+    let begin = ui_handle
+        .global::<ModuleState>()
+        .get_storage_available_begin();
+    let end = ui_handle
+        .global::<ModuleState>()
+        .get_storage_available_end();
+    let generation = ui_handle.global::<ModuleState>().get_storage_generation();
+
+    let begin_id = to_block_id(begin as _, end as _, generation as _);
+    let end_id = to_block_id(end as _, end as _, generation as _);
+
+    let regions = db.present_ranges(addr, begin_id, end_id).unwrap();
+    let mut regions = regions
+        .iter()
+        .map(|r| (r.0 as u32, r.1 as u32))
+        .collect::<Vec<_>>();
+    regions.sort_by(|r1, r2| r1.0.cmp(&r2.0));
+
+    let w = ui_handle.get_download_bar_width();
+    let empty_grey = ui_handle.global::<Theme>().get_empty_grey();
+    let mut warn_orange = ui_handle
+        .global::<Theme>()
+        .get_warn_orange()
+        .as_argb_encoded()
+        .to_be_bytes();
+    warn_orange.rotate_left(1);
+    let mut active_blue = ui_handle
+        .global::<Theme>()
+        .get_active_blue()
+        .as_argb_encoded()
+        .to_le_bytes();
+    active_blue.rotate_left(1);
+
+    let mut buf = colour_bar::pixel_buffer(w as usize, empty_grey.red());
+    colour_bar::rasterize_range(&mut buf, warn_orange, begin as _, end as _, total as _);
+    colour_bar::rasterize_ranges(&mut buf, active_blue, &regions, total as _);
+    let image = colour_bar::pixel_buffer_to_image(&buf);
+
+    ui_handle.set_download_image(image);
 }

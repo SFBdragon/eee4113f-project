@@ -1,0 +1,14 @@
+export component DownloadBar inherits Rectangle {
+    in property <image> segment-image;
+    in property <brush> border-colour: #2c3e50;
+
+    border-radius: 4px;
+    clip: true;
+
+    Image {
+        width: parent.width;
+        height: parent.height;
+        source: root.segment-image;
+        image-rendering: pixelated;
+    }
+}

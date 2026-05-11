@@ -17,7 +17,9 @@ import { RingBufferWidget } from "ringbuffer.slint";
 
 import "../assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf";
 import { Theme } from "theme.slint";
+import { DownloadBar } from "download_bar.slint";
 
+export { Theme }
 
 export global GlobalAppState {
     in-out property <int> controller_addr;
@@ -32,24 +34,25 @@ export global GlobalAppState {
 }
 
 export global ModuleState {
-    in property <string> storage_policy;
-    in property <int> storage_total;
-    in property <int> storage_available_begin;
-    in property <int> storage_available_end;
-    in property <int> storage_overwriteable_upto;
+    in-out property <string> storage_policy;
+    in-out property <int> storage_total;
+    in-out property <int> storage_available_begin;
+    in-out property <int> storage_available_end;
+    in-out property <int> storage_overwriteable_upto;
+    in-out property <int> storage_generation;
 
-    in property <float> p_overwritable_1;
-    in property <float> p_preserved_1;
-    in property <float> p_free_2;
-    in property <float> p_overwritable_2;
-    in property <float> p_preserved_2;
+    in-out property <float> p_overwritable_1;
+    in-out property <float> p_preserved_1;
+    in-out property <float> p_free_2;
+    in-out property <float> p_overwritable_2;
+    in-out property <float> p_preserved_2;
 
-    in property <int> lora_recv_win_on_period;
-    in property <int> lora_recv_win_total_period;
+    in-out property <int> lora_recv_win_on_period;
+    in-out property <int> lora_recv_win_total_period;
 
-    in property <bool> wifi_enabled;
-    in property <bool> wifi_data_dumping;
-    in property <bool> wifi_data_streaming;
+    in-out property <bool> wifi_enabled;
+    in-out property <bool> wifi_data_dumping;
+    in-out property <bool> wifi_data_streaming;
 }
 
 export global DebugAppState {
@@ -119,6 +122,10 @@ export component AppWindow inherits Window {
 
     callback debug_set_lora_module_attached(bool);
     callback debug_set_wifi_module_attached(bool);
+    callback debug_set_lora_send_fails(bool);
+    callback debug_set_wifi_send_fails(bool);
+    callback debug_set_lora_recv_fails(bool);
+    callback debug_set_wifi_recv_fails(bool);
 
     callback file-new();
     callback file-open();
@@ -255,6 +262,11 @@ export component AppWindow inherits Window {
 
     // -------------------------------------------------------- //
 
+    out property <int> download-bar-width: download-bar.width / 1phx;
+    in-out property <image> download_image;
+
+    // -------------------------------------------------------- //
+
     HorizontalLayout {
         spacing: 1px;
 
@@ -323,7 +335,7 @@ export component AppWindow inherits Window {
                         }
                     }
 
-                    if (GlobalAppState.lora_connected): VerticalLayout {
+                    VerticalLayout {
                         padding: 8pt;
                         spacing: 8pt;
 
@@ -462,6 +474,12 @@ export component AppWindow inherits Window {
                             p_free_2: ModuleState.p_free_2;
                             p_overwritable_2: ModuleState.p_overwritable_2;
                             p_preserved_2: ModuleState.p_preserved_2;
+                            height: 40px;
+                        }
+
+                        download-bar := DownloadBar {
+                            segment-image: download_image;
+                            height: 40px;
                         }
 
                         GridBox {
@@ -474,7 +492,7 @@ export component AppWindow inherits Window {
 
                                 ComboBox {
                                     width: 160pt;
-                                    model: ["Overwrite All", "Overwrite Unprotected", "Overwrite Free", "Readonly"];
+                                    model: ["Overwrite", "Preserve", "Readonly"];
 
                                     selected(current-value) => {
                                         set_storage_policy(GlobalAppState.lora_module_addr, current-value)
