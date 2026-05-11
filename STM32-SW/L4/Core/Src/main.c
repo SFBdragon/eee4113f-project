@@ -76,7 +76,7 @@ static void MX_RTC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_SDMMC1_SD_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void UART_SendString(UART_HandleTypeDef *huart, char *str);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -145,31 +145,7 @@ int main(void)
   HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_SET);
 
 
-  // I2C OLED Display
-  ssd1306_Init(); 
-  ssd1306_Fill(Black);
 
-  // Testing LSE RTC
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef sDate = {0};
-  uint32_t count = 0; // Incrementing timer
-  char oled_buffer[20]; // Buffer to hold the formatted string
-  char oled_SD_buffer[20]; // Buffer to hold the formatted string
- 
-  // SDMMC TESTING
-  // FATFS TESTING
-
-
-
-  //hsd1.SdCard.BlockSize; //TODO: PRINT TO OLED
-  //sprintf(oled_buffer, "Block Size: %lu", hsd1.SdCard.BlockSize);
-
-  ssd1306_SetCursor(0, 40);
-  //ssd1306_WriteString("hello", Font_11x18, White);
-  ssd1306_WriteString(oled_SD_buffer, Font_7x10, White);
-  ssd1306_UpdateScreen();
- 
- 
  
  
   /* USER CODE END 2 */
@@ -181,63 +157,52 @@ int main(void)
     // Polling WIFI power for now as indicator
     HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
 
-      char oled_buffer[20]; 
-    sprintf(oled_buffer, "SD Blk2: %lu", hsd1.SdCard.BlockSize);
-    ssd1306_SetCursor(2, 0);
-    //ssd1306_WriteString(oled_buffer, Font_7x10, White);
-      
- 
-    /* 5. Refresh Screen */
-    ssd1306_UpdateScreen();
-
-    FATFS SDFatFS;  
-    FIL MyFile;     
+    //FATFS SDFatFS;  
+    //FIL MyFile;     
   /* --- String Shifter Test --- */
-char test_string[16];   // Buffer to hold the data
-char oled_msg[20];
-const char* filename = "test.txt";
-UINT br, bw;
 
-// 1. Mount the SD Card
-if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
-    
-    // 2. Try to open and READ the existing string
-    if (f_open(&MyFile, filename, FA_READ) == FR_OK) {
-        f_read(&MyFile, test_string, 5, &br); // Read first 5 chars
-        test_string[br] = '\0';               // Null terminate
-        f_close(&MyFile);
+    //const char* filename = "test.txt";
+    //UINT br, bw;
 
-        // 3. MODIFY: Rotate the string (e.g., ABCDE -> BCDEA)
-        char first = test_string[0];
-        for(int i = 0; i < 4; i++) {
-            test_string[i] = test_string[i+1];
-        }
-        test_string[4] = first;
+    // 1. Mount the SD Card
+    /*
+    if (f_mount(&SDFatFS, SDPath, 1) == FR_OK) {
         
-        sprintf(oled_msg, "Read: %s", test_string);
+        // 2. Try to open and READ the existing string
+        if (f_open(&MyFile, filename, FA_READ) == FR_OK) {
+            f_read(&MyFile, test_string, 5, &br); // Read first 5 chars
+            test_string[br] = '\0';               // Null terminate
+            f_close(&MyFile);
+
+            // 3. MODIFY: Rotate the string (e.g., ABCDE -> BCDEA)
+            char first = test_string[0];
+            for(int i = 0; i < 4; i++) {
+                test_string[i] = test_string[i+1];
+            }
+            test_string[4] = first;
+            
+            sprintf(oled_msg, "Read: %s", test_string);
+        } else {
+            // 4. INITIALIZE: If file doesn't exist, create it with "ABCDE"
+            strcpy(test_string, "ABCDE");
+            sprintf(oled_msg, "Init: ABCfDE");
+        }
+
+        // 5. WRITE the modified string back to the card
+        if (f_open(&MyFile, filename, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
+            f_write(&MyFile, test_string, 5, &bw);
+            f_close(&MyFile);
+        }
     } else {
-        // 4. INITIALIZE: If file doesn't exist, create it with "ABCDE"
-        strcpy(test_string, "ABCDE");
-        sprintf(oled_msg, "Init: ABCDE");
+        sprintf(oled_msg, "Mount Fail");
     }
-
-    // 5. WRITE the modified string back to the card
-    if (f_open(&MyFile, filename, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
-        f_write(&MyFile, test_string, 5, &bw);
-        f_close(&MyFile);
-    }
-} else {
-    sprintf(oled_msg, "Mount Fail");
-}
-
-// 6. Output to OLED
-ssd1306_Fill(Black);
-ssd1306_SetCursor(0, 0);
-ssd1306_WriteString(oled_msg, Font_7x10, White);
-ssd1306_UpdateScreen();
+    */
 
 
 
+// Serial output code:
+    char msg[] = "Hello from STM32!\r\n";
+    HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 100);  
     HAL_Delay(2000);
     
     /* USER CODE END WHILE */
@@ -670,7 +635,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+/**
+ * @brief Sends a string over the specified UART peripheral.
+ * @param huart: Pointer to the UART handle (e.g., &huart3)
+ * @param str: The string to be sent
+ */
+static void UART_SendString(UART_HandleTypeDef *huart, char *str) {
+    HAL_UART_Transmit(huart, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+}
 /* USER CODE END 4 */
 
 /**
