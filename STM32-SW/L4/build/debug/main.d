@@ -33,7 +33,8 @@ build/debug/main.o: Core/Src/main.c Core/Inc/main.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
  Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h \
  Drivers/OLED/ssd1306.h Drivers/OLED/ssd1306_conf.h \
- Drivers/OLED/ssd1306_fonts.h Drivers/OLED/ssd1306.h Core/Inc/SD_IO.h
+ Drivers/OLED/ssd1306_fonts.h Drivers/OLED/ssd1306.h Core/Inc/SD_IO.h \
+ Core/Inc/SD_Stream.h
 Core/Inc/main.h:
 Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 Core/Inc/stm32l4xx_hal_conf.h:
@@ -75,3 +76,4 @@ Drivers/OLED/ssd1306_conf.h:
 Drivers/OLED/ssd1306_fonts.h:
 Drivers/OLED/ssd1306.h:
 Core/Inc/SD_IO.h:
+Core/Inc/SD_Stream.h:

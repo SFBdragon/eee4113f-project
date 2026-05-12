@@ -30,6 +30,7 @@
 #include <stdio.h>
 
 #include "SD_IO.h"
+#include "SD_Stream.h"
 
 /* USER CODE END Includes */
 
@@ -40,10 +41,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RING_BUFFER_SIZE (10 * 1024) // 10KB
-#define SD_BLOCK_SIZE    (4096)      // 4KB burst (8 sectors)
 
-uint8_t ring_buffer[RING_BUFFER_SIZE];
+uint8_t ring_buffer[RX_BUF_SIZE];
 uint8_t dma_transfer_buffer[SD_BLOCK_SIZE] __attribute__((aligned(32))); 
 
 volatile uint32_t head = 0; // Written by UART ISR
@@ -96,7 +95,6 @@ extern UART_HandleTypeDef huart1;
 
 
 // SHARC BUOY DATA WRITINGS
-#define RX_BUF_SIZE 2000  // max expected, adjust as needed
 uint8_t rxBuffer[RX_BUF_SIZE];
 volatile uint16_t rxLen = 0;
 volatile uint8_t dataReady = 0;
@@ -185,7 +183,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 // SHARC BUOR RX -> DMA setup
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, ring_buffer, RING_BUFFER_SIZE);
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuffer, RX_BUF_SIZE);
 
   // This allows the debugger to keep communicating even if the CPU enters SLEEP, STOP, or STANDBY
   HAL_DBGMCU_EnableDBGSleepMode();
@@ -199,55 +197,84 @@ int main(void)
   UART_SendString(&huart3, "SETUP\r\n");
 
   // Start UART RX in DMA Circular mode
-  // The DMA hardware will automatically wrap around to the start of ring_buffer
+  // The DMA hardware will automatically wrap around to the start of rXuffer
   //SD_RawWriteTest();    // NB KEEP THIS COMMENTED OUT worked BECAUSE IT DESTROYS SECTOR 100 BOOT
   Print_SD_Details();
   SD_IO_Init(&huart3); 
 
   total_uptime = SD_ReadUptime();
-  
+  SD_Stream_Init(&huart3);
   HAL_Delay(500);
   //HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_RESET);
-
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
+  int i = 0;
+  while (i < 1000)
   { 
-
+    i++;
+    //UART_SendString(&huart3, "From within \r\n");
+                
+    SD_Stream_Flush();
 
     // CONST POLE:
 
-      while (1)
-      {
-        if (cb_write_first_half) {
-          cb_write_first_half = 0;
-          UART_SendString(&huart3, "First half of buffer ready\r\n");
-          // Process first half of the buffer
-          // For example, write to SD card or print debug info
-          //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
-        }
-        else if (cb_write_second_half){
-          cb_write_second_half = 0;
-          UART_SendString(&huart3, "Second half of buffer ready\r\n");
-          // Process second half of the buffer
-          // For example, write to SD card or print debug info
-          //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
-        }
+    
+    // Chain of Device data incoming checks
+    // SHARC BOUY DATA INCOMING
+              // First have a check to indicate that it was a DMA_IDLE interrupt here
+              if (cb_write_first_half) {
+                cb_write_first_half = 0;
+                UART_SendString(&huart3, "First half of buffer ready\r\n");
+                
+                // Process first half of the buffer
+                SD_Stream_WriteHalf(rxBuffer, RX_BUF_SIZE / 2);
+                //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
+              }
+              else if (cb_write_second_half){
+                cb_write_second_half = 0;
+                UART_SendString(&huart3, "Second half of buffer ready\r\n");
+                // Process second half of the buffer
+                SD_Stream_WriteSecondHalf(rxBuffer + RX_BUF_SIZE / 2, RX_BUF_SIZE / 2);
+                //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
+              }
 
-        if (dataReady)
-        {
-          dataReady = 0;
-          // End of transmissoin
-          char hdr[48];
-          sprintf(hdr, "Received %d bytes:\r\n", rxLen);
-          UART_SendString(&huart3, hdr);
-        }
-        
-      }
-      
+              else if (dataReady)
+              {
+                dataReady = 0;
+                // End of transmissoin
+                char hdr[48];
+                sprintf(hdr, "Received %d bytes:\r\n", rxLen);
+                UART_SendString(&huart3, hdr);
+
+                // Write remaining data (if you want to - maybe only in prep for offload)
+                //SD_Stream_WriteHalf(rxBuffer, rxLen);
+              }
+      SD_Stream_Flush();
+      HAL_Delay(10);
+
+    // Example: Read the first 5 sectors of your data area
+    //SD_Stream_ReadDebug(DATA_START_SECTOR, 5);  
+    //HAL_Delay(1000);
+
+    // LORA DATA INCOMING DATA triggerd by LPUART1_IDLE or LPUART1_HT
+    // I will trigger the interrupt and get to this point but TAM and SHAUN need to route this incoming data command.
+              // IF WIFI OFFLOAD, HOW DOES SHAUN WANT TO TREAT THIS?
+              // POWER UP WIFI
+              // SOME TAM CODE
+              // OFFLOAD BEGIN?
+
+
+    // RTC WAKEUP (Lora window start / stop)
+    // ACTIVE / DEACTIVATE LORA POWER, INDICATE ON OLED
+    
+    // Watchdog timer?
+
+    // Other interrupts?
+    
+  /*
     // Configure RTC wakeup
     HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 4, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       
@@ -278,34 +305,6 @@ int main(void)
     }
 
 
-   // READ SERIAL DATA FROM ESP32 HERE
-          #define ESP_BUF_SIZE 511
-          uint8_t espBuffer[ESP_BUF_SIZE];
-
-          // Re-init UART1 after STOP mode — clocks were gated
-          MX_USART1_UART_Init();
-
-          UART_SendString(&huart3, "Waiting for ESP32 data...\r\n");
-
-          HAL_StatusTypeDef rxStatus = HAL_UART_Receive(&huart1, espBuffer, ESP_BUF_SIZE, 3000);
-
-          if (rxStatus == HAL_OK) {
-            UART_SendString(&huart3, "ESP32 data received OK\r\n");
-
-            // Optional: debug print how many A's came in
-            char dbg[48];
-            sprintf(dbg, "First byte: 0x%02X, Last byte: 0x%02X\r\n",
-                    espBuffer[0], espBuffer[ESP_BUF_SIZE - 1]);
-            UART_SendString(&huart3, dbg);
-
-          } else if (rxStatus == HAL_TIMEOUT) {
-            UART_SendString(&huart3, "ESP32 data timeout\r\n");
-
-          } else {
-            char dbg[48];
-            sprintf(dbg, "UART RX error: 0x%08lX\r\n", huart1.ErrorCode);
-            UART_SendString(&huart3, dbg);
-          }
 
 
     // COMPLETED IN IRQs already
@@ -315,22 +314,29 @@ int main(void)
     HAL_Delay(100);
 
 
+    */
 
-
-    while(0){
-      // TESTING BASIC WRITE TO SD CARD
-    total_uptime += 10;
-    SD_WriteUptime(total_uptime);
-    HAL_GPIO_WritePin(Lo_GPIO_0_GPIO_Port,Lo_GPIO_0_Pin, GPIO_PIN_SET);
-    HAL_Delay(2000);
-    HAL_GPIO_WritePin(Lo_GPIO_0_GPIO_Port,Lo_GPIO_0_Pin, GPIO_PIN_RESET);
-    HAL_Delay(10000);
-    
-    }
+ 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
+
+
+  // POST WHILE LOOP
+  SD_Stream_Flush();
+  uint32_t sectors_written = SD_Stream_GetCurrentSector() - DATA_START_SECTOR;
+  HAL_Delay(500);  // give card time to settle
+   UART_SendString(&huart3, "While exit\n");
+  uint32_t sectors_written_read = SD_Stream_GetCurrentSector() - DATA_START_SECTOR;
+
+
+  //SD_Stream_ReadDebug(2048,2);
+  SD_Stream_ReadDebug(DATA_START_SECTOR, sectors_written_read);
+
+
+  
+
   /* USER CODE END 3 */
 }
 
@@ -830,10 +836,6 @@ void UART_SendString(UART_HandleTypeDef *huart, char *str) {
 }
 
 
-uint32_t get_dma_head(void) {
-    // __HAL_DMA_GET_COUNTER returns remaining items; subtract from size to get current index
-    return RING_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
-}
 
 void Print_SD_Details(void) {
     char msg[128]; // Increased buffer size to fit all details
@@ -942,6 +944,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
             case HAL_UART_RXEVENT_HT:
                 // First half of rxBuffer ready
                 // rxBuffer[0] to rxBuffer[RX_BUF_SIZE/2 - 1]
+                    char dbg[80];
+                snprintf(dbg, sizeof(dbg), "HT: first bytes: %02X %02X %02X %02X\r\n",
+                    rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3]);
+                UART_SendString(&huart3, dbg);
                 cb_write_first_half = 1;
                 break;
 

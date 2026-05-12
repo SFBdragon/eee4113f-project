@@ -8,5 +8,6 @@
 void             SD_IO_Init(UART_HandleTypeDef *uartHandle);
 HAL_StatusTypeDef SD_WriteUptime(uint32_t uptime);
 uint32_t          SD_ReadUptime(void);
+ 
 
 #endif /* SD_IO_H */

@@ -45,10 +45,10 @@ void loop() {
 
   // 5. STOP SIGNAL
   Serial1.flush();                   // ← ADD THIS: wait for TX to complete
-  delay(10);                         // ← small gap before pulling low
+  delay(100);                         // ← small gap before pulling low
   digitalWrite(TRIGGER_PIN, LOW);
   digitalWrite(ONBOARD_LED, LOW); // LED OFF
 
   //Serial.println("Massive packet sent.");
-  delay(2000); // Wait 2 seconds to make the burst obvious
+  delay(500); // Wait 2 seconds to make the burst obvious
 }
