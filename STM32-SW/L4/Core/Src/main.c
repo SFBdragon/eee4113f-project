@@ -51,7 +51,13 @@ volatile uint32_t tail = 0; // Read by Main Loop
 volatile uint8_t wake_up_flag = 0;
 
 static uint8_t writeBuf[512];
-static uint8_t readBuf[512];
+static uint8_t readBuf[512];//
+
+// lora
+
+uint8_t  lora_rx_buf[250];
+uint16_t lora_rx_len   = 0;
+volatile uint8_t lora_rx_ready = 0; 
 
 /* USER CODE END PD */
 
@@ -123,6 +129,7 @@ static uint32_t get_dma_head(void);
 static void Print_SD_Details(void);
 static void SD_RawWriteTest(void);
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void SD_SpeedTest(void);
 /* USER CODE END PFP */
 
@@ -173,6 +180,19 @@ int main(void)
   /* USER CODE BEGIN SysInit */
   // BEFORE SDMMC FAILS
 
+
+  // LPUART CLOCK OVERRIDE TO KEEP HSI ON IN STOP MODE (NB THIS IS ALSO DONE IN MX_LPUART1_UART_Init BUT WE NEED IT EARLY TO KEEP HSI ALIVE)
+      // Set LPUART1 clock to HSI16 and keep HSI alive in Stop mode
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_LPUART1;
+    PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_HSI;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+        Error_Handler();
+    }
+    // Replace __HAL_RCC_HSIKERON_ENABLE() with:
+    SET_BIT(RCC->CR, RCC_CR_HSIKERON);
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -191,6 +211,8 @@ int main(void)
 // SHARC BUOR RX -> DMA setup
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuffer, RX_BUF_SIZE);
 
+  // LPUART Trigger
+HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
   // This allows the debugger to keep communicating even if the CPU enters SLEEP, STOP, or STANDBY
   HAL_DBGMCU_EnableDBGSleepMode();
   HAL_DBGMCU_EnableDBGStopMode();
@@ -235,9 +257,28 @@ int main(void)
 
     // CONST POLE:
 
-    
+      if (lora_rx_ready){
+        lora_rx_ready = 0;
+          UART_SendString(&huart3, "LORA DATA READY\r\n"); 
+          char hex[8];
+          for (uint16_t i = 0; i < lora_rx_len; i++)
+          {
+              snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
+              UART_SendString(&huart3, hex);
+          }
+      }
+
+      if (wake_source == 3){
+      UART_SendString(&huart3, "Woke from LPUART!\r\n"); 
+      // decode commands
+      }
+
+      if (wake_source == 2){
+      UART_SendString(&huart3, "Woke from GPIO!\r\n"); 
+      // Check time 
+      }
     // Chain of Device data incoming checks
-    // SHARC BOUY DATA INCOMING
+    // SHARC BOUY DATA INCOMINGf
               // First have a check to indicate that it was a DMA_IDLE interrupt here
               if (cb_write_first_half) {
                 cb_write_first_half = 0;
@@ -266,7 +307,6 @@ int main(void)
                 //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
                 SD_Stream_Flush();
               }
-
               else if (dataReady)
               {
                 dataReady = 0;
@@ -281,7 +321,7 @@ int main(void)
                  SD_Stream_Flush();
               }
      
-      HAL_Delay(1000); // DElay to allow completion before resleep
+    HAL_Delay(500); // DElay to allow completion before resleep concerend why this is needded.. maybe dma isnt working
 
     // Example: Read the first 5 sectors of your data area
     //SD_Stream_ReadDebug(DATA_START_SECTOR, 5);  
@@ -296,8 +336,8 @@ int main(void)
 
 
     // RTC WAKEUP (Lora window start / stop)
-    if (wake_source == 2){
-      UART_SendString(&huart3, "Woke from GPIO!\r\n"); 
+    if (wake_source == 1){
+      UART_SendString(&huart3, "Woke from RTC!\r\n"); 
       // Check time 
 
     }
@@ -306,9 +346,10 @@ int main(void)
 
     // Other interrupts?
     
-  
+
+    wake_source = 0; // reset wake source for next loop
     // Configure RTC wakeup
-    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 4, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       
 
     __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag
@@ -319,8 +360,8 @@ int main(void)
 
     // ENTER STOP MODE
     HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
-    //HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  /SLEEP NOT STOP 
-    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI); 
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
+    //HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
     SystemClock_Config();
     HAL_ResumeTick();
 
@@ -337,7 +378,7 @@ int main(void)
     }
 
     */
-   
+
     
 
 
@@ -388,7 +429,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI
+                              |RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.MSICalibrationValue = 0;
@@ -484,8 +528,8 @@ static void MX_LPUART1_UART_Init(void)
 
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 209700;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_7B;
+  hlpuart1.Init.BaudRate = 115200;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
   hlpuart1.Init.Mode = UART_MODE_TX_RX;
@@ -961,9 +1005,25 @@ void SD_RawWriteTest(void) {
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+
+
+    if (huart->Instance == LPUART1)
+    {
+        // lora_rx_buf already contains the data, Size bytes valid
+        lora_rx_buf[Size] = '\0';  // null-terminate for easy string use
+
+        // Set a flag for main loop to process — keep ISR short
+        lora_rx_len   = Size;
+        lora_rx_ready = 1;
+
+        // Re-arm — matching call for this callback
+        HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
+    }
+
 
 // Fires  at N/2, N, or idle
-{
+
     if (huart->Instance == USART1)
     {
         HAL_UART_RxEventTypeTypeDef event = HAL_UARTEx_GetRxEventType(huart);
@@ -996,6 +1056,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         }
     }
 }
+
+// OVERRIDE OF WEAK LORA INTERRUPT:
+
 
 
 
