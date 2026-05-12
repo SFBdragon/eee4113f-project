@@ -59,6 +59,11 @@ uint8_t  lora_rx_buf[250];
 uint16_t lora_rx_len   = 0;
 volatile uint8_t lora_rx_ready = 0; 
 
+uint8_t lora_tx_buf[250];
+uint16_t lora_tx_len   = 0;
+
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -131,6 +136,8 @@ static void SD_RawWriteTest(void);
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
 //void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void SD_SpeedTest(void);
+
+void lora_send(uint8_t *pData, uint16_t size);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -250,28 +257,50 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
   }
   while (i < 10000000)
   { 
+
+  
+
+    /*
+  // example of lora send usage:
+  uint8_t lora_tx_buf[] = {'G', 'Ge', 'G'};
+  lora_send(lora_tx_buf, sizeof(lora_tx_buf));
+    */
+
     i++;
     //UART_SendString(&huart3, "From within \rf\n");
                 
-    
-
     // CONST POLE:
 
       if (lora_rx_ready){
         lora_rx_ready = 0;
-          UART_SendString(&huart3, "LORA DATA READY\r\n"); 
+
+        // RESET THE LORA WINDOW TIMING 
+          UART_SendString(&huart3, "LORA DATA READY OUT\r\n"); 
           char hex[8];
           for (uint16_t i = 0; i < lora_rx_len; i++)
           {
               snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
               UART_SendString(&huart3, hex);
           }
+
+
       }
 
       if (wake_source == 3){
       UART_SendString(&huart3, "Woke from LPUART!\r\n"); 
       // decode commands
       }
+      if (lora_rx_ready){
+        // ONLY OCCURS WHEN END OF LORA PACKET. Technically the Lora Wake source is useles...... 
+        lora_rx_ready = 0;
+        UART_SendString(&huart3, "LORA DATA READY OUT\r\n"); 
+        char hex[8];
+        for (uint16_t i = 0; i < lora_rx_len; i++)
+        {
+            snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
+            UART_SendString(&huart3, hex);
+      }
+    }
 
       if (wake_source == 2){
       UART_SendString(&huart3, "Woke from GPIO!\r\n"); 
@@ -602,7 +631,7 @@ static void MX_USART2_UART_Init(void)
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
   huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart2.Init.OverSampling = UART_OVERSAMPLING_16;
   huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
@@ -1016,6 +1045,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         // Set a flag for main loop to process — keep ISR short
         lora_rx_len   = Size;
         lora_rx_ready = 1;
+        // Trigger interrupt ot process data
+        NVIC_SetPendingIRQ(EXTI0_IRQn);
+
 
         // Re-arm — matching call for this callback
         HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
@@ -1057,7 +1089,14 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
 }
 
-// OVERRIDE OF WEAK LORA INTERRUPT:
+
+
+void lora_send(uint8_t *pData, uint16_t size) {
+  // Wrapper function for sending data over LORA
+    // RE-ASSERT Power to LORA
+    HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, SET);
+    HAL_UART_Transmit(&hlpuart1, pData, size, 100);
+}
 
 
 

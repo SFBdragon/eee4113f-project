@@ -79,10 +79,6 @@ void Error_Handler(void);
 #define Wi_EN_GPIO_Port GPIOC
 #define Wi_RST_Pin GPIO_PIN_3
 #define Wi_RST_GPIO_Port GPIOC
-#define Wi_USART2_CTS_Pin GPIO_PIN_0
-#define Wi_USART2_CTS_GPIO_Port GPIOA
-#define Wi_USART2_RTS_Pin GPIO_PIN_1
-#define Wi_USART2_RTS_GPIO_Port GPIOA
 #define Wi_USART2_TX_Pin GPIO_PIN_2
 #define Wi_USART2_TX_GPIO_Port GPIOA
 #define Wi_USART2_RX_Pin GPIO_PIN_3
