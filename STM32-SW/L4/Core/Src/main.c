@@ -40,7 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RING_BUFFER_SIZE (64 * 1024) // 64KB
+#define RING_BUFFER_SIZE (10 * 1024) // 10KB
 #define SD_BLOCK_SIZE    (4096)      // 4KB burst (8 sectors)
 
 uint8_t ring_buffer[RING_BUFFER_SIZE];
@@ -85,7 +85,7 @@ uint8_t rxBuf[512];
 
 
 volatile uint8_t wake_source = 0;
-
+volatile uint8_t halfTransferFired = 0;
 
 
 // USART From SHarc BUOY data
@@ -93,6 +93,13 @@ volatile uint8_t cb_write_first_half  = 0;
 volatile uint8_t cb_write_second_half = 0;
 volatile uint8_t uart_active          = 0;   /* set by EXTI, cleared on done */
 extern UART_HandleTypeDef huart1;
+
+
+// SHARC BUOY DATA WRITINGS
+#define RX_BUF_SIZE 2000  // max expected, adjust as needed
+uint8_t rxBuffer[RX_BUF_SIZE];
+volatile uint16_t rxLen = 0;
+volatile uint8_t dataReady = 0;
 
 /* USER CODE END PV */
 
@@ -113,6 +120,7 @@ void UART_SendString(UART_HandleTypeDef *huart, char *str);
 static uint32_t get_dma_head(void);
 static void Print_SD_Details(void);
 static void SD_RawWriteTest(void);
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -176,6 +184,9 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+// SHARC BUOR RX -> DMA setup
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, ring_buffer, RING_BUFFER_SIZE);
+
   // This allows the debugger to keep communicating even if the CPU enters SLEEP, STOP, or STANDBY
   HAL_DBGMCU_EnableDBGSleepMode();
   HAL_DBGMCU_EnableDBGStopMode();
@@ -206,49 +217,37 @@ int main(void)
   while (1)
   { 
 
-    if (cb_write_first_half) {
-      cb_write_first_half = 0;
-      // TODO: PUSH FIRST HALF INTO BUFFER
-    }
 
-    if (cb_write_first_half)
-    {
-      cb_write_first_half = 0;
+    // CONST POLE:
 
-      /* TODO: push second half into your circular buffer */
-      // YourCircBuf_Write(&circ_buf, uart_dma_buf + UART_DMA_BUF_SIZE / 2, UART_DMA_BUF_SIZE / 2);
-
-      /* TODO: SD write if threshold met */
-      // if (YourCircBuf_BytesAvailable(&circ_buf) >= SD_WRITE_THRESHOLD)
-      // {
-      //     /* SD write implementation goes here */
-      // }
-    }
-
-
-        /* ── Decide which sleep mode to enter ── */
-
-        if (uart_active)
-        {
-            /* Data is flowing — Sleep keeps DMA and UART running */
-           // HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-
-            /* Woken by DMA half/full IRQ — loop back to process flags above */
+      while (1)
+      {
+        if (cb_write_first_half) {
+          cb_write_first_half = 0;
+          UART_SendString(&huart3, "First half of buffer ready\r\n");
+          // Process first half of the buffer
+          // For example, write to SD card or print debug info
+          //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
         }
-        else
-        {
-            /* Idle — no data expected, drop into Stop 2 */
-            //HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
-
-            /* ── Woken by GPIO EXTI (other device signalling ready) ──
-             *
-             *  PLL is dead after Stop 2 — restore clocks before anything else.
-             *  EXTI callback has already set uart_active = 1 and armed DMA,
-             *  but SystemClock_Config() must come before any peripheral access. */
-            SystemClock_Config();
+        else if (cb_write_second_half){
+          cb_write_second_half = 0;
+          UART_SendString(&huart3, "Second half of buffer ready\r\n");
+          // Process second half of the buffer
+          // For example, write to SD card or print debug info
+          //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
         }
 
-
+        if (dataReady)
+        {
+          dataReady = 0;
+          // End of transmissoin
+          char hdr[48];
+          sprintf(hdr, "Received %d bytes:\r\n", rxLen);
+          UART_SendString(&huart3, hdr);
+        }
+        
+      }
+      
     // Configure RTC wakeup
     HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 4, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       
@@ -258,18 +257,17 @@ int main(void)
         
     UART_SendString(&huart3, "Going to bed\r\n");
 
-    //HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
-    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
-    //SystemClock_Config();
-    HAL_ResumeTick();
 
+    // ENTER STOP MODE
+    HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
+    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
+    SystemClock_Config();
+    HAL_ResumeTick();
 
     //char dbg[40];
     //sprintf(dbg, "wake_source raw value = %d\r\n", wake_source);
     //UART_SendString(&huart3, dbg);
 
-    // ACTUAL STOP MODE
-    // 
 
     UART_SendString(&huart3, "DEBUG: Checking wake source\r\n");
 
@@ -279,10 +277,42 @@ int main(void)
       default: UART_SendString(&huart3, "Wake source unknown\r\n"); break;
     }
 
-    HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-    __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin);
-    HAL_RTCEx_DeactivateWakeUpTimer(&hrtc); 
-    HAL_Delay(1000);
+
+   // READ SERIAL DATA FROM ESP32 HERE
+          #define ESP_BUF_SIZE 511
+          uint8_t espBuffer[ESP_BUF_SIZE];
+
+          // Re-init UART1 after STOP mode — clocks were gated
+          MX_USART1_UART_Init();
+
+          UART_SendString(&huart3, "Waiting for ESP32 data...\r\n");
+
+          HAL_StatusTypeDef rxStatus = HAL_UART_Receive(&huart1, espBuffer, ESP_BUF_SIZE, 3000);
+
+          if (rxStatus == HAL_OK) {
+            UART_SendString(&huart3, "ESP32 data received OK\r\n");
+
+            // Optional: debug print how many A's came in
+            char dbg[48];
+            sprintf(dbg, "First byte: 0x%02X, Last byte: 0x%02X\r\n",
+                    espBuffer[0], espBuffer[ESP_BUF_SIZE - 1]);
+            UART_SendString(&huart3, dbg);
+
+          } else if (rxStatus == HAL_TIMEOUT) {
+            UART_SendString(&huart3, "ESP32 data timeout\r\n");
+
+          } else {
+            char dbg[48];
+            sprintf(dbg, "UART RX error: 0x%08lX\r\n", huart1.ErrorCode);
+            UART_SendString(&huart3, dbg);
+          }
+
+
+    // COMPLETED IN IRQs already
+    //HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+    //__HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin);
+    //HAL_RTCEx_DeactivateWakeUpTimer(&hrtc); 
+    HAL_Delay(100);
 
 
 
@@ -899,7 +929,40 @@ void SD_RawWriteTest(void) {
     UART_SendString(&huart3, "--- END RAW TEST ---\r\n\r\n");
 }
 
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
+// Fires  at N/2, N, or idle
+{
+    if (huart->Instance == USART1)
+    {
+        HAL_UART_RxEventTypeTypeDef event = HAL_UARTEx_GetRxEventType(huart);
+
+        switch (event)
+        {
+            case HAL_UART_RXEVENT_HT:
+                // First half of rxBuffer ready
+                // rxBuffer[0] to rxBuffer[RX_BUF_SIZE/2 - 1]
+                cb_write_first_half = 1;
+                break;
+
+            case HAL_UART_RXEVENT_TC:
+                // Second half of rxBuffer ready
+                // rxBuffer[RX_BUF_SIZE/2] to rxBuffer[RX_BUF_SIZE - 1]
+                cb_write_second_half = 1;
+                break;
+
+            case HAL_UART_RXEVENT_IDLE:
+                // Partial chunk — line went quiet
+                // rxBuffer[0] to rxBuffer[Size - 1]
+
+                rxLen   = Size;
+                dataReady = 1;
+                HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuffer, RX_BUF_SIZE);
+                break;
+        }
+    }
+}
+//cb_write_second_half = 1;
 /* USER CODE END 4 */
 
 /**

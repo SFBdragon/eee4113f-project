@@ -8,10 +8,7 @@
         "Drivers/CMSIS/Include",
         "Drivers/OLED",
         "Drivers/STM32L4xx_HAL_Driver/Inc",
-        "Drivers/STM32L4xx_HAL_Driver/Inc/Legacy",
-        "FATFS/App",
-        "FATFS/Target",
-        "Middlewares/Third_Party/FatFs/src"
+        "Drivers/STM32L4xx_HAL_Driver/Inc/Legacy"
       ],
       "defines": [
         "STM32L476xx",

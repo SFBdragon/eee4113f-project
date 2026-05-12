@@ -4,33 +4,51 @@
 #define ONBOARD_LED 8
 #define BAUD_RATE 115200
 
-char dataBuffer[512];
-bool ledState = false;
+// Hardware UART pins
+#define SERIAL_TX_PIN 21
+#define SERIAL_RX_PIN 20
+
+// 1KB Buffer to make the packet "long" on the wire
+uint8_t dataBuffer[1024]; 
 
 void setup() {
   pinMode(TRIGGER_PIN, OUTPUT);
   pinMode(ONBOARD_LED, OUTPUT);
-
-  digitalWrite(TRIGGER_PIN, LOW);
-  digitalWrite(ONBOARD_LED, LOW);
-
+  
   Serial.begin(BAUD_RATE);
+  // Use Serial1 for the physical TX/RX pins
+  Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-  memset(dataBuffer, 'A', 511);
-  dataBuffer[511] = '\0';
+  // Fill buffer with a recognizable pattern (ASCII 'A' through 'Z' repeating)
+  for(int i = 0; i < 1024; i++) {
+    dataBuffer[i] = (i % 26) + 65; 
+  }
+
+  digitalWrite(ONBOARD_LED, HIGH); // Off
 }
 
 void loop() {
-  // Set trigger to HIGH for interrupt
-  digitalWrite(ONBOARD_LED, LOW); //ACTIVE LOW
-  digitalWrite(TRIGGER_PIN, HIGH);
-  delay(1000);                       // Delay to wait for interrupt
+  // 1. START SIGNAL
 
-  // 3. Send 511 bytes of data (exclude null terminator)
-  Serial.write((uint8_t*)dataBuffer, 511);
+  digitalWrite(ONBOARD_LED, HIGH); // LED ON IS TRIGGER
+  delay(100);
+  // 2. SEND START FRAME (4 bytes of 0xAA for clear pulsing)
+  uint8_t startFrame[] = {0xAA, 0xAA, 0xAA, 0xAA};
+  Serial1.write(startFrame, 4);
 
-  digitalWrite(ONBOARD_LED, HIGH);
+  // 3. SEND LARGE PAYLOAD
+  Serial1.write(dataBuffer, 1024);
+
+  // 4. SEND END FRAME
+  uint8_t endFrame[] = {0xFF, 0xFF, 0x0D, 0x0A};
+  Serial1.write(endFrame, 4);
+
+  // 5. STOP SIGNAL
+  Serial1.flush();                   // ← ADD THIS: wait for TX to complete
+  delay(10);                         // ← small gap before pulling low
   digitalWrite(TRIGGER_PIN, LOW);
-  // 4. Wait remainder of 5-second cycle before next toggle
-  delay(1000);                       // ← THIS WAS MISSING entirely
-}                                    // ← closing brace was missing
+  digitalWrite(ONBOARD_LED, LOW); // LED OFF
+
+  //Serial.println("Massive packet sent.");
+  delay(2000); // Wait 2 seconds to make the burst obvious
+}
