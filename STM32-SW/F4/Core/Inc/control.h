@@ -1,6 +1,5 @@
 // transmission.h
 
-#include <cstdint>
 #include <stdint.h>
 #include <stdbool.h>
 

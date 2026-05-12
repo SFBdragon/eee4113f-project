@@ -6,6 +6,7 @@ build = "build.rs"
 links = "nicdrivers"
 
 [dependencies]
+control-protocol = { path = "../control-protocol" }
 
 [build-dependencies]
 cc = "1"

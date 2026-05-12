@@ -1,9 +1,15 @@
-import { HorizontalBox, Palette, } from "std-widgets.slint";
+import {
+    HorizontalBox,
+    Palette,
+} from "std-widgets.slint";
+
+import { Theme } from "theme.slint";
 
 
 component Circle inherits VerticalLayout {
-    in property <length> radius;
     in property <color> fill;
+
+    private property <length> radius: 0.7rem;
 
     vertical-stretch: 0;
     alignment: center;
@@ -27,20 +33,20 @@ export component StatusBar inherits Rectangle {
     in property <string> instruction: "";
 
     horizontal-stretch: 1;
-    height: 40px;
+    height: 40pt;
 
     background: Palette.alternate-background;
-    
+
     HorizontalLayout {
-        padding: 8px;
-        spacing: 8px;
+        padding: 8pt;
+        spacing: 8pt;
 
         Text {
             horizontal-stretch: 0;
 
             text: root.subject;
-            font-weight: 700;
-            font-size: 15px;
+            font-weight: Theme.bold-font-weight;
+            font-size: 1.2rem;
             vertical-alignment: center;
             horizontal-alignment: center;
         }
@@ -49,11 +55,11 @@ export component StatusBar inherits Rectangle {
             horizontal-stretch: 1;
         }
 
-        if (!root.connected) : Text {
+        if (!root.connected): Text {
             text: root.instruction;
-            font-size: 15px;
+            font-size: 1.2rem;
             font-italic: true;
-            font-weight: 300;
+            font-weight: Theme.default-font-weight;
 
             color: orange;
 
@@ -69,22 +75,28 @@ export component StatusBar inherits Rectangle {
             horizontal-stretch: 0;
 
             text: "Attached";
-            font-size: 15px;
+            font-size: 1.2rem;
             vertical-alignment: center;
         }
 
-        Circle { radius: 6px; fill: attached ? green : red; }
+        Circle {
+            fill: attached ? green : red;
+        }
 
-        Rectangle { width: 3px; }
+        Rectangle {
+            width: 3px;
+        }
 
         Text {
             horizontal-stretch: 0;
 
             text: "Connected";
-            font-size: 15px;
+            font-size: 1.2rem;
             vertical-alignment: center;
         }
 
-        Circle { radius: 6px; fill: connected ? green : red; }
+        Circle {
+            fill: connected ? green : red;
+        }
     }
 }

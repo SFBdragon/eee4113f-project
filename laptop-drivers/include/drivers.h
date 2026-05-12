@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -12,7 +11,7 @@
 // --------------- Types --------------- //
 
 typedef int32_t Status;
-typedef uintptr_t BufLen;
+typedef uint16_t BufLen;
 
 
 // --------------- Constants --------------- //
@@ -37,8 +36,9 @@ typedef uintptr_t BufLen;
 #define MAX_WIFI_SEND_PACKET_LEN 250
 
 #define STATUS_SUCCESS 0
+#define STATUS_RECEIVE_TIMEOUT -3
 #define STATUS_MODULE_DETACHED -5
-// add more statusses as necessary
+// add more statuses as necessary
 
 
 // --------------- LoRa --------------- //
@@ -54,12 +54,25 @@ Status initialize_lora_module();
 // Once it returns, send/recv will no longer be called until initialize is called again.
 void shutdown_lora_module();
 
+// This is used to help estimate the RTT for automatic transmission and control.
+// This is directly related to Bandwidth, Spreading Factor, and Code Rate.
+double get_lora_byterate();
+
 // Read the memory from [data, data + len) bytes and send it as the data payload for a LoRa packet.
+// This must be sent as one LoRa packet. `len` will be `MAX_LORA_SEND_PACKET_LEN` at most.
+//
+// This will not be called while `recv` is being called, and `recv` won't be called until this completes.
+// Essentially, Shaun provides media access control for LoRa.
 Status send_lora_packet(uint8_t *data, BufLen len);
 
 // Block until a LoRa packet data payload is received.
 // Writes the payload bytes into `data` and the payload length into `len`.
-Status recv_lora_packet(uint8_t data[MAX_LORA_RECV_PACKET_LEN], BufLen *len);
+//
+// This is not called while `send_lora_packet` is executing.
+//
+// `data` and `len` must describe one entire packet or nothing once this function returns.
+// Feel free to overwrite `data` partially, fully, or not at all regardless of `len`. 
+Status recv_lora_packet(uint8_t data[MAX_LORA_RECV_PACKET_LEN], BufLen *len, uint32_t timeout_ms);
 
 // --------------- WiFi --------------- //
 

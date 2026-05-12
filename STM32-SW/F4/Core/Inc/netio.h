@@ -5,7 +5,6 @@
 // Shaun will wirete code files to implement parts of this interface.
 // e.g. `protocol.c`
 
-#include <cstdint>
 #include <stdint.h>
 
 
@@ -77,7 +76,7 @@ Status power_down_wifi();
 // Read the memory from [data, data + len) bytes and send it off.
 //
 // Tamryn defines this function. Shaun calls it.
-short send_wifi_packet(uint64_t *macdst, uint8_t *data, uint16_t len);
+short send_wifi_packet(uint64_t macdst, uint8_t *data, uint16_t len);
 
 // Provide the least recent unread packet in memory [data, data + len).
 // 
