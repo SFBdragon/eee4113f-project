@@ -92,6 +92,12 @@ DMA_HandleTypeDef hdma_sdmmc1_tx;
 SPI_HandleTypeDef hspi1;
 
 /* USER CODE BEGIN PV */
+
+// STATE FLAGS
+
+uint8_t WIFI_MODE = 1;    // Indicates if WIFI is to be active or not.
+uint8_t WIFI_MODE_SETUP = 0;
+
 uint32_t total_uptime; // Total time SD card has been active, in seconds
 const char total_uptime_filename[] = "UPTIME.txt";
 uint8_t rxBuf[512];
@@ -114,6 +120,19 @@ volatile uint16_t rxLen = 0;
 volatile uint8_t dataReady = 0;
 
 static uint8_t largeTestBuf[LARGE_TEST_BURST_SIZE] __attribute__((aligned(4)));
+
+
+// WIFI
+// 1. The Buffer: Adjust the size (64, 128, 256) based on your largest expected packet
+#define WIFI_BUFFER_SIZE 128
+volatile uint8_t wifi_rx_buf[WIFI_BUFFER_SIZE];
+
+// 2. The Length: Stores how many bytes actually arrived in the last packet
+volatile uint16_t wifi_rx_len = 0;
+
+// 3. The Flag: A simple '0' or '1' so your main loop knows new data is ready
+volatile uint8_t wifi_rx_ready = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -220,6 +239,7 @@ int main(void)
 
   // LPUART Trigger
 HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
+  
   // This allows the debugger to keep communicating even if the CPU enters SLEEP, STOP, or STANDBY
   HAL_DBGMCU_EnableDBGSleepMode();
   HAL_DBGMCU_EnableDBGStopMode();
@@ -251,13 +271,42 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   int i = 0;
-  while(0); // stick heref
-  { HAL_Delay(1000);
-    //UART_SendString(&huart3, "Hello from main loop\r\n");
-  }
+
   while (i < 10000000)
   { 
 
+    // WIFI DATA OFFLOAD
+    // POWER UP WIFI
+
+    // WIFI TEST SEND
+    
+    char *msg = "UART Test: Hello from STM32!\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+
+
+
+    /*
+    // WIFI TESST RECIEVE:
+    uint8_t wi_rxBuffer[20]; 
+    HAL_StatusTypeDef rxStatus = HAL_UART_Receive(&huart2, wi_rxBuffer, 10, 1000);
+      if (rxStatus == HAL_OK) {
+      UART_SendString(&huart3, "WIFI DATA RECEIVED:\r\n"); 
+      
+      char hex[8];
+      for (uint16_t i = 0; i < 10; i++) // 10 is the number of bytes we asked for
+      {
+          snprintf(hex, sizeof(hex), "%02X ", wi_rxBuffer[i]);
+          UART_SendString(&huart3, hex);
+      }
+      UART_SendString(&huart3, "\r\n");
+  } 
+  else if (rxStatus == HAL_TIMEOUT) {
+      UART_SendString(&huart3, "WIFI RX TIMEOUT (No data received)\r\n");
+  }
+\
+
+*\
+  
   
 
     /*
@@ -286,15 +335,43 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
 
       }
 
+
+      // ================   WIFI MANAGEMENT=======================
+
+      if (WIFI_MODE){
+        // Wifi Active
+        // RE-assert Power to power
+        if(WIFI_MODE_SETUP == 0){
+          // setup wifi
+          UART_SendString(&huart3, "STARTING WIFI\r\n"); 
+          HAL_GPIO_WritePin(Wi_EN_GPIO_Port, Wi_EN_Pin, GPIO_PIN_SET);
+          HAL_UARTEx_ReceiveToIdle_IT(&huart2, (uint8_t *)wifi_rx_buf, sizeof(wifi_rx_buf));  // settign up recieve to internal buffer
+           // TAM: ANY WIFI SETUP DONE HERE
+           WIFI_MODE_SETUP = 1; // set flag after setup
+        }
+        
+        // WIFI INCOMING DATA - LIKELY SIMPLE PING IMPLEMENTED HERE
+        if (wifi_rx_ready == 1) 
+        {
+          UART_SendString(&huart3, "WIFI DATA RECEIVED:\r\n"); 
+          wifi_rx_ready = 0; // Reset the flag so we don't process the same data twice
+        }   
+
+
+        // 
+
+      }
+
       if (wake_source == 3){
       UART_SendString(&huart3, "Woke from LPUART!\r\n"); 
       // decode commands
       }
+
       if (lora_rx_ready){
         // ONLY OCCURS WHEN END OF LORA PACKET. Technically the Lora Wake source is useles...... 
         lora_rx_ready = 0;
         UART_SendString(&huart3, "LORA DATA READY OUT\r\n"); 
-        char hex[8];
+       char hex[8];
         for (uint16_t i = 0; i < lora_rx_len; i++)
         {
             snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
@@ -1055,7 +1132,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 
 // Fires  at N/2, N, or idle
-
+    // FOR SHARC BOUY ROUTING
     if (huart->Instance == USART1)
     {
         HAL_UART_RxEventTypeTypeDef event = HAL_UARTEx_GetRxEventType(huart);
@@ -1086,6 +1163,38 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
                 HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuffer, RX_BUF_SIZE);
                 break;
         }
+    }
+
+
+    // WIFI ROUTING
+    // Check if the interrupt came from USART2
+    if (huart->Instance == USART2)
+    {
+        // 1. Size = number of bytes received until IDLE or Buffer Full
+        wifi_rx_len = Size;
+        wifi_rx_ready = 1;
+
+        // 2. Safety: Null-terminate for string handling
+        if (Size < sizeof(wifi_rx_buf)) {
+            wifi_rx_buf[Size] = '\0';
+        }
+
+        // 3. Print the formatted Hex output to your PC/Debug port (huart3)
+        UART_SendString(&huart3, "USART2 DATA RECEIVED:\r\n"); 
+        
+        char hex[8];
+        for (uint16_t i = 0; i < Size; i++)
+        {
+            snprintf(hex, sizeof(hex), "%02X ", wifi_rx_buf[i]);
+            UART_SendString(&huart3, hex);
+        }
+        UART_SendString(&huart3, "\r\n");
+
+        // 4. Trigger the software interrupt for further processing logic
+        NVIC_SetPendingIRQ(EXTI0_IRQn);
+
+        // 5. IMPORTANT: Re-arm the listener for the next packet
+        HAL_UARTEx_ReceiveToIdle_IT(&huart2, (uint8_t *)wifi_rx_buf, sizeof(wifi_rx_buf));
     }
 }
 
