@@ -33,6 +33,19 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 void UART_SendString(UART_HandleTypeDef *huart, char *str);
 extern UART_HandleTypeDef huart3;
+
+#define UART_DMA_BUF_SIZE  512 // SHARC BUOY INCOMING BUFFER SIZE
+
+/* Raw DMA landing buffer — do not read from this directly */
+extern uint8_t  uart_dma_buf[UART_DMA_BUF_SIZE];
+
+/* Your circular buffer instance goes here */
+/* extern YourCircBuf_t circ_buf; */
+
+/* Flags set by DMA callbacks */
+extern volatile uint8_t cb_write_first_half;
+extern volatile uint8_t cb_write_second_half;
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

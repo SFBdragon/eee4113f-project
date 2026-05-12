@@ -82,6 +82,18 @@ SPI_HandleTypeDef hspi1;
 uint32_t total_uptime; // Total time SD card has been active, in seconds
 const char total_uptime_filename[] = "UPTIME.txt";
 uint8_t rxBuf[512];
+
+
+volatile uint8_t wake_source = 0;
+
+
+
+// USART From SHarc BUOY data
+volatile uint8_t cb_write_first_half  = 0;  
+volatile uint8_t cb_write_second_half = 0;
+volatile uint8_t uart_active          = 0;   /* set by EXTI, cleared on done */
+extern UART_HandleTypeDef huart1;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -164,7 +176,12 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
+  // This allows the debugger to keep communicating even if the CPU enters SLEEP, STOP, or STANDBY
+  HAL_DBGMCU_EnableDBGSleepMode();
+  HAL_DBGMCU_EnableDBGStopMode();
+  HAL_DBGMCU_EnableDBGStandbyMode();
+
+  //fHAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(Wi_EN_GPIO_Port, Wi_EN_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_SET);
 
@@ -178,6 +195,8 @@ int main(void)
 
   total_uptime = SD_ReadUptime();
   
+  HAL_Delay(500);
+  //HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_RESET);
 
 
   /* USER CODE END 2 */
@@ -186,7 +205,90 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   { 
+
+    if (cb_write_first_half) {
+      cb_write_first_half = 0;
+      // TODO: PUSH FIRST HALF INTO BUFFER
+    }
+
+    if (cb_write_first_half)
+    {
+      cb_write_first_half = 0;
+
+      /* TODO: push second half into your circular buffer */
+      // YourCircBuf_Write(&circ_buf, uart_dma_buf + UART_DMA_BUF_SIZE / 2, UART_DMA_BUF_SIZE / 2);
+
+      /* TODO: SD write if threshold met */
+      // if (YourCircBuf_BytesAvailable(&circ_buf) >= SD_WRITE_THRESHOLD)
+      // {
+      //     /* SD write implementation goes here */
+      // }
+    }
+
+
+        /* ── Decide which sleep mode to enter ── */
+
+        if (uart_active)
+        {
+            /* Data is flowing — Sleep keeps DMA and UART running */
+           // HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+
+            /* Woken by DMA half/full IRQ — loop back to process flags above */
+        }
+        else
+        {
+            /* Idle — no data expected, drop into Stop 2 */
+            //HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
+
+            /* ── Woken by GPIO EXTI (other device signalling ready) ──
+             *
+             *  PLL is dead after Stop 2 — restore clocks before anything else.
+             *  EXTI callback has already set uart_active = 1 and armed DMA,
+             *  but SystemClock_Config() must come before any peripheral access. */
+            SystemClock_Config();
+        }
+
+
+    // Configure RTC wakeup
+    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 4, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+      
+
+    __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag
   
+        
+    UART_SendString(&huart3, "Going to bed\r\n");
+
+    //HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
+    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
+    //SystemClock_Config();
+    HAL_ResumeTick();
+
+
+    //char dbg[40];
+    //sprintf(dbg, "wake_source raw value = %d\r\n", wake_source);
+    //UART_SendString(&huart3, dbg);
+
+    // ACTUAL STOP MODE
+    // 
+
+    UART_SendString(&huart3, "DEBUG: Checking wake source\r\n");
+
+    switch (wake_source) {
+      case 1: UART_SendString(&huart3, "Woke from RTC\r\n");      break;
+      case 2: UART_SendString(&huart3, "Woke from GPIO\r\n");     break;
+      default: UART_SendString(&huart3, "Wake source unknown\r\n"); break;
+    }
+
+    HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+    __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin);
+    HAL_RTCEx_DeactivateWakeUpTimer(&hrtc); 
+    HAL_Delay(1000);
+
+
+
+
+    while(0){
+      // TESTING BASIC WRITE TO SD CARD
     total_uptime += 10;
     SD_WriteUptime(total_uptime);
     HAL_GPIO_WritePin(Lo_GPIO_0_GPIO_Port,Lo_GPIO_0_Pin, GPIO_PIN_SET);
@@ -194,6 +296,7 @@ int main(void)
     HAL_GPIO_WritePin(Lo_GPIO_0_GPIO_Port,Lo_GPIO_0_Pin, GPIO_PIN_RESET);
     HAL_Delay(10000);
     
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -696,18 +799,6 @@ void UART_SendString(UART_HandleTypeDef *huart, char *str) {
     HAL_UART_Transmit(huart, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
 
-// Interrupt handler that triggers RX data
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  // NB CANTT SEND TO UART FROM WITHIN
-
-    if (GPIO_Pin == D_WAKE_Pin) // Ensure it's the right pin
-    {
-        // --- DO SOMETHING HERE ---
-       wake_up_flag = 1; // Set flag to indicate wake-up event occurred 
-       HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
-    }
-}
 
 uint32_t get_dma_head(void) {
     // __HAL_DMA_GET_COUNTER returns remaining items; subtract from size to get current index
