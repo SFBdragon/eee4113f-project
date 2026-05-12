@@ -57,7 +57,10 @@ static uint8_t readBuf[512];
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+// all for for testing
+#define LARGE_TEST_TOTAL_SIZE (16 * 1024 * 1024) // 16 MB
+#define LARGE_TEST_BURST_SIZE (16 * 1024)        // 16 KB bursts (32 blocks)
+#define LARGE_TEST_BLOCKS     (LARGE_TEST_BURST_SIZE / 512)
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -99,6 +102,7 @@ uint8_t rxBuffer[RX_BUF_SIZE];
 volatile uint16_t rxLen = 0;
 volatile uint8_t dataReady = 0;
 
+static uint8_t largeTestBuf[LARGE_TEST_BURST_SIZE] __attribute__((aligned(4)));
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,6 +123,7 @@ static uint32_t get_dma_head(void);
 static void Print_SD_Details(void);
 static void SD_RawWriteTest(void);
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
+void SD_SpeedTest(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -138,6 +143,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
     HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
     return ch;
   }
+
 
 /* USER CODE END 0 */
 
@@ -201,10 +207,14 @@ int main(void)
   //SD_RawWriteTest();    // NB KEEP THIS COMMENTED OUT worked BECAUSE IT DESTROYS SECTOR 100 BOOT
   Print_SD_Details();
   SD_IO_Init(&huart3); 
+  SD_RawWriteTest();
 
   total_uptime = SD_ReadUptime();
   SD_Stream_Init(&huart3);
   HAL_Delay(500);
+
+    // SPEED TEST
+  //SD_SpeedTest();
   //HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_RESET);
 
   /* USER CODE END 2 */
@@ -212,12 +222,16 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   int i = 0;
-  while (i < 1000)
+  while(0); // stick heref
+  { HAL_Delay(1000);
+    //UART_SendString(&huart3, "Hello from main loop\r\n");
+  }
+  while (i < 10000000)
   { 
     i++;
-    //UART_SendString(&huart3, "From within \r\n");
+    //UART_SendString(&huart3, "From within \rf\n");
                 
-    SD_Stream_Flush();
+    
 
     // CONST POLE:
 
@@ -229,16 +243,28 @@ int main(void)
                 cb_write_first_half = 0;
                 UART_SendString(&huart3, "First half of buffer ready\r\n");
                 
+                // RE-ENIT SD CARD
+                HAL_SD_DeInit(&hsd1);       // cleanly tear down
+                MX_SDMMC1_SD_Init();        // re-init SDMMC peripheral
+                //HAL_Delay(100);
+                
                 // Process first half of the buffer
                 SD_Stream_WriteHalf(rxBuffer, RX_BUF_SIZE / 2);
                 //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
+                SD_Stream_Flush();
               }
               else if (cb_write_second_half){
                 cb_write_second_half = 0;
                 UART_SendString(&huart3, "Second half of buffer ready\r\n");
+                // RE-INIT SD CARD
+                HAL_SD_DeInit(&hsd1);       // cleanly tear down
+                MX_SDMMC1_SD_Init();        // re-init SDMMC peripheral
+                //HAL_Delay(100);
+
                 // Process second half of the buffer
                 SD_Stream_WriteSecondHalf(rxBuffer + RX_BUF_SIZE / 2, RX_BUF_SIZE / 2);
                 //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
+                SD_Stream_Flush();
               }
 
               else if (dataReady)
@@ -251,9 +277,11 @@ int main(void)
 
                 // Write remaining data (if you want to - maybe only in prep for offload)
                 //SD_Stream_WriteHalf(rxBuffer, rxLen);
+
+                 SD_Stream_Flush();
               }
-      SD_Stream_Flush();
-      HAL_Delay(10);
+     
+      HAL_Delay(1000); // DElay to allow completion before resleep
 
     // Example: Read the first 5 sectors of your data area
     //SD_Stream_ReadDebug(DATA_START_SECTOR, 5);  
@@ -268,13 +296,17 @@ int main(void)
 
 
     // RTC WAKEUP (Lora window start / stop)
-    // ACTIVE / DEACTIVATE LORA POWER, INDICATE ON OLED
+    if (wake_source == 2){
+      UART_SendString(&huart3, "Woke from GPIO!\r\n"); 
+      // Check time 
+
+    }
     
     // Watchdog timer?
 
     // Other interrupts?
     
-  /*
+  
     // Configure RTC wakeup
     HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 4, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       
@@ -282,20 +314,20 @@ int main(void)
     __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag
   
         
-    UART_SendString(&huart3, "Going to bed\r\n");
+   // UART_SendString(&huart3, "Going to bed\r\n");
 
 
     // ENTER STOP MODE
     HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
-    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
+    //HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  /SLEEP NOT STOP 
+    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI); 
     SystemClock_Config();
     HAL_ResumeTick();
 
-    //char dbg[40];
-    //sprintf(dbg, "wake_source raw value = %d\r\n", wake_source);
-    //UART_SendString(&huart3, dbg);
 
-
+  
+  /*
+    
     UART_SendString(&huart3, "DEBUG: Checking wake source\r\n");
 
     switch (wake_source) {
@@ -304,17 +336,15 @@ int main(void)
       default: UART_SendString(&huart3, "Wake source unknown\r\n"); break;
     }
 
-
-
-
-    // COMPLETED IN IRQs already
-    //HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-    //__HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin);
-    //HAL_RTCEx_DeactivateWakeUpTimer(&hrtc); 
-    HAL_Delay(100);
-
-
     */
+   
+    
+
+
+    //HAL_Delay(100);
+
+
+    
 
  
     /* USER CODE END WHILE */
@@ -325,14 +355,13 @@ int main(void)
 
   // POST WHILE LOOP
   SD_Stream_Flush();
-  uint32_t sectors_written = SD_Stream_GetCurrentSector() - DATA_START_SECTOR;
   HAL_Delay(500);  // give card time to settle
-   UART_SendString(&huart3, "While exit\n");
+  UART_SendString(&huart3, "While exit\n");
   uint32_t sectors_written_read = SD_Stream_GetCurrentSector() - DATA_START_SECTOR;
 
 
-  //SD_Stream_ReadDebug(2048,2);
-  SD_Stream_ReadDebug(DATA_START_SECTOR, sectors_written_read);
+  SD_Stream_ReadDebug(DATA_START_SECTOR, DATA_START_SECTOR + sectors_written_read);
+  //SD_Stream_ReadDebug(DATA_START_SECTOR, sectors_written_read);
 
 
   
@@ -945,8 +974,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
                 // First half of rxBuffer ready
                 // rxBuffer[0] to rxBuffer[RX_BUF_SIZE/2 - 1]
                     char dbg[80];
-                snprintf(dbg, sizeof(dbg), "HT: first bytes: %02X %02X %02X %02X\r\n",
-                    rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3]);
+               // snprintf(dbg, sizeof(dbg), "HT: first bytes: %02X %02X %02X %02X\r\n", rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3]);
                 UART_SendString(&huart3, dbg);
                 cb_write_first_half = 1;
                 break;
@@ -968,7 +996,73 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         }
     }
 }
-//cb_write_second_half = 1;
+
+
+
+void SD_SpeedTest(void) {
+    char uart[128];
+    uint32_t startTime, endTime, totalTime;
+    uint32_t currentSector = 10000; // Start far away from headers
+    HAL_StatusTypeDef status;
+
+    UART_SendString(&huart3, "\r\n--- STARTING 16MB STRESS TEST (Blocking) ---\r\n");
+    UART_SendString(&huart3, "Preparing 16KB pattern...\r\n");
+
+    // Initialize with a simple pattern
+    for (int i = 0; i < LARGE_TEST_BURST_SIZE; i++) {
+        largeTestBuf[i] = (uint8_t)(i % 256);
+    }
+
+    startTime = HAL_GetTick();
+
+    // 1024 iterations * 16KB = 16MB
+    uint32_t iterations = LARGE_TEST_TOTAL_SIZE / LARGE_TEST_BURST_SIZE;
+
+    for (uint32_t i = 0; i < iterations; i++) {
+        // Periodically print progress
+        if (i % 128 == 0 && i != 0) {
+            sprintf(uart, "Progress: %lu / %lu MB written...\r\n", (i * LARGE_TEST_BURST_SIZE) / (1024 * 1024), LARGE_TEST_TOTAL_SIZE / (1024 * 1024));
+            UART_SendString(&huart3, uart);
+        }
+
+        // WRITE
+        status = HAL_SD_WriteBlocks(&hsd1, largeTestBuf, currentSector, LARGE_TEST_BLOCKS, 5000);
+        
+        if (status != HAL_OK) {
+            sprintf(uart, "\r\nFATAL: Write failed at Iteration %lu | Code: 0x%08lX\r\n", i, hsd1.ErrorCode);
+            UART_SendString(&huart3, uart);
+            return;
+        }
+
+        // WAIT for card to settle
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+            if (HAL_GetTick() - startTime > 60000) { // 60s total timeout
+                UART_SendString(&huart3, "Timeout waiting for card!\r\n");
+                return;
+            }
+        }
+
+        currentSector += LARGE_TEST_BLOCKS;
+    }
+
+    endTime = HAL_GetTick();
+    totalTime = endTime - startTime;
+    
+    // Calculate final stats
+    float totalMB = (float)LARGE_TEST_TOTAL_SIZE / (1024.0f * 1024.0f);
+    float seconds = (float)totalTime / 1000.0f;
+    float speedKBps = ((float)LARGE_TEST_TOTAL_SIZE / 1024.0f) / seconds;
+
+    sprintf(uart, "\r\n--- TEST COMPLETE ---\r\n");
+    UART_SendString(&huart3, uart);
+    sprintf(uart, "Total Data: %.2f MB\r\n", totalMB);
+    UART_SendString(&huart3, uart);
+    sprintf(uart, "Total Time: %.2f seconds\r\n", seconds);
+    UART_SendString(&huart3, uart);
+    sprintf(uart, "Final Speed: %.2f KB/s\r\n", speedKBps);
+    UART_SendString(&huart3, uart);
+}
+
 /* USER CODE END 4 */
 
 /**

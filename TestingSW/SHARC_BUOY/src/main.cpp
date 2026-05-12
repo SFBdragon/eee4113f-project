@@ -50,5 +50,5 @@ void loop() {
   digitalWrite(ONBOARD_LED, LOW); // LED OFF
 
   //Serial.println("Massive packet sent.");
-  delay(500); // Wait 2 seconds to make the burst obvious
+  delay(2000); // Wait 2 seconds to make the burst obvious
 }
