@@ -52,13 +52,13 @@ do
 
    # The Arduino expects to see "AAA" (which is 0x41 0x41 0x41)
 
-   echo -ne "AAAAAAAAAAAAAAAAAAAAAAA" > $PORT
+   echo -ne "SHAUNS_FUCKING_WIFI_PING" > $PORT
 
     
 
    # We print the timestamp locally so you know when the script sent data
 
-   echo -e "\n[$(date +%T)] Sent: AAAAAAAAAA"
+   echo -e "\n[$(date +%T)] Sent: SHAUNS_FUCKING_WIFI_PING"
 
 
 
