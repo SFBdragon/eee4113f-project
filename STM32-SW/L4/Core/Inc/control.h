@@ -40,33 +40,28 @@ void set_lora_recv_window(uint16_t on_period, uint16_t total_period);
 
 // The storage page header.
 typedef struct {
-    // metadata
-    // metadata
-    // metadata
-    uint32_t blk;
-    // len?
     uint16_t len;
-    // crc?
-    uint32_t crc;
-} PageHeader;
+    uint16_t crc;
+    // [len bytes follow]
+} BlockHeader;
 
 // The size of the data units used by the rest of the API.
-#define STORAGE_BLOCK_SIZE /* = <glen plz specify> */
+#define STORAGE_BLOCK_SIZE 512
 
 // The total number of pages available for record storage.
-uint32_t storage_total_blocks();
+uint64_t storage_total_blocks();
 
-uint32_t storage_first_readable_block();
+uint64_t storage_first_readable_block();
 
-uint32_t storage_first_protected_block();
+uint64_t storage_first_protected_block();
 
-uint32_t storage_last_readable_block();
+uint64_t storage_last_readable_block();
 
 // Read a page between `storage_first_readable_page` and `storage_last_readable_page`.
 // Read the page into `buffer`. `buffer` is `STORAGE_PAGE_SIZE` large.
 //
 // Returns the length read in.
-uint32_t read_block(uint32_t page_index, uint8_t* buffer, uint32_t *len);
+uint32_t read_block(uint64_t block_id, uint8_t* buffer);
 
 typedef enum {
     // If bulk storage runs out, overwrite oldest records with new records.
@@ -90,7 +85,7 @@ void set_overwrite_policy(Policy policy);
 //
 // This must adjust `storage_first_protected_block` but not
 // `storage_first_readable_block` or `storage_last_readable_block`.
-void allow_overwrite(uint32_t upto_page);
+void allow_overwrite(uint64_t upto_block);
 
 // Defined by Glen, called by Shaun before a WiFi transmission.
 void flush_block_buffer_to_disk();
@@ -100,11 +95,10 @@ void flush_block_buffer_to_disk();
 // The format of record metadata.
 // Defined by Glen.
 typedef struct {
-    // TODO
-    uint32_t sequence_number;
-    // datetime;
-    // ???
-    uint16_t payload_length;
+    uint16_t len;
+    // ?? datetime?
+
+    // [len bytes follow]
 } RecordHeader;
 
 // TODO GPS STUFF ?
