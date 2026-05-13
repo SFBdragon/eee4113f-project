@@ -11,6 +11,7 @@ pub struct LoRaFrame<'a> {
     pub mod_addr: LoRaAddr,
     pub sequence_flag: bool,
     pub payload: &'a [u8],
+    // 16-bit CRC suffix
 }
 
 impl<'a> LoRaFrame<'a> {

@@ -10,46 +10,56 @@ import {
     SpinBox,
     ComboBox,
     GridBox,
+    ScrollView,
 } from "std-widgets.slint";
-
-import { StatusBar } from "statusbar.slint";
-import { RingBufferWidget } from "ringbuffer.slint";
 
 import "../assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf";
 import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+import { LoRa } from "lora.slint";
+import { Storage } from "storage.slint";
+import { WiFi } from "wifi.slint";
+import { DataDump } from "datadump.slint";
+import { Export } from "export.slint";
 
+export { Theme }
 
 export global GlobalAppState {
     in-out property <int> controller_addr;
 
     in-out property <bool> lora_attached: false;
-    in-out property <bool> lora_connected: false;
     in-out property <string> lora_module_addr: "FF:FF";
 
     in-out property <bool> wifi_attached: false;
     in-out property <bool> wifi_connected: false;
     in-out property <string> wifi_connected_mac: "Not Connected";
+
+    in property <[string]> none_and_addresses;
+
+    in property <int> bytes_per_block;
+}
+
+export struct BlockId {
+    lo: int,
+    hi: int,
 }
 
 export global ModuleState {
-    in property <string> storage_policy;
-    in property <int> storage_total;
-    in property <int> storage_available_begin;
-    in property <int> storage_available_end;
-    in property <int> storage_overwriteable_upto;
+    // in-out property <bool> storage_readonly;
+    in-out property <bool> storage_overwrite;
+    in-out property <int> storage_total;
+    in-out property <BlockId> storage_available_begin;
+    in-out property <BlockId> storage_available_end;
+    in-out property <BlockId> storage_overwriteable_upto;
 
-    in property <float> p_overwritable_1;
-    in property <float> p_preserved_1;
-    in property <float> p_free_2;
-    in property <float> p_overwritable_2;
-    in property <float> p_preserved_2;
+    in-out property <int> lora_recv_win_on_period;
+    in-out property <int> lora_recv_win_total_period;
 
-    in property <int> lora_recv_win_on_period;
-    in property <int> lora_recv_win_total_period;
+    in-out property <bool> wifi_enabled;
+    in-out property <bool> wifi_data_dumping;
 
-    in property <bool> wifi_enabled;
-    in property <bool> wifi_data_dumping;
-    in property <bool> wifi_data_streaming;
+    in property <int> downloaded_bytes;
+    in property <int> remote_only_bytes;
 }
 
 export global DebugAppState {
@@ -57,111 +67,37 @@ export global DebugAppState {
     in-out property <bool> wifi_mod_attached: true;
 }
 
-component LegendItem inherits HorizontalBox {
-    in property <color> item-color;
-    in property <string> item-name;
-    spacing: 8pt;
-    padding: 0pt;
-
-    // The "Color Icon"
-    Rectangle {
-        width: 1.2rem;
-        height: 1.2rem;
-        background: root.item-color;
-        border-radius: 4pt;
-    }
-
-    // The Label
-    Text {
-        text: root.item-name;
-        vertical-alignment: center;
-    }
-}
-
-component CheckListItem inherits HorizontalBox {
-    in property <string> text;
-    in property <bool> done;
-
-    Text {
-        text: parent.text;
-        vertical-alignment: center;
-        horizontal-alignment: left;
-    }
-
-    Text {
-        text: parent.done ? "🟢" : "🔴";
-    }
-}
-
 export component AppWindow inherits Window {
 
     title: "Communication Module Control Panel";
-    preferred-width: 1200px;
-    preferred-height: 800px;
-    min-width: 400px;
+    preferred-width: 1000px;
+    preferred-height: 1000px;
+    min-width: 600px;
     min-height: 300px;
     icon: @image-url("../assets/app_icon.png");
-    background: white;
+    background: Palette.alternate-background;
 
     default-font-size: Theme.default-font-size;
     default-font-weight: Theme.default-font-weight;
     default-font-family: Theme.default-font-family;
 
     callback lora_ping(string);
-    callback set_lora_recv_window(string, { on: int, tot: int});
-    callback set_storage_policy(string, string);
+    callback set_lora_recv_window(string, int, int);
+    callback set_storage_overwrite(string, bool);
     callback set_overwritable_upto(string, int);
 
     callback set_wifi_enabled(string, bool);
-    callback wifi_ping(string);
-    callback request_wifi_data_dump(string, from: int, to: int);
+    callback request_wifi_data_dump(string, BlockId, BlockId);
     callback cancel_wifi_data_dump(string);
+
+    callback data_export(string);
 
     callback debug_set_lora_module_attached(bool);
     callback debug_set_wifi_module_attached(bool);
-
-    callback file-new();
-    callback file-open();
-    callback quit-app();
-
-    MenuBar {
-        Menu {
-            title: @tr("File");
-
-            MenuItem {
-                title: @tr("New");
-                activated => {
-                    file-open();
-                }
-                shortcut: @keys(Control + N);
-            }
-
-            MenuItem {
-                title: @tr("Open");
-                activated => {
-                    file-open();
-                }
-                shortcut: @keys(Control + O);
-            }
-
-            MenuItem {
-                title: @tr("Quit");
-                activated => {
-                    quit-app();
-                }
-                shortcut: @keys(Control + Shift + Q);
-            }
-        }
-
-        Menu {
-            title: @tr("Help");
-            MenuItem {
-                title: @tr("About");
-                activated => {
-                }
-            }
-        }
-    }
+    callback debug_set_lora_send_fails(bool);
+    callback debug_set_wifi_send_fails(bool);
+    callback debug_set_lora_recv_fails(bool);
+    callback debug_set_wifi_recv_fails(bool);
 
     // callback popup_confirmed;
     // callback show_confirm_popup;
@@ -204,24 +140,10 @@ export component AppWindow inherits Window {
     //     }
     // }
 
-    private property <bool> lora_heartbeat: true;
-    private property <duration> lora_heartbeat_period_edit: 2s;
-    private property <duration> lora_heartbeat_period: 2s;
-
-    Timer {
-        interval: lora_heartbeat_period;
-        running: lora_heartbeat;
-
-        triggered() => {
-            if (GlobalAppState.lora_attached) {
-                lora_ping(GlobalAppState.lora_module_addr)
-            }
-        }
-    }
-
     // -------------------------------------------------------- //
 
-    private property <duration> time_since_lora_reply: 0;
+    private property <duration> time_since_lora_reply: 100000000s;
+    private property <bool> are_we_lora_yet: false;
 
     lora_time_since_reply_timer := Timer {
         interval: 1s;
@@ -235,9 +157,11 @@ export component AppWindow inherits Window {
     public function on_lora_reply() {
         time_since_lora_reply = 0;
         lora_time_since_reply_timer.restart();
+        are_we_lora_yet = true;
     }
 
-    private property <duration> since_on_wifi_recv: 0;
+    private property <duration> since_on_wifi_recv: 100000000s;
+    private property <bool> are_we_wifi_yet: false;
 
     since_on_wifi_recv_timer := Timer {
         interval: 1s;
@@ -251,396 +175,187 @@ export component AppWindow inherits Window {
     public function on_wifi_recv() {
         since_on_wifi_recv = 0;
         since_on_wifi_recv_timer.restart();
+        are_we_wifi_yet = true;
     }
 
     // -------------------------------------------------------- //
 
-    HorizontalLayout {
-        spacing: 1px;
+    callback storage_mark_obtained_overwritable(string, BlockId);
+    callback storage_mark_all_overwritable(string, BlockId);
+    callback storage_unmark_overwritable(string, BlockId);
 
-        Rectangle {
-            background: Palette.background;
-            width: 50%;
+    out property <int> storage_bar_width: storage_section.storage_bar_width;
+    in-out property <image> storage_bar_image;
 
-            VerticalLayout {
-                lora_status := StatusBar {
-                    subject: "LoRa";
-                    attached: GlobalAppState.lora_attached;
-                    connected: GlobalAppState.lora_connected;
-                    instruction: "Pinging...";
+    out property <int> download_bar_width: datadump_section.download_bar_width;
+    in-out property <image> download_bar_image;
+
+    // -------------------------------------------------------- //
+
+    private property <bool> scrollview-has-more-below: true;
+
+    scroll := ScrollView {
+        vertical-stretch: 0;
+        mouse-drag-pan-enabled: true;
+
+        scrolled => {
+            scrollview-has-more-below = (-self.viewport-y + self.height) < self.viewport-height;
+        }
+
+        VerticalBox {
+            alignment: start;
+            vertical-stretch: 0;
+            max-width: 700px;
+
+            lora_section := LoRa {
+                lora_attached: GlobalAppState.lora_attached;
+                are_we_lora_yet: root.are_we_lora_yet;
+                module_address: GlobalAppState.lora_module_addr;
+                time_since_lora_reply: root.time_since_lora_reply;
+
+                lora_recv_window_active: ModuleState.lora_recv_win_on_period;
+                lora_recv_window_period: ModuleState.lora_recv_win_total_period;
+
+                lora_ping(a) => {
+                    root.lora_ping(a);
                 }
 
-                VerticalLayout {
-                    alignment: LayoutAlignment.start;
-                    padding: 8pt;
-                    spacing: 8pt;
+                set_lora_recv_window(addr, active, period) => {
+                    root.set_lora_recv_window(addr, active, period);
+                }
+            }
 
-                    HorizontalLayout {
-                        spacing: 8pt;
+            storage_section := Storage {
+                // readonly: ModuleState.storage_readonly;
+                // storage_readonly(r) => root.set_storage_policy(GlobalAppState.lora_module_addr, r ? "Readonly" : self.overwrite ? "Overwrite" : "Preserve");
+                enable_control: GlobalAppState.lora_attached && root.are_we_lora_yet;
+                overwrite: ModuleState.storage_overwrite;
 
-                        Text {
-                            text: "Heartbeat";
-                            font-weight: Theme.bold-font-weight;
-                            vertical-alignment: center;
-                        }
-
-                        Switch {
-                            checked: lora_heartbeat;
-                            toggled => {
-                                lora_heartbeat = self.checked;
-                            }
-                        }
-
-                        Text {
-                            text: lora_heartbeat_period_edit / 1s + "s";
-                            width: 50pt;
-                            horizontal-alignment: right;
-                            vertical-alignment: center;
-                        }
-
-                        Slider {
-                            minimum: 1.0;
-                            maximum: 30.0;
-                            value: lora_heartbeat_period / 1s;
-                            enabled: lora_heartbeat;
-
-                            changed(value) => {
-                                lora_heartbeat_period_edit = value * 1s;
-                            }
-
-                            released(value) => {
-                                lora_heartbeat_period = value * 1s;
-                            }
-                        }
-
-                        Button {
-                            text: "Ping Now";
-                            enabled: GlobalAppState.lora_attached;
-
-                            clicked => {
-                                lora_ping(GlobalAppState.lora_module_addr)
-                            }
-                        }
-                    }
-
-                    if (GlobalAppState.lora_connected): VerticalLayout {
-                        padding: 8pt;
-                        spacing: 8pt;
-
-                        HorizontalLayout {
-                            Text {
-                                text: "State of LoRa module: ";
-                                horizontal-alignment: left;
-                            }
-
-                            Text {
-                                text: GlobalAppState.lora_module_addr;
-                                horizontal-alignment: right;
-                            }
-                        }
-
-                        HorizontalLayout {
-                            Text {
-                                text: "Time since last reply: ";
-                                horizontal-alignment: left;
-                            }
-
-                            Text {
-                                text: time_since_lora_reply / 1s + "s";
-                                horizontal-alignment: right;
-                            }
-                        }
-
-                        HorizontalLayout {
-                            HorizontalLayout {
-                                horizontal-stretch: 0.0;
-                                alignment: start;
-
-                                Text {
-                                    text: "Receive Window: ";
-                                    horizontal-alignment: left;
-                                    horizontal-stretch: 0.25;
-                                    vertical-alignment: center;
-                                }
-
-                                edit_on := SpinBox {
-                                    height: 1.4rem;
-                                    minimum: 10;
-                                    maximum: edit_tot.value;
-                                }
-
-                                Text {
-                                    text: "s per ";
-                                    horizontal-alignment: left;
-                                    vertical-alignment: center;
-                                }
-
-                                edit_tot := SpinBox {
-                                    height: 1.4rem;
-                                    minimum: edit_on.value;
-                                    maximum: 3600;
-                                }
-
-                                Text {
-                                    text: "s.";
-                                    horizontal-alignment: left;
-                                    vertical-alignment: center;
-                                }
-
-                                submit := Button {
-                                    text: "Set";
-                                    height: 1.4rem;
-
-                                    clicked => {
-                                        set_lora_recv_window(
-                                            GlobalAppState.lora_module_addr,
-                                            {
-                                            on: edit_on.value,
-                                            tot: edit_tot.value,
-                                        })
-                                    }
-                                }
-                            }
-
-                            HorizontalBox { }
-
-                            Text {
-                                text: ModuleState.lora_recv_win_on_period + "s every " + ModuleState.lora_recv_win_total_period + "s";
-                                horizontal-alignment: right;
-                            }
-                        }
-
-                        HorizontalLayout {
-                            Text {
-                                text: "Storage Policy";
-                                vertical-alignment: center;
-                                horizontal-alignment: left;
-                                horizontal-stretch: 0;
-                            }
-
-                            ComboBox {
-                                width: 200pt;
-                                model: ["Overwrite All", "Overwrite Unprotected", "Overwrite Free", "Readonly"];
-                                horizontal-stretch: 0;
-
-                                selected(current-value) => {
-                                    set_storage_policy(GlobalAppState.lora_module_addr, current-value)
-                                }
-                            }
-
-                            Text {
-                                text: ModuleState.storage_policy;
-                                horizontal-alignment: right;
-                            }
-                        }
-
-                        HorizontalLayout {
-                            Text {
-                                text: "Storage:";
-                                font-weight: Theme.bold-font-weight;
-                            }
-
-                            LegendItem {
-                                item-color: #444444;
-                                item-name: "Free";
-                            }
-
-                            LegendItem {
-                                item-color: #e67e22;
-                                item-name: "Overwritable";
-                            }
-
-                            LegendItem {
-                                item-color: #27ae60;
-                                item-name: "Protected";
-                            }
-                        }
-
-                        RingBufferWidget {
-                            p_overwritable_1: ModuleState.p_overwritable_1;
-                            p_preserved_1: ModuleState.p_preserved_1;
-                            p_free_2: ModuleState.p_free_2;
-                            p_overwritable_2: ModuleState.p_overwritable_2;
-                            p_preserved_2: ModuleState.p_preserved_2;
-                        }
-
-                        GridBox {
-                            Row {
-                                Text {
-                                    text: "Storage Policy";
-                                    vertical-alignment: center;
-                                    horizontal-alignment: left;
-                                }
-
-                                ComboBox {
-                                    width: 160pt;
-                                    model: ["Overwrite All", "Overwrite Unprotected", "Overwrite Free", "Readonly"];
-
-                                    selected(current-value) => {
-                                        set_storage_policy(GlobalAppState.lora_module_addr, current-value)
-                                    }
-                                }
-
-                                Text {
-                                    text: ModuleState.storage_policy;
-                                    horizontal-alignment: left;
-                                }
-                            }
-
-                            Row {
-                                Text {
-                                    text: "Module WiFi Powered";
-                                    vertical-alignment: center;
-                                    horizontal-alignment: left;
-                                }
-
-                                HorizontalLayout {
-                                    alignment: end;
-                                    Switch {
-                                        enabled: ModuleState.wifi_enabled;
-
-                                        toggled => {
-                                            set_wifi_enabled(GlobalAppState.lora_module_addr, self.checked)
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    text: ModuleState.wifi_enabled ? "Enabled" : "Disabled";
-                                    vertical-alignment: center;
-                                    horizontal-alignment: left;
-                                }
-                            }
-                        }
-
-                        Button {
-                            text: "Enable WiFi";
-                            enabled: GlobalAppState.lora_connected;
-
-                            clicked => {
-                                set_wifi_enabled(GlobalAppState.lora_module_addr, true)
-                            }
-                        }
-
-                        Button {
-                            text: "Disable WiFI";
-                            enabled: GlobalAppState.lora_connected && GlobalAppState.wifi_connected;
-
-                            clicked => {
-                                set_wifi_enabled(GlobalAppState.lora_module_addr, false)
-                            }
-                        }
-                    }
+                storage_set_policy_overwrite(r) => {
+                    root.set_storage_overwrite(GlobalAppState.lora_module_addr, r);
                 }
 
-                // -------------------------------------------------------------------------- //
+                storage_mark_obtained_overwritable() => {
+                    root.storage_mark_obtained_overwritable(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin);
+                }
+                storage_mark_all_overwritable() => {
+                    root.storage_mark_all_overwritable(GlobalAppState.lora_module_addr, ModuleState.storage_available_end);
+                }
+                storage_unmark_overwritable() => {
+                    root.storage_unmark_overwritable(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin);
+                }
+
+                storage_bar_image: root.storage_bar_image;
+            }
+
+            wifi_section := WiFi {
+                enabled_prereq: GlobalAppState.lora_attached && root.are_we_lora_yet;
+                wifi_attached: GlobalAppState.wifi_attached;
+                wifi_powered: ModuleState.wifi_enabled;
+                module_address: GlobalAppState.lora_module_addr;
+                time_since_wifi_recv: since_on_wifi_recv;
+
+                set_wifi_enabled(addr, powered) => {
+                    set_wifi_enabled(addr, powered)
+                }
+            }
+
+            datadump_section := DataDump {
+                enable_control: ModuleState.wifi_enabled && root.are_we_wifi_yet && GlobalAppState.lora_attached && root.are_we_lora_yet;
+
+                wifi_connected: GlobalAppState.wifi_connected;
+                wifi_dumping: ModuleState.wifi_data_dumping;
+
+                download_bar_image: root.download_bar_image;
+
+                remote_only_bytes: ModuleState.remote_only_bytes;
+
+                data_transfer_all() => {
+                    root.request_wifi_data_dump(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin, ModuleState.storage_available_end);
+                }
+                data_transfer_cancel => {
+                    root.cancel_wifi_data_dump(GlobalAppState.lora_module_addr);
+                }
+            }
+
+            export_section := Export {
+                none_and_addresses: GlobalAppState.none_and_addresses;
+
+                export(addr) => {
+                    data_export(addr);
+                }
+            }
+
+            VerticalBox {
                 // DEBUG CONTROLS
-                // -------------------------------------------------------------------------- //
 
-                VerticalLayout {
-                    alignment: LayoutAlignment.end;
-                    padding: 4px;
-                    spacing: 4px;
-                    Switch {
-                        text: "DEBUG: LoRa module attached";
-                        checked: true;
+                Switch {
+                    text: "DEBUG: LoRa module attached";
+                    checked: false;
 
-                        toggled => {
-                            debug_set_lora_module_attached(self.checked)
-                        }
+                    toggled => {
+                        debug_set_lora_module_attached(self.checked)
                     }
+                }
 
-                    Switch {
-                        text: "DEBUG: WiFi module attached";
-                        checked: true;
+                Switch {
+                    text: "DEBUG: LoRa send fails";
+                    checked: false;
 
-                        toggled => {
-                            debug_set_wifi_module_attached(self.checked)
-                        }
+                    toggled => {
+                        debug_set_lora_send_fails(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: LoRa recv fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_lora_recv_fails(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: WiFi module attached";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_wifi_module_attached(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: WiFi send fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_wifi_send_fails(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: WiFi recv fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_wifi_recv_fails(self.checked)
                     }
                 }
             }
         }
+    }
 
-        Rectangle {
-            background: Palette.background;
-            width: 50%;
+    Rectangle {
+        width: 100%;
+        height: 12px;
+        y: root.height - self.height;
+        background: @linear-gradient(180deg, #ffffff00 0%, #44444466 100%);
 
-            VerticalLayout {
-                wifi_status := StatusBar {
-                    subject: "WiFi";
-                    attached: GlobalAppState.wifi_attached;
-                    connected: GlobalAppState.wifi_connected;
-                    instruction: "";
-                }
-
-                VerticalLayout {
-                    padding: 4pt;
-                    spacing: 2pt;
-
-                    // CheckListItem {
-                    //     text: "(1) Attach LoRa module";
-                    //     done: GlobalAppState.lora_attached;
-                    // }
-
-                    // CheckListItem {
-                    //     text: "(2) Attach WiFi module";
-                    //     done: GlobalAppState.wifi_attached;
-                    // }
-
-                    // CheckListItem {
-                    //     text: "(3) Find LoRa module";
-                    //     done: GlobalAppState.lora_connected;
-                    // }
-
-                    // CheckListItem {
-                    //     text: "(5) When in range, turn on module WiFi";
-                    //     done: ModuleState.wifi_enabled;
-                    // }
-
-                    HorizontalLayout {
-                        Text {
-                            text: "Connected to MAC:";
-                            font-weight: Theme.bold-font-weight;
-                            horizontal-alignment: left;
-                        }
-
-                        Text {
-                            text: GlobalAppState.wifi_connected_mac;
-                            font-weight: 700;
-                            horizontal-alignment: right;
-                        }
-                    }
-
-                    VerticalLayout { }
-
-                    Button {
-                        horizontal-stretch: 0;
-                        vertical-stretch: 0;
-
-                        text: "Dump Data";
-                        enabled: GlobalAppState.wifi_connected;
-
-                        clicked => {
-                            request_wifi_data_dump(GlobalAppState.lora_module_addr, 123, 456)
-                        }
-                    }
-
-                    GridBox {
-                        Row {
-                            Text {
-                                text: "Time since WiFi ping";
-                            }
-
-                            Text {
-                                text: since_on_wifi_recv / 1s + "s";
-                            }
-                        }
-                    }
-
-                    Rectangle { }
-                }
-            }
+        opacity: scrollview-has-more-below ? 1.0 : 0.0;
+        animate opacity {
+            duration: 200ms;
+            easing: ease-out;
         }
     }
 }

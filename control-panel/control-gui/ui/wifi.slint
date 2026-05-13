@@ -1,0 +1,160 @@
+import {
+    HorizontalBox,
+    Palette,
+    VerticalBox,
+    Switch,
+    Button,
+    Slider,
+} from "std-widgets.slint";
+import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+
+import { IconDisplay, IconSet } from "lucida.slint";
+
+export component WiFi inherits HorizontalBox {
+
+    in property <bool> enabled_prereq;
+    in property <bool> wifi_attached;
+    in property <bool> wifi_powered;
+    in property <string> module_address;
+    in property <duration> time_since_wifi_recv;
+
+    callback set_wifi_enabled(string, bool);
+
+    Rectangle {
+        background: Palette.background;
+        width: 100%;
+        border-radius: 4pt;
+        border-color: Palette.border;
+        border-width: 1px;
+
+        VerticalBox {
+            alignment: start;
+
+            HorizontalBox {
+
+                HorizontalLayout {
+                    spacing: 4pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.Wifi;
+                            stroke: Palette.foreground;
+                            stroke-width: 2;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: "WiFi";
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        font-weight: Theme.bold-font-weight;
+                        font-size: Theme.large-font-size;
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1.0;
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        width: 120pt;
+                        spacing: 5pt;
+
+                        VerticalLayout {
+                            alignment: center;
+                            IconDisplay {
+                                icon: wifi_attached ? IconSet.SatelliteDish : IconSet.SatelliteDish;
+                                stroke: wifi_attached ? Theme.ok-green : Theme.err-red;
+                                stroke-width: 1.5;
+                                size: 25pt;
+                            }
+                        }
+
+                        Text {
+                            text: wifi_attached ? "Plugged In" : "Not Plugged In";
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        width: 120pt;
+                        spacing: 5pt;
+
+                        VerticalLayout {
+                            alignment: center;
+                            IconDisplay {
+                                icon: IconSet.Timer;
+                                stroke: !wifi_attached ? Theme.err-red : time_since_wifi_recv > 4s ? Theme.err-red : time_since_wifi_recv > 2s ? Theme.warn-orange : Theme.ok-green;
+                                stroke-width: 1.5;
+                                size: 25pt;
+                            }
+                        }
+
+                        Text {
+                            text: time_since_wifi_recv >= 100000000s ? "No packets yet" : "Last reply from " + module_address + " " + time_since_wifi_recv / 1s + "s ago";
+                            vertical-alignment: center;
+                            wrap: TextWrap.word-wrap;
+                        }
+                    }
+                }
+            }
+
+            HorizontalBox {
+                HorizontalLayout {
+                    alignment: center;
+                    width: Theme.first-col;
+                    wifi_switch := Switch {
+                        enabled: enabled_prereq;
+                        transform-scale: Theme.switch-scale;
+
+                        toggled => {
+                            set_wifi_enabled(module_address, self.checked)
+                        }
+                    }
+                }
+
+                VerticalLayout {
+                    Text {
+                        text: "Toggle remote device WiFi power";
+                        font-weight: Theme.bold-font-weight;
+                        vertical-alignment: center;
+                    }
+
+                    Text {
+                        text: "The module will begin pinging this laptop to show reachability.";
+                        vertical-alignment: center;
+                    }
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1.0;
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    width: 120pt;
+                    spacing: 5pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: wifi_powered ? IconSet.Zap : IconSet.ZapOff;
+                            stroke: wifi_powered ? Theme.ok-green : Theme.err-red;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: wifi_powered ? "Remote WiFi On" : "Remote WiFi Off";
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+}

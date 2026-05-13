@@ -183,7 +183,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   /** Initializes the peripherals clock
   */
     PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_LPUART1;
-    PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
+    PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_HSI;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
     {
       Error_Handler();
@@ -204,6 +204,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     GPIO_InitStruct.Alternate = GPIO_AF8_LPUART1;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+    /* LPUART1 interrupt Init */
+    HAL_NVIC_SetPriority(LPUART1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(LPUART1_IRQn);
     /* USER CODE BEGIN LPUART1_MspInit 1 */
 
     /* USER CODE END LPUART1_MspInit 1 */
@@ -283,18 +286,19 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**USART2 GPIO Configuration
-    PA0     ------> USART2_CTS
-    PA1     ------> USART2_RTS
     PA2     ------> USART2_TX
     PA3     ------> USART2_RX
     */
-    GPIO_InitStruct.Pin = Wi_USART2_CTS_Pin|Wi_USART2_RTS_Pin|Wi_USART2_TX_Pin|Wi_USART2_RX_Pin;
+    GPIO_InitStruct.Pin = Wi_USART2_TX_Pin|Wi_USART2_RX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* USART2 interrupt Init */
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
     /* USER CODE BEGIN USART2_MspInit 1 */
 
     /* USER CODE END USART2_MspInit 1 */
@@ -358,6 +362,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     */
     HAL_GPIO_DeInit(GPIOC, L0_LPUART1_RX_Pin|L0_LPUART1_TX_Pin);
 
+    /* LPUART1 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(LPUART1_IRQn);
     /* USER CODE BEGIN LPUART1_MspDeInit 1 */
 
     /* USER CODE END LPUART1_MspDeInit 1 */
@@ -394,13 +400,13 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     __HAL_RCC_USART2_CLK_DISABLE();
 
     /**USART2 GPIO Configuration
-    PA0     ------> USART2_CTS
-    PA1     ------> USART2_RTS
     PA2     ------> USART2_TX
     PA3     ------> USART2_RX
     */
-    HAL_GPIO_DeInit(GPIOA, Wi_USART2_CTS_Pin|Wi_USART2_RTS_Pin|Wi_USART2_TX_Pin|Wi_USART2_RX_Pin);
+    HAL_GPIO_DeInit(GPIOA, Wi_USART2_TX_Pin|Wi_USART2_RX_Pin);
 
+    /* USART2 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(USART2_IRQn);
     /* USER CODE BEGIN USART2_MspDeInit 1 */
 
     /* USER CODE END USART2_MspDeInit 1 */
@@ -558,7 +564,7 @@ void HAL_SD_MspInit(SD_HandleTypeDef* hsd)
     hdma_sdmmc1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
     hdma_sdmmc1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_sdmmc1_rx.Init.Mode = DMA_NORMAL;
-    hdma_sdmmc1_rx.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_sdmmc1_rx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
     if (HAL_DMA_Init(&hdma_sdmmc1_rx) != HAL_OK)
     {
       Error_Handler();
@@ -575,7 +581,7 @@ void HAL_SD_MspInit(SD_HandleTypeDef* hsd)
     hdma_sdmmc1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
     hdma_sdmmc1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_sdmmc1_tx.Init.Mode = DMA_NORMAL;
-    hdma_sdmmc1_tx.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_sdmmc1_tx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
     if (HAL_DMA_Init(&hdma_sdmmc1_tx) != HAL_OK)
     {
       Error_Handler();

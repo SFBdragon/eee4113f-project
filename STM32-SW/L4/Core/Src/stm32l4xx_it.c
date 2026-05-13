@@ -59,7 +59,9 @@ extern volatile uint8_t wake_source;
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern UART_HandleTypeDef hlpuart1;
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
 extern RTC_HandleTypeDef hrtc;
 extern DMA_HandleTypeDef hdma_sdmmc1_rx;
 extern DMA_HandleTypeDef hdma_sdmmc1_tx;
@@ -282,6 +284,20 @@ void USART1_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles USART2 global interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI line[15:10] interrupts.
   */
 void EXTI15_10_IRQHandler(void)
@@ -337,6 +353,21 @@ void DMA2_Channel5_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Channel5_IRQn 1 */
 
   /* USER CODE END DMA2_Channel5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles LPUART1 global interrupt.
+  */
+void LPUART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN LPUART1_IRQn 0 */
+
+  wake_source = 3;
+  /* USER CODE END LPUART1_IRQn 0 */
+  HAL_UART_IRQHandler(&hlpuart1);
+  /* USER CODE BEGIN LPUART1_IRQn 1 */
+
+  /* USER CODE END LPUART1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

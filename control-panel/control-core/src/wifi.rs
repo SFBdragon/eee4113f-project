@@ -90,7 +90,7 @@ pub enum WiFiEvent {
     ReceiveMessage(Vec<u8>),
 
     /// Got a ping over WiFi.
-    Ping(LoRaAddr),
+    Ping((Mac, LoRaAddr)),
 }
 
 pub fn start_wifi_listener_thread(controller_addr: LoRaAddr) -> Receiver<WiFiEvent> {
@@ -121,8 +121,7 @@ fn wifi_attacher(
 
             sender.send(WiFiEvent::Attached)?;
 
-            // don't ? this
-            wifi_listener(controller_addr, hal.as_ref(), &sender);
+            let _ = wifi_listener(controller_addr, hal.as_ref(), &sender);
 
             sender.send(WiFiEvent::Detached)?;
         }
@@ -171,8 +170,8 @@ fn wifi_listener(
                     |m| {
                         let _ = sender.send(WiFiEvent::ReceiveMessage(m));
                     },
-                    |a| {
-                        let _ = sender.send(WiFiEvent::Ping(a));
+                    |(m, a)| {
+                        let _ = sender.send(WiFiEvent::Ping((m, a)));
                     },
                 ),
                 Either::A(Err(status)) => match status {

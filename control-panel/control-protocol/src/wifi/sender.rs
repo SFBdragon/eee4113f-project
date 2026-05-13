@@ -118,6 +118,14 @@ impl Sender {
         }
     }
 
+    pub fn available_payload_bytes(&self) -> u32 {
+        match &self.state {
+            SenderState::None => 0,
+            SenderState::Syn { .. } => 0,
+            SenderState::Connected { conn, .. } => conn.available_payload_bytes() as u32,
+        }
+    }
+
     pub fn push_message(&mut self, message: &[u8]) -> bool {
         match &mut self.state {
             SenderState::None => false,
@@ -147,9 +155,6 @@ impl Sender {
                             self.crc_fn,
                         );
 
-                        // Ping the controller immediately. This allows the controller to complete the connection.
-                        // This is effectively the "ACK" in the SYN, SYN-ACK, ACK handshake (though it's not an AckFrame).
-                        try_send = conn.push_message(b"HELLO");
                         break 'state Some(SenderState::Connected { mac, conn });
                     }
                 }
