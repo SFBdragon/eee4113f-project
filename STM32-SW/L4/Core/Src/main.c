@@ -32,6 +32,9 @@
 #include "SD_IO.h"
 #include "SD_Stream.h"
 
+#include "control.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +46,7 @@
 /* USER CODE BEGIN PD */
 
 uint8_t ring_buffer[RX_BUF_SIZE];
-uint8_t dma_transfer_buffer[SD_BLOCK_SIZE] __attribute__((aligned(32))); 
+uint8_t dma_transfer_buffer[SD_SECTOR_SIZE] __attribute__((aligned(32))); 
 
 volatile uint32_t head = 0; // Written by UART ISR
 volatile uint32_t tail = 0; // Read by Main Loop
@@ -61,6 +64,9 @@ volatile uint8_t lora_rx_ready = 0;
 
 uint8_t lora_tx_buf[250];
 uint16_t lora_tx_len   = 0;
+
+// For packing blocks
+static uint8_t packedBlocks[NUM_BLOCKS][SD_BLOCK_SIZE];
 
 
 
@@ -102,10 +108,8 @@ uint32_t total_uptime; // Total time SD card has been active, in seconds
 const char total_uptime_filename[] = "UPTIME.txt";
 uint8_t rxBuf[512];
 
-
 volatile uint8_t wake_source = 0;
 volatile uint8_t halfTransferFired = 0;
-
 
 // USART From SHarc BUOY data
 volatile uint8_t cb_write_first_half  = 0;  
@@ -119,8 +123,12 @@ uint8_t rxBuffer[RX_BUF_SIZE];
 volatile uint16_t rxLen = 0;
 volatile uint8_t dataReady = 0;
 
-static uint8_t largeTestBuf[LARGE_TEST_BURST_SIZE] __attribute__((aligned(4)));
+// For cheeky packet spacing
+static uint8_t accumBuffer[RX_BUF_SIZE * 4];   // size to taste
+static uint16_t accumHead = 0;
+static uint16_t lastSize = 0;
 
+static uint8_t largeTestBuf[LARGE_TEST_BURST_SIZE] __attribute__((aligned(4)));
 
 // WIFI
 // 1. The Buffer: Adjust the size (64, 128, 256) based on your largest expected packet
@@ -132,6 +140,10 @@ volatile uint16_t wifi_rx_len = 0;
 
 // 3. The Flag: A simple '0' or '1' so your main loop knows new data is ready
 volatile uint8_t wifi_rx_ready = 0;
+
+
+// DATA BLOCK NUMBER , PERSIST ACROSS HALF-BUFFER CALLBACKS
+static uint16_t g_block_num = 0;   // persists across half-buffer callbacks
 
 /* USER CODE END PV */
 
@@ -155,8 +167,12 @@ static void SD_RawWriteTest(void);
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
 //void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void SD_SpeedTest(void);
+void UART_DumpBuffer(uint8_t *data, uint32_t len);
 
 void lora_send(uint8_t *pData, uint16_t size);
+
+void PackBlocks(const uint8_t *src, uint16_t startBlockNum) ;
+uint16_t CRC16(const uint8_t *data, uint16_t length);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -238,7 +254,9 @@ int main(void)
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuffer, RX_BUF_SIZE);
 
   // LPUART Trigger
-HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
+    HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
+
+
   
   // This allows the debugger to keep communicating even if the CPU enters SLEEP, STOP, or STANDBY
   HAL_DBGMCU_EnableDBGSleepMode();
@@ -274,17 +292,6 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
 
   while (i < 10000000)
   { 
-
-    // WIFI DATA OFFLOAD
-    // POWER UP WIFI
-
-    // WIFI TEST SEND
-    
-    char *msg = "UART Test: Hello from STM32!\r\n";
-    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
-
-
-
     /*
     // WIFI TESST RECIEVE:
     uint8_t wi_rxBuffer[20]; 
@@ -309,34 +316,14 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
   
   
 
-    /*
+  
   // example of lora send usage:
   uint8_t lora_tx_buf[] = {'G', 'Ge', 'G'};
   lora_send(lora_tx_buf, sizeof(lora_tx_buf));
     */
 
     i++;
-    //UART_SendString(&huart3, "From within \rf\n");
-                
-    // CONST POLE:
-
-      if (lora_rx_ready){
-        lora_rx_ready = 0;
-
-        // RESET THE LORA WINDOW TIMING 
-          UART_SendString(&huart3, "LORA DATA READY OUT\r\n"); 
-          char hex[8];
-          for (uint16_t i = 0; i < lora_rx_len; i++)
-          {
-              snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
-              UART_SendString(&huart3, hex);
-          }
-
-
-      }
-
-
-      // ================   WIFI MANAGEMENT=======================
+      // ================   WIFI MANAGEMENT =======================
 
       if (WIFI_MODE){
         // Wifi Active
@@ -345,60 +332,157 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
           // setup wifi
           UART_SendString(&huart3, "STARTING WIFI\r\n"); 
           HAL_GPIO_WritePin(Wi_EN_GPIO_Port, Wi_EN_Pin, GPIO_PIN_SET);
+          HAL_Delay(100);
           HAL_UARTEx_ReceiveToIdle_IT(&huart2, (uint8_t *)wifi_rx_buf, sizeof(wifi_rx_buf));  // settign up recieve to internal buffer
            // TAM: ANY WIFI SETUP DONE HERE
            WIFI_MODE_SETUP = 1; // set flag after setup
         }
+        // TODO : POWER DOWN MODE
         
         // WIFI INCOMING DATA - LIKELY SIMPLE PING IMPLEMENTED HERE
         if (wifi_rx_ready == 1) 
         {
+          wifi_rx_ready = 0; // Reset the flag so we don't process the same data twice
+
+          // TAM / SHAUN TO PROCESS INCOMING WIFI DATA HERE 
+
+          // BELOW IS DEBUG CODE TO OUTPUT THE INCOMIGN DATA
           UART_SendString(&huart3, "WIFI DATA RECEIVED:\r\n"); 
           wifi_rx_ready = 0; // Reset the flag so we don't process the same data twice
+
+          // DEBUG START
+          UART_SendString(&huart3, (char*)wifi_rx_buf);
+          UART_SendString(&huart3, "\r\n");
+          HAL_UARTEx_ReceiveToIdle_IT(&huart2, (uint8_t *)wifi_rx_buf, sizeof(wifi_rx_buf));
+
+
+          // TODO: IMPLEMENT NEATER WIFI SEND 
+        char *msg = "UART Test: Hello from STM32!\r\n";
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+
+        SD_Stream_ReadDebug(DATA_START_SECTOR,100 );
+          // DEBUG END
         }   
-
-
-        // 
 
       }
 
+
+
+      // ================== LORA ======================
       if (wake_source == 3){
-      UART_SendString(&huart3, "Woke from LPUART!\r\n"); 
-      // decode commands
+        UART_SendString(&huart3, "Woke from LPUART!\r\n"); 
       }
 
       if (lora_rx_ready){
         // ONLY OCCURS WHEN END OF LORA PACKET. Technically the Lora Wake source is useles...... 
         lora_rx_ready = 0;
-        UART_SendString(&huart3, "LORA DATA READY OUT\r\n"); 
+
+        // DEBUG START
+        UART_SendString(&huart3, "LORA DATA: \r\n"); 
        char hex[8];
         for (uint16_t i = 0; i < lora_rx_len; i++)
         {
             snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
             UART_SendString(&huart3, hex);
-      }
+        }
+        UART_SendString(&huart3, "\r\n"); 
+
+
+        // DEBUG END
+
+      // GLENS TEMP PACKET ROUTING:
+      // IF FIRST TWO BYTES SPELL YES_WIFI OR SOMETHING set WIFI_MODE = 1, IF NOW_WIFI, THEN SET WIFI_MODE = 0.
+      // TAM / SHAUN TO DECODE THIS INCOMING DATA PACKET
     }
 
+
+// ================= SHARC BUOY ================
       if (wake_source == 2){
       UART_SendString(&huart3, "Woke from GPIO!\r\n"); 
       // Check time 
       }
     // Chain of Device data incoming checks
-    // SHARC BOUY DATA INCOMINGf
-              // First have a check to indicate that it was a DMA_IDLE interrupt here
-              if (cb_write_first_half) {
-                cb_write_first_half = 0;
-                UART_SendString(&huart3, "First half of buffer ready\r\n");
+    // SHARC BOUY DATA INCOMING
+
+    uint16_t current_block_length = 0;  // how to read this... it is live incoming data ... But I decide where the end of the send is so I could shift the pointer
+    uint16_t block_size;
+    uint16_t last_packet_start; // Keeps track of start of prev packet for PL maths and PL placement. PL at last_packet_start -2.
+
+
+
+    // RX BUFFER is the pointer to the end of teh DMA input
+    // I WANT TO STRUCTURE DATA IN BLOCKS BEFORE SENDING INTO THE SD CARD. EACH BLOCK WILL BE: 
+    // BLOCK NUMBER (16 BIT) | crc (make dummy for now) | PL (Packet length of upcoming packet) | PACKET | packet length | PACKET .....
+      // First have a check to indicate that it was a DMA_IDLE interrupt here
+             if (cb_write_first_half) {
+              
+              cb_write_first_half = 0;
+              UART_SendString(&huart3, "First half of buffer ready\r\n");
+              
+              // Storing firstHalf in memory
+              static uint8_t firstHalfCopy[RX_BUF_SIZE / 2];
+             memcpy(firstHalfCopy, rxBuffer, RX_BUF_SIZE / 2);
+              PackBlocks(firstHalfCopy, RX_BUF_SIZE / 2);
+
+
+             // UART_SendString(&huart3, "--- BEGIN RAW ACCUM DUMP ---\r\n");
+
+            for (uint32_t i = 0; i < accumHead; i++) {
+                char hex[4];
+                snprintf(hex, sizeof(hex), "%02X ", accumBuffer[i]);
+              //  UART_SendString(&huart3, hex);
+
+                // Every 32 bytes, start a new line for readability
+                if ((i + 1) % 32 == 0) {
+               //     UART_SendString(&huart3, "\r\n");
+                }
+            }
+                char pbg[60];
+           snprintf(pbg, sizeof(pbg), "PackBlocks: accumHead=%u\r\n", accumHead);
+           // UART_SendString(&huart3, pbg);
+
+
+
+             // PackBlocks(accumBuffer, accumHead);
+
+              accumHead = 0;
+
+              
+              // Visualizing what the "Packed Blocks" look like before SD Write
+              UART_SendString(&huart3, "Packed Block 0 Preview:\r\n");
+              UART_DumpBuffer(packedBlocks[0], 512); // Assuming standard 512-byte SD blocks
+
+              UART_SendString(&huart3, "Packed Block 1 Preview:\r\n");
+               UART_DumpBuffer(packedBlocks[1], 512); // Assuming standard 512-byte SD blocks
+                 
+              UART_SendString(&huart3, "Packed Block 2 Preview:\r\n");
+              UART_DumpBuffer(packedBlocks[2], 512); // Assuming standard 512-byte SD blocks
                 
+                UART_SendString(&huart3, "Packed Block 3 Preview:\r\n");
+              UART_DumpBuffer(packedBlocks[3], 512); // Assuming standard 512-byte SD blocks
+                    
+                UART_SendString(&huart3, "Packed Block 4 Preview:\r\n");
+              UART_DumpBuffer(packedBlocks[4], 512); // Assuming standard 512-byte SD blocks
+                    
+                UART_SendString(&huart3, "Packed Block 5 Preview:\r\n");
+              UART_DumpBuffer(packedBlocks[5], 512); // Assuming standard 512-byte SD blocks
+                    
+            
+
                 // RE-ENIT SD CARD
                 HAL_SD_DeInit(&hsd1);       // cleanly tear down
                 MX_SDMMC1_SD_Init();        // re-init SDMMC peripheral
                 //HAL_Delay(100);
                 
                 // Process first half of the buffer
-                SD_Stream_WriteHalf(rxBuffer, RX_BUF_SIZE / 2);
+                //SD_Stream_WriteHalf(rxBuffer, RX_BUF_SIZE / 2);
                 //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
-                SD_Stream_Flush();
+
+                for (uint16_t i = 0; i < NUM_BLOCKS; i++) {
+                    SD_Stream_WriteBlock(packedBlocks[i]);
+                }
+
+//SD_Stream_Flush();
               }
               else if (cb_write_second_half){
                 cb_write_second_half = 0;
@@ -409,9 +493,9 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
                 //HAL_Delay(100);
 
                 // Process second half of the buffer
-                SD_Stream_WriteSecondHalf(rxBuffer + RX_BUF_SIZE / 2, RX_BUF_SIZE / 2);
+             //   SD_Stream_WriteSecondHalf(rxBuffer + RX_BUF_SIZE / 2, RX_BUF_SIZE / 2);
                 //HAL_GPIO_TogglePin(Lo_GPIO_0_GPIO_Port, Lo_GPIO_0_Pin);
-                SD_Stream_Flush();
+               // SD_Stream_Flush();
               }
               else if (dataReady)
               {
@@ -421,58 +505,60 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
                 sprintf(hdr, "Received %d bytes:\r\n", rxLen);
                 UART_SendString(&huart3, hdr);
 
+                // Figure out length of packet
+                // Append PL to start of packet (Not sure how to do the first one because I cant force open space)
+                // Append two open spaces for future PL after this packet
+
                 // Write remaining data (if you want to - maybe only in prep for offload)
                 //SD_Stream_WriteHalf(rxBuffer, rxLen);
 
-                 SD_Stream_Flush();
+             //    SD_Stream_Flush();
               }
      
-    HAL_Delay(500); // DElay to allow completion before resleep concerend why this is needded.. maybe dma isnt working
 
-    // Example: Read the first 5 sectors of your data area
-    //SD_Stream_ReadDebug(DATA_START_SECTOR, 5);  
-    //HAL_Delay(1000);
-
-    // LORA DATA INCOMING DATA triggerd by LPUART1_IDLE or LPUART1_HT
-    // I will trigger the interrupt and get to this point but TAM and SHAUN need to route this incoming data command.
-              // IF WIFI OFFLOAD, HOW DOES SHAUN WANT TO TREAT THIS?
-              // POWER UP WIFI
-              // SOME TAM CODE
-              // OFFLOAD BEGIN?
-
-
-    // RTC WAKEUP (Lora window start / stop)
-    if (wake_source == 1){
-      UART_SendString(&huart3, "Woke from RTC!\r\n"); 
-      // Check time 
-
-    }
-    
-    // Watchdog timer?
-
-    // Other interrupts?
-    
-
-    wake_source = 0; // reset wake source for next loop
-    // Configure RTC wakeup
-    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
-      
 
     __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag
   
-        
-   // UART_SendString(&huart3, "Going to bed\r\n");
+         
+    HAL_Delay(500); // DElay to allow completion before resleep concerend why this is needded.. maybe dma isnt working
 
 
+
+
+
+    // ===================== RTC FOR LORA WINDOW SETUP  =================
+
+    // RTC WAKEUP (Lora window start / stop)
+    // TOOD: MAKE THIS WAKE_SOURCE A FLAG THAT GETS SET RATHER
+    if (wake_source == 1){
+      UART_SendString(&huart3, "Woke from RTC!\r\n"); 
+
+      // Check time 
+      // Re-configure RTC wakeup
+      HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+    }
+
+    // TEMP OUTSIDE TO FORCE INTERRUTP 
+    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+    
+    //============================= WATCH DOG TIMER ==========================
+    // TODO
+    // Other interrupt?
+    
+
+  
+
+    
+
+// ====================== GOING TO SLEEP =========================
     // ENTER STOP MODE
+    wake_source = 0; // reset wake source for next loop
+    // UART_SendString(&huart3, "Going to bed\r\n");
     HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
     //HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
     SystemClock_Config();
     HAL_ResumeTick();
-
-
-  
   /*
     
     UART_SendString(&huart3, "DEBUG: Checking wake source\r\n");
@@ -484,24 +570,14 @@ HAL_UARTEx_ReceiveToIdle_IT(&hlpuart1, lora_rx_buf, sizeof(lora_rx_buf));
     }
 
     */
-
-    
-
-
-    //HAL_Delay(100);
-
-
-    
-
- 
-    /* USER CODE END WHILE */
+     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
 
 
   // POST WHILE LOOP
-  SD_Stream_Flush();
+  //SD_Stream_Flush();
   HAL_Delay(500);  // give card time to settle
   UART_SendString(&huart3, "While exit\n");
   uint32_t sectors_written_read = SD_Stream_GetCurrentSector() - DATA_START_SECTOR;
@@ -527,6 +603,7 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
+ 
   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
   {
     Error_Handler();
@@ -1142,7 +1219,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
             case HAL_UART_RXEVENT_HT:
                 // First half of rxBuffer ready
                 // rxBuffer[0] to rxBuffer[RX_BUF_SIZE/2 - 1]
-                    char dbg[80];
+                  char dbg[80];
                // snprintf(dbg, sizeof(dbg), "HT: first bytes: %02X %02X %02X %02X\r\n", rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3]);
                 UART_SendString(&huart3, dbg);
                 cb_write_first_half = 1;
@@ -1154,15 +1231,54 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
                 cb_write_second_half = 1;
                 break;
 
-            case HAL_UART_RXEVENT_IDLE:
-                // Partial chunk — line went quiet
-                // rxBuffer[0] to rxBuffer[Size - 1]
+          case HAL_UART_RXEVENT_IDLE:
+              if (Size == lastSize) break; // No new data
 
-                rxLen   = Size;
-                dataReady = 1;
-                HAL_UARTEx_ReceiveToIdle_DMA(&huart1, rxBuffer, RX_BUF_SIZE);
-                break;
-        }
+              uint16_t newBytes;
+              if (Size > lastSize) {
+                  // Linear case: data is in one continuous chunk
+                  newBytes = Size - lastSize;
+              }
+
+              // DEBUG: PRINT OUT NEW BYTES
+
+              // Print out RXbuffer[head-size ; head]
+              // --- DIRECT RX BUFFER DUMP ---
+              UART_SendString(&huart3, "RX DATA: ");
+              
+              //for (uint16_t i = 0; i < newBytes; i++) {
+              for (uint16_t i = 0; i < newBytes; i++) {
+                  char hex[4];
+                  // Accessing the buffer linearly from the last known position
+                  snprintf(hex, sizeof(hex), "%02X ", rxBuffer[lastSize + i]);
+                  UART_SendString(&huart3, hex);
+              }
+              //UART_SendString(&huart3, "\r\n");
+              // ^^ is outputting the correct data.
+              // Now load that data into the accumBuffer
+              
+              accumBuffer[accumHead++] = 0x00; // This will be size of value
+              accumBuffer[accumHead++] = 0x00;
+
+              // 2. Copy the data from rxBuffer into accumBuffer
+              memcpy(&accumBuffer[accumHead], &rxBuffer[lastSize], newBytes);
+              
+              // 3. DEBUG: Print the AccumBuffer to see the result
+              //UART_SendString(&huart3, "ACCUM CONTENTS: ");
+              for (uint16_t i = 0; i < (newBytes + 2)*2; i++) {
+                  char hex[4];
+                  // We look back at what we just wrote (starting 2 bytes before the new data)
+                  snprintf(hex, sizeof(hex), "%02X ", accumBuffer[(accumHead - 2) + i]);
+                //  UART_SendString(&huart3, hex);
+              }
+             // UART_SendString(&huart3, "\r\n");
+
+              // 4. Update the pointers
+            accumHead += newBytes;
+            lastSize = Size;
+            }
+
+            
     }
 
 
@@ -1180,15 +1296,15 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         }
 
         // 3. Print the formatted Hex output to your PC/Debug port (huart3)
-        UART_SendString(&huart3, "USART2 DATA RECEIVED:\r\n"); 
+       //UART_SendString(&huart3, "USART2 DATA RECEIVED:\r\n"); 
         
         char hex[8];
         for (uint16_t i = 0; i < Size; i++)
         {
             snprintf(hex, sizeof(hex), "%02X ", wifi_rx_buf[i]);
-            UART_SendString(&huart3, hex);
+           // UART_SendString(&huart3, hex);
         }
-        UART_SendString(&huart3, "\r\n");
+       // UART_SendString(&huart3, "\r\n");
 
         // 4. Trigger the software interrupt for further processing logic
         NVIC_SetPendingIRQ(EXTI0_IRQn);
@@ -1274,6 +1390,72 @@ void SD_SpeedTest(void) {
     UART_SendString(&huart3, uart);
 }
 
+void PackBlocks(const uint8_t *src, uint16_t dataLen) {
+    // Determine how many bytes go into each block based on total dataLen
+    uint16_t remaining = dataLen;
+
+    for (uint16_t i = 0; i < NUM_BLOCKS; i++) {
+        uint8_t *block = packedBlocks[i];
+        const uint8_t *data = src + (i * BLOCK_DATA_SIZE);
+        
+        // Calculate length for THIS specific block
+        uint16_t currentBlockLen = (remaining > BLOCK_DATA_SIZE) ? BLOCK_DATA_SIZE : remaining;
+        
+        // Calculate CRC only for the actual data present in this block
+        uint16_t crc = CRC16(data, currentBlockLen);
+
+        // --- NEW HEADER STRUCTURE ---
+        // Byte 0-1: Block Length (High byte, then Low byte)
+        block[0] = (currentBlockLen >> 8) & 0xFF; 
+        block[1] =  currentBlockLen       & 0xFF; 
+        
+        // Byte 2-3: CRC of the data
+        block[2] = (crc >> 8) & 0xFF;
+        block[3] =  crc            & 0xFF;
+
+        // Write data
+        if (currentBlockLen > 0) {
+            memcpy(&block[4], data, currentBlockLen);
+        }
+
+        // Optional: Zero out the rest of the 512-byte block if currentBlockLen < BLOCK_DATA_SIZE
+        if (currentBlockLen < BLOCK_DATA_SIZE) {
+            memset(&block[4 + currentBlockLen], 0, BLOCK_DATA_SIZE - currentBlockLen);
+        }
+
+        // Update remaining count
+        if (remaining >= currentBlockLen) {
+            remaining -= currentBlockLen;
+        } else {
+            remaining = 0;
+        }
+
+
+      
+    }
+}
+
+uint16_t CRC16(const uint8_t *data, uint16_t length) {
+    return 69;
+}
+
+void UART_DumpBuffer(uint8_t *data, uint32_t len) {
+    char msg[64];
+    for (uint32_t i = 0; i < len; i += 16) {
+        sprintf(msg, "%04X: ", (unsigned int)i);
+        UART_SendString(&huart3, msg);
+        
+        for (int j = 0; j < 16; j++) {
+            if (i + j < len) {
+                sprintf(msg, "%02X ", data[i + j]);
+            } else {
+                sprintf(msg, "   ");
+            }
+            UART_SendString(&huart3, msg);
+        }
+        UART_SendString(&huart3, "\r\n");
+    }
+}
 /* USER CODE END 4 */
 
 /**

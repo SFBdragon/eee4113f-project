@@ -328,6 +328,8 @@ void SDMMC1_IRQHandler(void)
 }
 
 /**
+ * 
+ * 
   * @brief This function handles DMA2 channel4 global interrupt.
   */
 void DMA2_Channel4_IRQHandler(void)

@@ -46,7 +46,7 @@ typedef struct {
 } BlockHeader;
 
 // The size of the data units used by the rest of the API.
-#define STORAGE_BLOCK_SIZE 512
+#define STORAGE_BLOCK_SIZE 1024
 
 // The total number of pages available for record storage.
 uint64_t storage_total_blocks();
