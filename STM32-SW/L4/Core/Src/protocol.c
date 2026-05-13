@@ -206,6 +206,7 @@ static void wifi_timer_cancel(void);
 static void wifi_timeout_handler(void *ctx);
 static bool fill_wifi_buffer(void);
 static void wifi_do_send_next(void);
+static void get_gps_info(uint32_t *lat, uint32_t *lon);
 
 
 // ---------------------------------------------------------------------------
@@ -657,14 +658,7 @@ static bool fill_wifi_buffer(void)
     while (g_dump_next_block <= g_dump_last_block
            && wifi_available_payload_bytes() >= STORAGE_BLOCK_SIZE)
     {
-        uint32_t bytes_read = 0;
-        read_block(g_dump_next_block, g_block_buf, &bytes_read);
-
-        if (bytes_read == 0) {
-            // Unreadable block — skip it rather than stalling the dump.
-            g_dump_next_block++;
-            continue;
-        }
+        uint32_t bytes_read = read_block(g_dump_next_block, g_block_buf);
 
         bool rts = wifi_push_message(g_block_buf, (uint16_t)bytes_read);
         ready_to_send |= rts;
@@ -678,4 +672,10 @@ static bool fill_wifi_buffer(void)
     }
 
     return ready_to_send;
+}
+
+
+void get_gps_info(uint32_t *lat, uint32_t *lon) {
+    *lat = 0;
+    *lon = 0;
 }
