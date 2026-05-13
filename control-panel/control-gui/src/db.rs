@@ -137,6 +137,40 @@ impl Database {
         Ok(result)
     }
 
+    /// Returns the first block_id strictly after `after` that is absent for `address`.
+    /// Returns `None` if all blocks from `after+1` to `BLOCK_ID_MAX` are present,
+    /// which in practice won't happen.
+    pub fn first_missing_after(
+        &self,
+        address: LoRaAddr,
+        after: u64,
+    ) -> Result<u64, rusqlite::Error> {
+        // Walk the present block_ids starting from `start` in order, and find
+        // the first gap. We stream rather than pulling everything into memory.
+        let mut stmt = self.conn.prepare(
+            "SELECT block_id FROM blocks
+             WHERE address = ?1 AND block_id >= ?2
+             ORDER BY block_id",
+        )?;
+
+        let mut expected = after;
+        let rows = stmt.query_map(params![address.to_raw() as i64, after as i64], |row| {
+            row.get::<_, i64>(0)
+        })?;
+
+        for row in rows {
+            let id = row? as u64;
+            if id != expected {
+                // There's a gap: expected..id, so `expected` is the first missing one.
+                return Ok(expected);
+            }
+            expected += 1;
+        }
+
+        // Ran out of rows — `expected` is the first missing id.
+        Ok(expected)
+    }
+
     /// Check whether every block_id in `first..=last` is present for the given address.
     pub fn all_present(
         &self,
@@ -212,7 +246,7 @@ fn db_path() -> PathBuf {
 }
 
 /// Collapse a sorted list of u64s into contiguous runs (inclusive ranges).
-fn contiguous_runs(ids: &[u64]) -> Vec<(u64, u64)> {
+pub fn contiguous_runs(ids: &[u64]) -> Vec<(u64, u64)> {
     let mut runs = Vec::new();
     let mut iter = ids.iter().copied();
     let Some(mut run_start) = iter.next() else {
@@ -288,5 +322,39 @@ mod tests {
         }
         let ranges = db.present_ranges(addr, 1, 10).unwrap();
         assert_eq!(ranges, vec![(1, 3), (7, 8)]);
+    }
+
+    #[test]
+    fn first_missing_after_basic() {
+        let db = open_mem();
+        db.add_address(LoRaAddr::from_raw(0x0001)).unwrap();
+        for id in [10u64, 11, 12, 15, 16] {
+            db.write_block(LoRaAddr::from_raw(0x0001), id, &[0])
+                .unwrap();
+        }
+        // Gap at 13 after a run of 10,11,12
+        assert_eq!(
+            db.first_missing_after(LoRaAddr::from_raw(0x0001), 9)
+                .unwrap(),
+            13
+        );
+        // After 12, same gap
+        assert_eq!(
+            db.first_missing_after(LoRaAddr::from_raw(0x0001), 12)
+                .unwrap(),
+            13
+        );
+        // 13 itself is missing, so after 12 → 13; after 13 → 14
+        assert_eq!(
+            db.first_missing_after(LoRaAddr::from_raw(0x0001), 13)
+                .unwrap(),
+            14
+        );
+        // After the last present block, next sequential id is missing
+        assert_eq!(
+            db.first_missing_after(LoRaAddr::from_raw(0x0001), 16)
+                .unwrap(),
+            17
+        );
     }
 }

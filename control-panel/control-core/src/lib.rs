@@ -14,9 +14,9 @@ pub mod mock;
 pub mod utils;
 pub mod wifi;
 
-#[derive(Debug, Clone)]
 pub struct Controller {
     pub addr: LoRaAddr,
+    pub wifi_hal: Arc<dyn wifi::hal::WiFiInterface>,
     pub wifi_receiver: Receiver<wifi::WiFiEvent>,
     pub lora_commands: Sender<lora::LoraCommand>,
     pub lora_events: Receiver<lora::LoraEvent>,
@@ -26,11 +26,13 @@ impl Controller {
     pub fn new() -> Self {
         let addr = LoRaAddr::from_raw(rand::random());
 
-        let wifi_receiver = wifi::start_wifi_listener_thread(addr);
+        let wifi_hal = Arc::new(wifi::hal::WiFiModule);
+        let wifi_receiver = wifi::start_wifi_listener_thread_with_hal(addr, wifi_hal.clone());
         let (lora_commands, lora_events) = lora::start_lora_thread(addr);
 
         Self {
             addr,
+            wifi_hal,
             wifi_receiver,
             lora_commands,
             lora_events,
@@ -49,11 +51,12 @@ impl Controller {
         (
             Self {
                 addr,
+                wifi_hal: mock_module.clone(),
                 wifi_receiver,
                 lora_commands,
                 lora_events,
             },
-            mock_module,
+            mock_module.clone(),
         )
     }
 }

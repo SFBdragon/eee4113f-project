@@ -1,0 +1,95 @@
+import {
+    HorizontalBox,
+    Palette,
+    VerticalBox,
+    Switch,
+    Button,
+    ComboBox,
+} from "std-widgets.slint";
+import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+import { IconDisplay, IconSet } from "lucida.slint";
+
+export component Export inherits HorizontalBox {
+
+    in property <[string]> none_and_addresses;
+
+    callback export(string);
+
+    Rectangle {
+        background: Palette.background;
+        width: 100%;
+        border-radius: 4pt;
+        border-color: Palette.border;
+        border-width: 1px;
+
+        VerticalBox {
+            alignment: start;
+            spacing: 0pt;
+
+            HorizontalBox {
+                spacing: 4pt;
+
+                VerticalLayout {
+                    alignment: center;
+                    IconDisplay {
+                        icon: IconSet.SquareArrowOutUpRight;
+                        stroke: Palette.foreground;
+                        stroke-width: 2;
+                        size: 25pt;
+                    }
+                }
+
+                Text {
+                    text: "Data Export";
+                    font-weight: Theme.bold-font-weight;
+                    font-size: Theme.large-font-size;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1.0;
+                }
+            }
+
+            HorizontalBox {
+
+                Button {
+                    primary: true;
+                    text: "Export";
+                    enabled: select-combo.current-index > 0;
+                    width: Theme.first-col;
+
+                    clicked => {
+                        export(select-combo.current-value)
+                    }
+                }
+
+                VerticalLayout {
+
+                    Text {
+                        text: "Export Data as JSON and BIN";
+                        font-weight: Theme.bold-font-weight;
+                        vertical-alignment: center;
+                    }
+
+                    Text {
+                        text: "Measurement data is in binary. Metadata and byte offsets in JSON.";
+                        vertical-alignment: center;
+                        wrap: TextWrap.word-wrap;
+                    }
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1.0;
+                }
+
+                select-combo := ComboBox {
+                    model: none_and_addresses;
+                    current-index: 0;
+                }
+            }
+        }
+    }
+}

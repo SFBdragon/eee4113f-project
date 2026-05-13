@@ -13,6 +13,10 @@ tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
 single-instance = "0.3.3"
 rusqlite = { version = "0.31", features = ["bundled"] }
+serde_json = "1.0.149"
+rfd = "0.17.2"
+serde = "1.0.228"
 
 [build-dependencies]
 slint-build = "1.16.1"
+lucide-slint = "1.14.0"

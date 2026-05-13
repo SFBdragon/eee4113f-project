@@ -10,23 +10,26 @@ pub fn pixel_buffer_to_image(buf: &[u8]) -> Image {
     Image::from_rgba8(pixel_buf)
 }
 
-pub fn rasterize_range(buf: &mut [u8], colour: [u8; 4], lo: usize, hi: usize, total: usize) {
-    let px_lo = lo * buf.len() / total / 4;
-    let px_hi = hi * buf.len() / total / 4;
+pub fn rasterize_range(buf: &mut [u8], colour: [u8; 4], lo: u64, hi: u64, total: u64) {
+    let px_lo = lo * buf.len() as u64 / total / 4;
+    let px_hi = hi * buf.len() as u64 / total / 4;
 
-    if lo <= hi {
-        for px in px_lo..px_hi {
-            buf[(px * 4)..(px * 4 + 4)].copy_from_slice(&colour);
-        }
-    } else {
-        for px in (px_lo + 0)..(buf.len() / 4) {
-            buf[(px * 4)..(px * 4 + 4)].copy_from_slice(&colour);
-        }
-
-        for px in 0..px_hi {
-            buf[(px * 4)..(px * 4 + 4)].copy_from_slice(&colour);
-        }
+    // if lo <= hi {
+    for px in px_lo..px_hi {
+        let base = (px * 4) as usize;
+        buf[base..(base + 4)].copy_from_slice(&colour);
     }
+    // } else {
+    //     for px in (px_lo + 0)..(buf.len() as u64 / 4) {
+    //         let base = (px * 4) as usize;
+    //         buf[base..(base + 4)].copy_from_slice(&colour);
+    //     }
+
+    //     for px in 0..px_hi {
+    //         let base = (px * 4) as usize;
+    //         buf[base..(base + 4)].copy_from_slice(&colour);
+    //     }
+    // }
 }
 
 /// Rasterize filled ranges into a 1-row RGBA pixel buffer.

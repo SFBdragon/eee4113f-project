@@ -121,8 +121,7 @@ fn wifi_attacher(
 
             sender.send(WiFiEvent::Attached)?;
 
-            // don't ? this
-            wifi_listener(controller_addr, hal.as_ref(), &sender);
+            let _ = wifi_listener(controller_addr, hal.as_ref(), &sender);
 
             sender.send(WiFiEvent::Detached)?;
         }

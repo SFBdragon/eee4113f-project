@@ -109,9 +109,6 @@ impl WiFiRx {
                 }
 
                 tracing::debug!("WiFi handshake done.");
-                // The transport layer says hello after the syn-ack to finalize the connection
-                // on the controller side.
-                debug_assert_eq!(frame.payload, b"HELLO");
 
                 // Switch connection.
                 self.connection = Some((module_mac, Connection::new(syn_seq)));

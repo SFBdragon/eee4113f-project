@@ -1,14 +1,23 @@
 
+import { Palette } from "std-widgets.slint";
 export global Theme {
     out property <length> default-font-size: 13pt;
-    out property <int> default-font-weight: 500;
+    out property <length> large-font-size: 16pt;
     out property <string> default-font-family: "Roboto";
 
+    out property <brush> dark-bg: Palette.alternate-background.darker(0.2);
+
+    out property <int> default-font-weight: 500;
     out property <int> bold-font-weight: 900;
+    out property <int> light-font-weight: 350;
 
     out property <color> empty-grey: #AAAAAA;
     out property <color> ok-green: #27ae60;
     out property <color> err-red: #ED0112;
-    out property <color> warn-orange: #e67e22;
+    out property <color> warn-orange: #e65e02;
     out property <color> active-blue: #1155EE;
+
+    out property <length> first-col: 80pt;
+
+    out property <float> switch-scale: 1.6;
 }

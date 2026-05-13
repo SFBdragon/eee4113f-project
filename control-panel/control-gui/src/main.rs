@@ -1,17 +1,20 @@
-use std::thread;
+use std::{iter, thread};
 
 use control_core::{
     lora::{LoraCommand, LoraEvent},
-    protocol::{self, LoRaAddr, app::LoRaModuleState},
+    protocol::{
+        self, LoRaAddr,
+        app::{LoRaModuleState, StartDataDump},
+    },
     wifi::WiFiEvent,
 };
-use crossbeam_channel::Receiver;
-use slint::ToSharedString;
+use crossbeam_channel::{Receiver, Sender, unbounded};
+use slint::{ModelRc, ToSharedString, VecModel};
 use tracing::{debug, error, info, info_span, warn};
 
 mod colour_bar;
 mod db;
-mod utils;
+mod export;
 
 slint::include_modules!();
 
@@ -62,6 +65,10 @@ fn main() {
 
     info!(%controller.addr, "Controller address selected.");
 
+    let db_conn = db::Database::open().unwrap();
+
+    let (dump_sender, dump_recerver) = unbounded::<DumpEvent>();
+
     let app_window = AppWindow::new().unwrap();
 
     app_window
@@ -95,14 +102,14 @@ fn main() {
         });
 
         let lora_commands = controller.lora_commands.clone();
-        app_window.on_set_lora_recv_window(move |addr, window| {
+        app_window.on_set_lora_recv_window(move |addr, active, period| {
             let addr = LoRaAddr::from_str(&addr).unwrap();
 
             let mut buf = [0u8; 32];
             let mut len = 0;
             protocol::app::LoRaCmd::SetLoRaRecvWindow(protocol::app::LoRaRecvWindow {
-                on_period: window.0 as _,
-                total_period: window.1 as _,
+                on_period: active as _,
+                total_period: period as _,
             })
             .serialize(&mut buf, &mut len)
             .unwrap();
@@ -113,9 +120,71 @@ fn main() {
         });
 
         let lora_commands = controller.lora_commands.clone();
-        app_window.on_set_storage_policy(move |addr, policy| {
+        app_window.on_storage_mark_obtained_overwritable(move |addr, avail_begin| {
             let addr = LoRaAddr::from_str(&addr).unwrap();
-            let policy = protocol::app::StoragePolicy::from_str(policy.as_str());
+
+            let block_id = from_block_id(avail_begin);
+
+            let db_conn = db::Database::open().unwrap();
+            let last_contiguously_obtained = db_conn.first_missing_after(addr, block_id).unwrap();
+
+            tracing::debug!(?last_contiguously_obtained, "Last contiguously obtained");
+
+            let mut buf = [0u8; 32];
+            let mut len = 0;
+            protocol::app::LoRaCmd::SetOverwritable(protocol::app::Overwritable {
+                up_to: last_contiguously_obtained,
+            })
+            .serialize(&mut buf, &mut len)
+            .unwrap();
+
+            lora_commands
+                .send(LoraCommand(addr, buf[..len].to_vec()))
+                .unwrap();
+        });
+
+        let lora_commands = controller.lora_commands.clone();
+        app_window.on_storage_mark_all_overwritable(move |addr, avail_end| {
+            let addr = LoRaAddr::from_str(&addr).unwrap();
+
+            let mut buf = [0u8; 32];
+            let mut len = 0;
+            protocol::app::LoRaCmd::SetOverwritable(protocol::app::Overwritable {
+                up_to: from_block_id(avail_end),
+            })
+            .serialize(&mut buf, &mut len)
+            .unwrap();
+
+            lora_commands
+                .send(LoraCommand(addr, buf[..len].to_vec()))
+                .unwrap();
+        });
+
+        let lora_commands = controller.lora_commands.clone();
+        app_window.on_storage_unmark_overwritable(move |addr, avail_begin| {
+            let addr = LoRaAddr::from_str(&addr).unwrap();
+
+            let mut buf = [0u8; 32];
+            let mut len = 0;
+            protocol::app::LoRaCmd::SetOverwritable(protocol::app::Overwritable {
+                up_to: from_block_id(avail_begin),
+            })
+            .serialize(&mut buf, &mut len)
+            .unwrap();
+
+            lora_commands
+                .send(LoraCommand(addr, buf[..len].to_vec()))
+                .unwrap();
+        });
+
+        let lora_commands = controller.lora_commands.clone();
+        app_window.on_set_storage_overwrite(move |addr, policy| {
+            let addr = LoRaAddr::from_str(&addr).unwrap();
+            let policy = if policy {
+                protocol::app::StoragePolicy::Overwrite
+            } else {
+                protocol::app::StoragePolicy::Preserve
+            };
 
             let mut buf = [0u8; 32];
             let mut len = 0;
@@ -144,6 +213,48 @@ fn main() {
                 .send(LoraCommand(addr, buf[..len].to_vec()))
                 .unwrap();
         });
+
+        let ds = dump_sender.clone();
+        app_window.on_request_wifi_data_dump(move |addr, begin, end| {
+            let addr = LoRaAddr::from_str(&addr).unwrap();
+
+            let begin = from_block_id(begin);
+            // Inclusivity:
+            // Dumps are inclusive: [start, end]
+            // So we must make sure not to include the block after the last.
+            // AVAILABLE_END is the write pointer after the last readable block, so we need to subtract 1.
+            let end = from_block_id(end) - 1;
+
+            let missing = db_conn.missing_in_range(addr, begin, end).unwrap();
+            let mut missing_runs = db::contiguous_runs(&missing);
+            // Reverse the list so we can treat it as a stack and still grab oldest first.
+            missing_runs.reverse();
+
+            ds.send(DumpEvent::QueueDumps(missing_runs)).unwrap();
+        });
+
+        let lora_commands = controller.lora_commands.clone();
+        let ds = dump_sender.clone();
+        app_window.on_cancel_wifi_data_dump(move |addr| {
+            let addr = LoRaAddr::from_str(&addr).unwrap();
+
+            ds.send(DumpEvent::CancelQueue).unwrap();
+
+            let mut buf = [0u8; 8];
+            let mut len = 0;
+            protocol::app::LoRaCmd::CancelDataDump
+                .serialize(&mut buf, &mut len)
+                .unwrap();
+
+            lora_commands
+                .send(LoraCommand(addr, buf[..len].to_vec()))
+                .unwrap();
+        });
+
+        app_window.on_data_export(move |addr| {
+            let addr = LoRaAddr::from_str(&addr).unwrap();
+            export::export(addr);
+        });
     }
 
     {
@@ -153,19 +264,44 @@ fn main() {
         });
 
         let mock_module = mock.clone();
+        app_window.on_debug_set_lora_send_fails(move |failing| {
+            mock_module.state().is_lora_send_failing = failing;
+        });
+
+        let mock_module = mock.clone();
+        app_window.on_debug_set_lora_recv_fails(move |failing| {
+            mock_module.state().is_lora_recv_failing = failing;
+        });
+
+        let mock_module = mock.clone();
         app_window.on_debug_set_wifi_module_attached(move |attached| {
             mock_module.state().is_laptop_wifi_module_attached = attached;
+        });
+
+        let mock_module = mock.clone();
+        app_window.on_debug_set_wifi_send_fails(move |failing| {
+            mock_module.state().is_wifi_send_failing = failing;
+        });
+
+        let mock_module = mock.clone();
+        app_window.on_debug_set_wifi_recv_fails(move |failing| {
+            mock_module.state().is_wifi_recv_failing = failing;
         });
     }
 
     {
         let events = controller.lora_events.clone();
+        let dump_sender = dump_sender.clone();
         let ui_handle = app_window.as_weak();
-        thread::spawn(move || lora_events_handler(events, ui_handle));
+        thread::spawn(move || lora_events_handler(events, dump_sender, ui_handle));
 
         let events = controller.wifi_receiver.clone();
         let ui_handle = app_window.as_weak();
         thread::spawn(move || wifi_events_handler(events, ui_handle));
+
+        let commands = controller.lora_commands.clone();
+        let events = dump_recerver;
+        thread::spawn(move || dump_event_handler(events, commands));
     }
 
     let a = LoRaAddr::from_raw(0x33AD);
@@ -174,58 +310,60 @@ fn main() {
     for i in 60..80 {
         db_conn.write_block(a, i, b"hello");
     }
-    for i in 0..5 {
-        db_conn.write_block(a, i + (1 << 32), b"hello");
+    for i in 100..105 {
+        db_conn.write_block(a, i, b"hello");
     }
+
+    // Initialize the addresses combobox.
+    update_addresses(&db_conn, &app_window);
+    init_storage_bar(&app_window);
+    init_download_bar(&app_window);
 
     app_window.run().unwrap();
 }
 
-fn lora_events_handler(lora_events: Receiver<LoraEvent>, ui_handle: slint::Weak<AppWindow>) {
+fn lora_events_handler(
+    lora_events: Receiver<LoraEvent>,
+    dump_sender: Sender<DumpEvent>,
+    ui_handle: slint::Weak<AppWindow>,
+) {
     let _span = info_span!("lora_events_handler").entered();
 
     debug!("Listening for LoRa events.");
     while let Ok(event) = lora_events.recv() {
         debug!(?event, "Got LoRa Event");
 
-        match &event {
-            LoraEvent::Message(m) => {
-                let m = String::from_utf8_lossy(m);
-                info!(%m, "LoRa message received");
-                warn!("TODO unimplemented: dropping message");
-            }
-            _ => {}
-        }
-
+        let ds = dump_sender.clone();
         let ui_handle_copy = ui_handle.clone();
         slint::invoke_from_event_loop(move || {
             if let Some(ui) = ui_handle_copy.upgrade() {
-                ui.invoke_on_lora_reply();
-
                 match event {
                     LoraEvent::Attached => {
                         ui.global::<GlobalAppState>().set_lora_attached(true);
-                        ui.global::<GlobalAppState>().set_lora_connected(false);
-                        ui.global::<GlobalAppState>()
-                            .set_lora_module_addr(format!("{}", LoRaAddr::bcast()).into());
+                        // ui.global::<GlobalAppState>()
+                        //     .set_lora_module_addr(format!("{}", LoRaAddr::bcast()).into());
                     }
                     LoraEvent::Detached => {
                         ui.global::<GlobalAppState>().set_lora_attached(false);
-                        ui.global::<GlobalAppState>().set_lora_connected(false);
-                        ui.global::<GlobalAppState>()
-                            .set_lora_module_addr(format!("{}", LoRaAddr::bcast()).into());
+                        // ui.global::<GlobalAppState>()
+                        //     .set_lora_module_addr(format!("{}", LoRaAddr::bcast()).into());
                     }
                     LoraEvent::Discovered(addr) => {
                         ui.global::<GlobalAppState>()
                             .set_lora_module_addr(format!("{}", addr).into());
-                        ui.global::<GlobalAppState>().set_lora_connected(true);
+
+                        let db_conn = db::Database::open().unwrap();
+                        db_conn.add_address(addr).unwrap();
+
+                        update_addresses(&db_conn, &ui);
                     }
                     LoraEvent::TimedOut(_addr) => {
-                        ui.global::<GlobalAppState>()
-                            .set_lora_module_addr(format!("{}", LoRaAddr::bcast()).into());
-                        ui.global::<GlobalAppState>().set_lora_connected(false)
+                        // ui.global::<GlobalAppState>()
+                        //     .set_lora_module_addr(LoRaAddr::bcast().to_shared_string());
                     }
                     LoraEvent::Message(m) => {
+                        ui.invoke_on_lora_reply();
+
                         let mut pos = 0;
                         let state = match LoRaModuleState::parse(&m, &mut pos) {
                             Ok(state) => state,
@@ -235,41 +373,30 @@ fn lora_events_handler(lora_events: Receiver<LoraEvent>, ui_handle: slint::Weak<
                             }
                         };
 
+                        ui.global::<ModuleState>().set_storage_overwrite(
+                            state.storage_policy == protocol::app::StoragePolicy::Overwrite,
+                        );
+
                         ui.global::<ModuleState>()
                             .set_storage_total(state.storage_info.total_blocks as _);
                         ui.global::<ModuleState>()
-                            .set_storage_available_begin(state.storage_info.available_begin as _);
+                            .set_storage_available_begin(to_block_id(
+                                state.storage_info.available_begin,
+                            ));
                         ui.global::<ModuleState>()
-                            .set_storage_available_end(state.storage_info.available_end as _);
-                        ui.global::<ModuleState>().set_storage_overwriteable_upto(
-                            state.storage_info.overwritable_end as _,
-                        );
+                            .set_storage_available_end(to_block_id(
+                                state.storage_info.available_end,
+                            ));
                         ui.global::<ModuleState>()
-                            .set_storage_generation(state.storage_info.generation as _);
-
-                        let ring_points = utils::RingBufferPoints::from_storage_info(
-                            &state.storage_info,
-                            state.status_flags & LoRaModuleState::STATUS_STORAGE_FULL != 0,
-                        );
-
-                        ui.global::<ModuleState>()
-                            .set_p_overwritable_1(ring_points.p_overwritable_1);
-                        ui.global::<ModuleState>()
-                            .set_p_preserved_1(ring_points.p_preserved_1);
-                        ui.global::<ModuleState>()
-                            .set_p_free_2(ring_points.p_free_2);
-                        ui.global::<ModuleState>()
-                            .set_p_overwritable_2(ring_points.p_overwritable_2);
-                        ui.global::<ModuleState>()
-                            .set_p_preserved_2(ring_points.p_preserved_2);
+                            .set_storage_overwriteable_upto(to_block_id(
+                                state.storage_info.overwritable_end,
+                            ));
 
                         ui.global::<ModuleState>()
                             .set_lora_recv_win_on_period(state.lora_recv_window.on_period as _);
-                        ui.global::<ModuleState>()
-                            .set_lora_recv_win_on_period(state.lora_recv_window.total_period as _);
-
-                        ui.global::<ModuleState>()
-                            .set_storage_policy(state.storage_policy.to_str().into());
+                        ui.global::<ModuleState>().set_lora_recv_win_total_period(
+                            state.lora_recv_window.total_period as _,
+                        );
 
                         ui.global::<ModuleState>().set_wifi_enabled(
                             state.status_flags & LoRaModuleState::STATUS_WIFI_ON != 0,
@@ -277,14 +404,17 @@ fn lora_events_handler(lora_events: Receiver<LoraEvent>, ui_handle: slint::Weak<
                         ui.global::<ModuleState>().set_wifi_data_dumping(
                             state.status_flags & LoRaModuleState::STATUS_WIFI_DUMPING != 0,
                         );
-                        ui.global::<ModuleState>().set_wifi_data_dumping(
-                            state.status_flags & LoRaModuleState::STATUS_WIFI_DUMPING != 0,
-                        );
+
+                        redraw_storage_bar(&ui, &state);
 
                         let addr = ui.global::<GlobalAppState>().get_lora_module_addr();
                         let addr = LoRaAddr::from_str(&addr).unwrap();
                         let db_conn = db::Database::open().unwrap();
                         redraw_download_bar(&ui, addr, &db_conn);
+
+                        if state.status_flags & LoRaModuleState::STATUS_WIFI_DUMPING == 0 {
+                            ds.send(DumpEvent::ClearToSendDumpRequest(addr));
+                        }
                     }
                 }
             }
@@ -299,15 +429,6 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
     debug!("Listening for WiFi events.");
     while let Ok(event) = events.recv() {
         debug!(?event, "Got WiFi Event");
-
-        match &event {
-            WiFiEvent::ReceiveMessage(m) => {
-                let m = String::from_utf8_lossy(m);
-                info!(%m, "WiFi message received");
-                warn!("TODO unimplemented: dropping message");
-            }
-            _ => {}
-        };
 
         let ui_handle_copy = ui_handle.clone();
         slint::invoke_from_event_loop(move || {
@@ -347,20 +468,17 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
                         let addr = ui.global::<GlobalAppState>().get_lora_module_addr();
                         let addr = LoRaAddr::from_str(&addr).unwrap();
 
-                        let end = ui.global::<ModuleState>().get_storage_available_end();
-                        let generation = ui.global::<ModuleState>().get_storage_generation();
-
                         let (block_index, block) =
-                            message.split_first_chunk::<{ size_of::<u32>() }>().unwrap();
-                        let block_index = u32::from_le_bytes(*block_index);
-
-                        let block_id = to_block_id(block_index, end as u32, generation as u16);
+                            message.split_first_chunk::<{ size_of::<u64>() }>().unwrap();
+                        let block_id = u64::from_le_bytes(*block_index);
 
                         let db_conn = db::Database::open().unwrap();
                         db_conn.write_block(addr, block_id, block).unwrap();
 
                         // Update the downloaded blocks visualization.
                         redraw_download_bar(&ui, addr, &db_conn);
+
+                        // check if we need to queue up another transmission
                     }
                 }
             }
@@ -369,36 +487,47 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
     }
 }
 
-fn to_block_id(index: u32, end: u32, generation: u16) -> u64 {
-    if index <= end {
-        ((generation as u64) << u32::BITS) + index as u64
-    } else {
-        (((generation - 1) as u64) << u32::BITS) + index as u64
+pub fn to_block_id(blkid: u64) -> BlockId {
+    BlockId {
+        lo: blkid as u32 as i32,
+        hi: (blkid >> 32) as u32 as i32,
     }
 }
 
-fn redraw_download_bar(ui_handle: &AppWindow, addr: LoRaAddr, db: &db::Database) {
-    let total = ui_handle.global::<ModuleState>().get_storage_total();
-    let begin = ui_handle
-        .global::<ModuleState>()
-        .get_storage_available_begin();
-    let end = ui_handle
-        .global::<ModuleState>()
-        .get_storage_available_end();
-    let generation = ui_handle.global::<ModuleState>().get_storage_generation();
+pub fn from_block_id(blkid: BlockId) -> u64 {
+    blkid.lo as u64 + ((blkid.hi as u64) << 32)
+}
 
-    let begin_id = to_block_id(begin as _, end as _, generation as _);
-    let end_id = to_block_id(end as _, end as _, generation as _);
+fn init_storage_bar(ui_handle: &AppWindow) {
+    let mut empty_grey = ui_handle
+        .global::<Theme>()
+        .get_empty_grey()
+        .as_argb_encoded()
+        .to_le_bytes();
+    empty_grey.rotate_left(1);
 
-    let regions = db.present_ranges(addr, begin_id, end_id).unwrap();
-    let mut regions = regions
-        .iter()
-        .map(|r| (r.0 as u32, r.1 as u32))
-        .collect::<Vec<_>>();
-    regions.sort_by(|r1, r2| r1.0.cmp(&r2.0));
+    let w = ui_handle.get_storage_bar_width() as usize;
+    let buf = colour_bar::pixel_buffer(w, empty_grey[0]);
+    let image = colour_bar::pixel_buffer_to_image(&buf);
 
-    let w = ui_handle.get_download_bar_width();
-    let empty_grey = ui_handle.global::<Theme>().get_empty_grey();
+    ui_handle.set_storage_bar_image(image);
+}
+
+fn redraw_storage_bar(ui_handle: &AppWindow, module: &protocol::app::LoRaModuleState) {
+    let overwritable = module
+        .storage_info
+        .available_end
+        .min(module.storage_info.overwritable_end)
+        - module.storage_info.available_begin;
+
+    let readable = module.storage_info.available_end - module.storage_info.available_begin;
+
+    let mut empty_grey = ui_handle
+        .global::<Theme>()
+        .get_empty_grey()
+        .as_argb_encoded()
+        .to_le_bytes();
+    empty_grey.rotate_left(1);
     let mut warn_orange = ui_handle
         .global::<Theme>()
         .get_warn_orange()
@@ -411,11 +540,143 @@ fn redraw_download_bar(ui_handle: &AppWindow, addr: LoRaAddr, db: &db::Database)
         .as_argb_encoded()
         .to_le_bytes();
     active_blue.rotate_left(1);
+    let mut ok_green = ui_handle
+        .global::<Theme>()
+        .get_ok_green()
+        .as_argb_encoded()
+        .to_le_bytes();
+    ok_green.rotate_left(1);
 
-    let mut buf = colour_bar::pixel_buffer(w as usize, empty_grey.red());
-    colour_bar::rasterize_range(&mut buf, warn_orange, begin as _, end as _, total as _);
-    colour_bar::rasterize_ranges(&mut buf, active_blue, &regions, total as _);
+    let w = ui_handle.get_storage_bar_width() as usize;
+    let mut buf = colour_bar::pixel_buffer(w, empty_grey[0]);
+
+    colour_bar::rasterize_range(
+        &mut buf,
+        warn_orange,
+        0,
+        overwritable,
+        module.storage_info.total_blocks as _,
+    );
+    colour_bar::rasterize_range(
+        &mut buf,
+        active_blue,
+        overwritable,
+        readable,
+        module.storage_info.total_blocks as _,
+    );
+
     let image = colour_bar::pixel_buffer_to_image(&buf);
 
-    ui_handle.set_download_image(image);
+    ui_handle.set_storage_bar_image(image);
+}
+
+fn init_download_bar(ui_handle: &AppWindow) {
+    let w = ui_handle.get_download_bar_width();
+    let empty_grey = ui_handle.global::<Theme>().get_empty_grey();
+    let mut warn_orange = ui_handle
+        .global::<Theme>()
+        .get_warn_orange()
+        .as_argb_encoded()
+        .to_be_bytes();
+    warn_orange.rotate_left(1);
+
+    let buf = colour_bar::pixel_buffer(w as usize, empty_grey.red());
+    let image = colour_bar::pixel_buffer_to_image(&buf);
+
+    ui_handle.set_download_bar_image(image);
+}
+
+fn redraw_download_bar(ui_handle: &AppWindow, addr: LoRaAddr, db: &db::Database) {
+    let total = ui_handle.global::<ModuleState>().get_storage_total();
+    let begin = ui_handle
+        .global::<ModuleState>()
+        .get_storage_available_begin();
+    let end = ui_handle
+        .global::<ModuleState>()
+        .get_storage_available_end();
+
+    let begin_id = from_block_id(begin);
+    let end_id = from_block_id(end);
+
+    let regions = db
+        .present_ranges(addr, begin_id, end_id)
+        .unwrap()
+        .iter()
+        .map(|r| ((r.0 - begin_id) as u32, (r.1 - begin_id) as u32))
+        .collect::<Vec<_>>();
+
+    let w = ui_handle.get_download_bar_width();
+    let empty_grey = ui_handle.global::<Theme>().get_empty_grey();
+    let mut err_red = ui_handle
+        .global::<Theme>()
+        .get_err_red()
+        .as_argb_encoded()
+        .to_be_bytes();
+    err_red.rotate_left(1);
+    let mut ok_green = ui_handle
+        .global::<Theme>()
+        .get_ok_green()
+        .as_argb_encoded()
+        .to_be_bytes();
+    ok_green.rotate_left(1);
+
+    let mut buf = colour_bar::pixel_buffer(w as usize, empty_grey.red());
+
+    let blocks = end_id - begin_id;
+    colour_bar::rasterize_range(&mut buf, err_red, 0, blocks, total as _);
+    colour_bar::rasterize_ranges(&mut buf, ok_green, &regions, total as _);
+    let image = colour_bar::pixel_buffer_to_image(&buf);
+
+    ui_handle.set_download_bar_image(image);
+}
+
+#[derive(Debug)]
+pub enum DumpEvent {
+    CancelQueue,
+    QueueDumps(Vec<(u64, u64)>),
+    ClearToSendDumpRequest(LoRaAddr),
+}
+
+fn dump_event_handler(events: Receiver<DumpEvent>, commands: Sender<LoraCommand>) {
+    let _span = info_span!("dump_events_handler").entered();
+
+    let mut queue = Vec::new();
+
+    debug!("Listening for dump events.");
+    while let Ok(event) = events.recv() {
+        debug!(?event, "Got Dump Event");
+
+        match event {
+            DumpEvent::CancelQueue => queue = Vec::new(),
+            DumpEvent::QueueDumps(items) => {
+                queue = items;
+            }
+            DumpEvent::ClearToSendDumpRequest(addr) => {
+                if let Some(range) = queue.pop() {
+                    let cmd = protocol::app::LoRaCmd::StartDataDump(StartDataDump {
+                        from_block_incl: range.0,
+                        to_block_incl: range.1,
+                    });
+
+                    let mut buf = [0u8; 32];
+                    let mut len = 0;
+                    cmd.serialize(&mut buf, &mut len).unwrap();
+
+                    commands
+                        .send(LoraCommand(addr, buf[..len].to_vec()))
+                        .unwrap();
+                }
+            }
+        }
+    }
+}
+
+fn update_addresses(db_conn: &db::Database, ui: &AppWindow) {
+    let addresses = db_conn.list_addresses().unwrap();
+
+    let addresses = iter::once("Select...".to_shared_string())
+        .chain(addresses.iter().map(|a| a.to_shared_string()));
+
+    ui.global::<GlobalAppState>()
+        .set_none_and_addresses(ModelRc::new(VecModel::from_iter(addresses)));
 }

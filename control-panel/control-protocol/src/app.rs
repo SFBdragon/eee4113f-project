@@ -1,3 +1,13 @@
+//! Defines the application-layer communication protocol over LoRa.
+//!
+//! The controller sends a list of commands.
+//! The module executes them, obtains status info, and sends it off.
+//!
+//! The transport layer doesn't allow the module to de-duplicate blocks,
+//! so command list is declarative, not procedural (mostly). Double-sending
+//! must not have adverse .
+//! This allows the full stack to be connectionless.
+
 #[macro_export]
 macro_rules! read_next {
     ($t:ty, $buf:expr, $pos:expr) => {{
@@ -103,30 +113,30 @@ impl LoRaCmd {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StartDataDump {
-    pub from_block: u32,
-    pub to_block: u32,
+    pub from_block_incl: u64,
+    pub to_block_incl: u64,
 }
 
 impl StartDataDump {
     pub fn serialize(&self, buf: &mut [u8], pos: &mut usize) -> Result<(), NotEnoughBytes> {
-        write_next!(self.from_block, buf, pos)?;
-        write_next!(self.to_block, buf, pos)
+        write_next!(self.from_block_incl, buf, pos)?;
+        write_next!(self.to_block_incl, buf, pos)
     }
 
     pub fn parse(buf: &[u8], pos: &mut usize) -> Result<Self, ParseError> {
-        let from_block = read_next!(u32, buf, pos)?;
-        let to_block = read_next!(u32, buf, pos)?;
+        let from_block = read_next!(u64, buf, pos)?;
+        let to_block = read_next!(u64, buf, pos)?;
 
         Ok(Self {
-            from_block,
-            to_block,
+            from_block_incl: from_block,
+            to_block_incl: to_block,
         })
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Overwritable {
-    pub up_to: u32,
+    pub up_to: u64,
 }
 
 impl Overwritable {
@@ -135,7 +145,7 @@ impl Overwritable {
     }
 
     pub fn parse(buf: &[u8], pos: &mut usize) -> Result<Self, ParseError> {
-        let up_to = read_next!(u32, buf, pos)?;
+        let up_to = read_next!(u64, buf, pos)?;
 
         Ok(Self { up_to })
     }
@@ -146,7 +156,7 @@ impl Overwritable {
 pub enum StoragePolicy {
     Overwrite = 1u8,
     Preserve = 2u8,
-    Readonly = 3u8,
+    // Readonly = 3u8,
 }
 
 impl TryFrom<u8> for StoragePolicy {
@@ -156,7 +166,7 @@ impl TryFrom<u8> for StoragePolicy {
         match value {
             1 => Ok(StoragePolicy::Overwrite),
             2 => Ok(StoragePolicy::Preserve),
-            3 => Ok(StoragePolicy::Readonly),
+            // 3 => Ok(StoragePolicy::Readonly),
             u => Err(u),
         }
     }
@@ -176,7 +186,7 @@ impl StoragePolicy {
         match self {
             Self::Overwrite => "Overwrite",
             Self::Preserve => "Preserve",
-            Self::Readonly => "Readonly",
+            // Self::Readonly => "Readonly",
         }
     }
 
@@ -184,7 +194,7 @@ impl StoragePolicy {
         match text {
             "Overwrite" => Self::Overwrite,
             "Preserve" => Self::Preserve,
-            "Readonly" => Self::Readonly,
+            // "Readonly" => Self::Readonly,
             _ => unreachable!(),
         }
     }
@@ -217,7 +227,7 @@ impl LoRaRecvWindow {
 pub struct LoRaModuleState {
     pub status_flags: u8,                 // 1B
     pub storage_policy: StoragePolicy,    // 1B
-    pub storage_info: StorageInfo,        // 16B
+    pub storage_info: StorageInfo,        // 20B
     pub lora_recv_window: LoRaRecvWindow, // 4B
     pub gps_info: GpsInfo,                // 8B
 }
@@ -226,8 +236,6 @@ impl LoRaModuleState {
     pub const STATUS_WIFI_ON: u8 = 1 << 0;
     // gap
     pub const STATUS_WIFI_DUMPING: u8 = 1 << 3;
-
-    pub const STATUS_STORAGE_FULL: u8 = 1 << 4;
 }
 
 impl LoRaModuleState {
@@ -259,34 +267,34 @@ impl LoRaModuleState {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StorageInfo {
     pub total_blocks: u32,
-    pub available_begin: u32,
-    pub available_end: u32,
-    pub overwritable_end: u32,
-    pub generation: u16,
+    pub available_begin: u64,
+    pub available_end: u64,
+    pub overwritable_end: u64,
 }
 
 impl StorageInfo {
     pub fn serialize(&self, buf: &mut [u8], pos: &mut usize) -> Result<(), NotEnoughBytes> {
         write_next!(self.total_blocks, buf, pos)?;
         write_next!(self.available_begin, buf, pos)?;
-        write_next!(self.available_end, buf, pos)?;
-        write_next!(self.overwritable_end, buf, pos)?;
-        write_next!(self.generation, buf, pos)
+        write_next!((self.available_end - self.available_begin) as u32, buf, pos)?;
+        write_next!(
+            (self.overwritable_end - self.available_begin) as u32,
+            buf,
+            pos
+        )
     }
 
     pub fn parse(buf: &[u8], pos: &mut usize) -> Result<Self, ParseError> {
         let total_blocks = read_next!(u32, buf, pos)?;
-        let available_begin = read_next!(u32, buf, pos)?;
+        let available_begin = read_next!(u64, buf, pos)?;
         let available_end = read_next!(u32, buf, pos)?;
         let overwritable_end = read_next!(u32, buf, pos)?;
-        let generation = read_next!(u16, buf, pos)?;
 
         Ok(Self {
             total_blocks,
             available_begin,
-            available_end,
-            overwritable_end,
-            generation,
+            available_end: available_begin + available_end as u64,
+            overwritable_end: available_begin + overwritable_end as u64,
         })
     }
 
