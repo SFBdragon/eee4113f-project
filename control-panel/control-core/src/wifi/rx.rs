@@ -59,7 +59,7 @@ impl WiFiRx {
         connected: impl FnOnce(Mac),
         disconnected: impl FnOnce(Mac),
         on_message: impl FnMut(Vec<u8>),
-        on_ping: impl FnOnce(LoRaAddr),
+        on_ping: impl FnOnce((Mac, LoRaAddr)),
     ) -> Option<(Mac, [u8; ACK_SIZE])> {
         let frame = match DataFrame::parse(bytes, compute_crc_raw) {
             Ok(f) => f,
@@ -72,9 +72,10 @@ impl WiFiRx {
         tracing::debug!(%module_mac, ?frame, "On recv WiFi packet.");
 
         if frame.flags & FLAG_PING == FLAG_PING {
-            on_ping(LoRaAddr::from_raw(u16::from_le_bytes(
-                frame.payload.try_into().unwrap(),
-            )));
+            on_ping((
+                module_mac,
+                LoRaAddr::from_raw(u16::from_le_bytes(frame.payload.try_into().unwrap())),
+            ));
 
             return None;
         }
@@ -108,9 +109,6 @@ impl WiFiRx {
                 }
 
                 tracing::debug!("WiFi handshake done.");
-                // The transport layer says hello after the syn-ack to finalize the connection
-                // on the controller side.
-                debug_assert_eq!(frame.payload, b"HELLO");
 
                 // Switch connection.
                 self.connection = Some((module_mac, Connection::new(syn_seq)));

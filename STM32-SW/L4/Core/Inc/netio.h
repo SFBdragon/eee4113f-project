@@ -69,10 +69,8 @@ void recv_lora_packet(uint8_t *data, BufLen len);
 // for power_up_wifi to be called.
 Status initialize_wifi();
 
-// Does this return immediately or does this block until power-up is done?
 Status power_up_wifi();
 
-// Does this return immediately or does this block until power-down is done?
 Status power_down_wifi();
 
 // Read the memory from [data, data + len) bytes and send it off.

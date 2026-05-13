@@ -4,10 +4,11 @@ use std::{
 };
 
 use control_protocol::{
-    LoRaAddr, app,
+    LoRaAddr,
+    app::{self, StartDataDump},
     lora::LoRaFrame,
     phy::*,
-    wifi::{Mac, common::DataFrame, ping::PING_BYTES},
+    wifi::{Mac, ping::PING_BYTES},
 };
 use tracing::trace;
 
@@ -33,7 +34,11 @@ pub struct MockModuleInner {
     pub mac: Mac,
 
     pub is_laptop_lora_module_attached: bool,
+    pub is_lora_send_failing: bool,
+    pub is_lora_recv_failing: bool,
     pub is_laptop_wifi_module_attached: bool,
+    pub is_wifi_send_failing: bool,
+    pub is_wifi_recv_failing: bool,
 
     pub is_module_wifi_on: bool,
     pub module_wifi_data_dump: Option<control_protocol::app::StartDataDump>,
@@ -54,8 +59,12 @@ impl MockModuleInner {
         Self {
             addr,
             mac,
-            is_laptop_lora_module_attached: true,
-            is_laptop_wifi_module_attached: true,
+            is_laptop_lora_module_attached: false,
+            is_lora_send_failing: false,
+            is_lora_recv_failing: false,
+            is_laptop_wifi_module_attached: false,
+            is_wifi_send_failing: false,
+            is_wifi_recv_failing: false,
             is_module_wifi_on: false,
             module_wifi_data_dump: None,
             wifi_sender_state: control_protocol::wifi::Sender::new(),
@@ -63,9 +72,8 @@ impl MockModuleInner {
             storage: control_protocol::app::StorageInfo {
                 total_blocks: 100,
                 available_begin: 70,
-                available_end: 30,
-                overwritable_end: 11,
-                generation: 1,
+                available_end: 130,
+                overwritable_end: 111,
             },
             lora_recv_window: control_protocol::app::LoRaRecvWindow {
                 on_period: 1,
@@ -149,6 +157,10 @@ impl crate::lora::hal::LoRaInterface for MockModule {
             return Err(crate::drivers::StatusError::ModuleDetached);
         }
 
+        if state.is_lora_send_failing {
+            return Ok(());
+        }
+
         let lora_frame = LoRaFrame::parse(bytes, compute_crc_raw).unwrap();
         tracing::debug!(?lora_frame, "mock: got lora frame");
 
@@ -173,7 +185,6 @@ impl crate::lora::hal::LoRaInterface for MockModule {
                     state.is_module_wifi_on = false;
                 }
                 app::LoRaCmd::StartDataDump(start_data_dump) => {
-
                     let mut state = self.state();
                     state.is_module_wifi_on = true;
                     state.wifi_sender_state.connect(
@@ -235,8 +246,12 @@ impl crate::lora::hal::LoRaInterface for MockModule {
         match r {
             Ok(r) => {
                 tracing::trace!("mock: recv_packet: got message");
-
                 let state = self.state();
+
+                if state.is_lora_recv_failing {
+                    return Err(crate::drivers::StatusError::ReceiveTimeout);
+                }
+
                 if state.is_laptop_lora_module_attached {
                     buffer[..r.len()].copy_from_slice(&r);
                     *len = r.len();
@@ -279,6 +294,10 @@ impl hal::WiFiInterface for MockModule {
             return Err(crate::drivers::StatusError::ModuleDetached);
         }
 
+        if state.is_wifi_send_failing {
+            return Ok(());
+        }
+
         tracing::debug!(%dst_mac, ?bytes, "for module WiFI.");
 
         if dst_mac.is_bcast() || dst_mac == state.mac {
@@ -309,28 +328,66 @@ impl hal::WiFiInterface for MockModule {
                     Err(_) => {}
                     Ok(i) if i == msg => {
                         self.wifi_try_send_receiver.recv().unwrap();
-                        break;
+
+                        if !self.state().is_wifi_recv_failing {
+                            break;
+                        }
                     }
                     Ok(i) if i == ping => {
                         self.wifi_ping_receiver.recv().unwrap();
 
-                        let state = self.state();
+                        let mut state = self.state();
 
-                        if state.is_laptop_wifi_module_attached {
-                            let mut ping_buf = [0u8; PING_BYTES];
-                            unsafe {
-                                control_protocol::wifi::ping::write_ping(
-                                    state.addr,
-                                    compute_crc_raw,
-                                    ping_buf.as_mut_ptr(),
-                                );
-                            }
-
-                            return Ok(hal::WiFiPacket {
-                                from: state.mac,
-                                data: ping_buf.to_vec(),
-                            });
+                        if state.is_wifi_recv_failing {
+                            continue;
                         }
+
+                        if !state.is_module_wifi_on {
+                            continue;
+                        }
+
+                        if !state.is_laptop_wifi_module_attached {
+                            continue;
+                        }
+
+                        if state.wifi_sender_state.available_payload_bytes() > 100 {
+                            if let Some(dump) = state.module_wifi_data_dump {
+                                let block = dump.from_block_incl;
+
+                                let mut tx = [0u8; 10];
+                                tx[..8].copy_from_slice(&block.to_le_bytes());
+
+                                tx[8] = 0xB0;
+                                tx[9] = 0x0B;
+
+                                state.wifi_sender_state.push_message(&tx);
+
+                                if dump.from_block_incl == dump.to_block_incl {
+                                    state.module_wifi_data_dump = None;
+                                } else {
+                                    state.module_wifi_data_dump = Some(StartDataDump {
+                                        from_block_incl: dump.from_block_incl + 1,
+                                        to_block_incl: dump.to_block_incl,
+                                    })
+                                }
+
+                                break;
+                            }
+                        }
+
+                        let mut ping_buf = [0u8; PING_BYTES];
+                        unsafe {
+                            control_protocol::wifi::ping::write_ping(
+                                state.addr,
+                                compute_crc_raw,
+                                ping_buf.as_mut_ptr(),
+                            );
+                        }
+
+                        return Ok(hal::WiFiPacket {
+                            from: state.mac,
+                            data: ping_buf.to_vec(),
+                        });
                     }
                     Ok(_) => unreachable!(),
                 }
