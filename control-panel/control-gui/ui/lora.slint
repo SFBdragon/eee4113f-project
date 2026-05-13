@@ -1,0 +1,327 @@
+import {
+    HorizontalBox,
+    Palette,
+    VerticalBox,
+    Switch,
+    Button,
+    Slider,
+    SpinBox,
+} from "std-widgets.slint";
+import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+
+import { IconDisplay, IconSet } from "lucida.slint";
+
+export component LoRa inherits HorizontalBox {
+
+    in property <bool> lora_attached;
+    in property <bool> are_we_lora_yet;
+    in property <string> module_address;
+    in property <duration> time_since_lora_reply;
+
+    in property <int> lora_recv_window_active;
+    in property <int> lora_recv_window_period;
+
+    callback lora_ping(string);
+    callback set_lora_recv_window(string, int, int);
+
+    private property <bool> lora_heartbeat: true;
+    private property <duration> lora_heartbeat_period_edit: 3s;
+    private property <duration> lora_heartbeat_period: 3s;
+
+    Timer {
+        interval: lora_heartbeat_period;
+        running: lora_heartbeat;
+
+        triggered() => {
+            if (lora_attached) {
+                lora_ping(module_address)
+            }
+        }
+    }
+
+    Rectangle {
+        background: Palette.background;
+        width: 100%;
+        border-radius: 4pt;
+        border-color: Palette.border;
+        border-width: 1px;
+
+        VerticalBox {
+            alignment: start;
+
+            HorizontalBox {
+                spacing: 4pt;
+
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: 4pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.Radio;
+                            stroke: Palette.foreground;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: "LoRa";
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        font-weight: Theme.bold-font-weight;
+                        font-size: Theme.large-font-size;
+                    }
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1.0;
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    width: 120pt;
+                    spacing: 5pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: lora_attached ? IconSet.SatelliteDish : IconSet.SatelliteDish;
+                            stroke: lora_attached ? Theme.ok-green : Theme.err-red;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: lora_attached ? "Plugged In" : "Not Plugged In";
+                        vertical-alignment: center;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    width: 120pt;
+                    spacing: 5pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.Timer;
+                            stroke: !lora_attached || !are_we_lora_yet ? Theme.err-red : time_since_lora_reply > 3 * lora_heartbeat_period ? Theme.err-red : time_since_lora_reply > 2 * lora_heartbeat_period ? Theme.warn-orange : Theme.ok-green;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: !are_we_lora_yet ? "No reply yet" : "Last reply from " + module_address + " " + time_since_lora_reply / 1s + "s ago";
+                        vertical-alignment: center;
+                        wrap: TextWrap.word-wrap;
+                    }
+                }
+                // HorizontalLayout {
+                //     alignment: center;
+                //     spacing: 4pt;
+
+                //     Button {
+                //         text: "Ping Now";
+                //         enabled: lora_attached;
+
+                //         clicked => {
+                //             lora_ping(module_address)
+                //         }
+                //     }
+                // }
+            }
+
+            HorizontalBox {
+
+                HorizontalLayout {
+                    alignment: center;
+                    width: Theme.first-col;
+                    Switch {
+                        enabled: lora_attached;
+                        checked: lora_heartbeat;
+                        transform-scale: Theme.switch-scale;
+                        toggled => {
+                            lora_heartbeat = self.checked;
+                        }
+                    }
+                }
+
+                VerticalLayout {
+                    spacing: 2pt;
+
+                    HorizontalLayout {
+                        Text {
+                            text: "Ping Interval ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "for device scanning and updates";
+                            font-weight: Theme.light-font-weight;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    HorizontalLayout {
+
+                        // Container for Slider + Ticks
+                        Rectangle {
+                            height: 30px;
+
+                            // The Ticks
+                            for i in (slide.maximum - slide.minimum) / slide.increment - 1: Rectangle {
+                                x: (parent.width - 20px) * ((i + 1) * slide.increment / (slide.maximum - slide.minimum)) + 10px;
+                                y: 16px;
+                                width: 1px;
+                                // Make major ticks (whole numbers) longer than minor ticks
+                                height: 4px; // mod((i + 2) * slide.increment, 5) == 0 ? 8px :
+                                background: grey;
+                            }
+
+                            slide := Slider {
+                                width: 100%;
+
+                                minimum: 1.0;
+                                maximum: 20.0;
+
+                                value: lora_heartbeat_period / 1s;
+                                enabled: lora_heartbeat && lora_attached;
+
+                                property <float> increment: 1;
+
+                                changed(v) => {
+                                    self.value = round(v / increment) * increment;
+                                    lora_heartbeat_period_edit = self.value * 1s;
+                                }
+
+                                released(value) => {
+                                    lora_heartbeat_period = value * 1s;
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: lora_heartbeat_period_edit / 1s + "s";
+                            vertical-alignment: center;
+                            width: 50pt;
+                        }
+                    }
+                }
+
+                Rectangle {
+                    // greedy spacer
+                    horizontal-stretch: 1;
+                }
+            }
+
+            HorizontalBox {
+
+                Button {
+                    primary: true;
+                    width: Theme.first-col;
+                    enabled: lora_attached && are_we_lora_yet;
+                    text: "Submit";
+
+                    clicked => {
+                        set_lora_recv_window(module_address, active.value, period.value)
+                    }
+                }
+
+                VerticalLayout {
+                    HorizontalLayout {
+                        alignment: start;
+
+                        Text {
+                            text: "Receive Window";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: " - deactivate LoRa periodically after 10m of inactivity";
+                            font-weight: Theme.light-font-weight;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    HorizontalLayout {
+
+                        Text {
+                            text: "Powered ";
+                            vertical-alignment: center;
+                        }
+
+                        active := SpinBox {
+                            enabled: lora_attached && are_we_lora_yet;
+                            minimum: 5;
+                            step-size: 5;
+
+                            edited(value) => {
+                                if (value > period.value) {
+                                    period.value = value;
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: " seconds every ";
+                            vertical-alignment: center;
+                        }
+
+                        period := SpinBox {
+                            enabled: lora_attached && are_we_lora_yet;
+                            minimum: 5;
+                            step-size: 5;
+
+                            edited(value) => {
+                                if (value < active.value) {
+                                    active.value = value;
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: " seconds.";
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+
+                Rectangle {
+                    // greedy spacer
+                    horizontal-stretch: 5;
+                }
+
+                HorizontalLayout {
+                    visible: lora_attached && are_we_lora_yet;
+                    alignment: start;
+                    width: 120pt;
+                    spacing: 5pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.Antenna;
+                            stroke: Palette.foreground;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: lora_recv_window_active == lora_recv_window_period ? "Continuously Listening" : "Active " + lora_recv_window_active + "s\nevery " + lora_recv_window_period + "s";
+                        vertical-alignment: center;
+                        wrap: TextWrap.word-wrap;
+                    }
+                }
+            }
+        }
+    }
+}

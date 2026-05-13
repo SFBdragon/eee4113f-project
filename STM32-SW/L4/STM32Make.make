@@ -75,6 +75,8 @@ endif
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/SD_IO.c \
+Core/Src/SD_Stream.c \
 Core/Src/main.c \
 Core/Src/stm32l4xx_hal_msp.c \
 Core/Src/stm32l4xx_it.c \
@@ -108,16 +110,7 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_spi_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
-Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_sdmmc.c \
-FATFS/App/fatfs.c \
-FATFS/Target/bsp_driver_sd.c \
-FATFS/Target/fatfs_platform.c \
-FATFS/Target/sd_diskio.c \
-Middlewares/Third_Party/FatFs/src/diskio.c \
-Middlewares/Third_Party/FatFs/src/ff.c \
-Middlewares/Third_Party/FatFs/src/ff_gen_drv.c \
-Middlewares/Third_Party/FatFs/src/option/ccsbcs.c \
-Middlewares/Third_Party/FatFs/src/option/syscall.c
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_sdmmc.c
 
 
 CXX_SOURCES = \
@@ -215,10 +208,7 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -IDrivers/OLED \
 -IDrivers/STM32L4xx_HAL_Driver/Inc \
--IDrivers/STM32L4xx_HAL_Driver/Inc/Legacy \
--IFATFS/App \
--IFATFS/Target \
--IMiddlewares/Third_Party/FatFs/src
+-IDrivers/STM32L4xx_HAL_Driver/Inc/Legacy
 
 
 

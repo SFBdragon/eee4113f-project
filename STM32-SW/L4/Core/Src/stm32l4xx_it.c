@@ -22,6 +22,9 @@
 #include "stm32l4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "main.h"
+#include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,7 +44,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern volatile uint8_t wake_source;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,6 +58,13 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern DMA_HandleTypeDef hdma_usart1_rx;
+extern UART_HandleTypeDef hlpuart1;
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
+extern RTC_HandleTypeDef hrtc;
+extern DMA_HandleTypeDef hdma_sdmmc1_rx;
+extern DMA_HandleTypeDef hdma_sdmmc1_tx;
 extern SD_HandleTypeDef hsd1;
 /* USER CODE BEGIN EV */
 
@@ -84,7 +94,26 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+      // Read fault status registers
+    uint32_t hfsr  = SCB->HFSR;   // HardFault Status
+    uint32_t cfsr  = SCB->CFSR;   // Configurable Fault Status
+    uint32_t mmfar = SCB->MMFAR;  // MemManage Fault Address
+    uint32_t bfar  = SCB->BFAR;   // BusFault Address
 
+    char buf[128];
+    snprintf(buf, sizeof(buf),
+        "\r\n*** HARDFAULT ***\r\n"
+        "HFSR:  0x%08lX\r\n"
+        "CFSR:  0x%08lX\r\n"
+        "MMFAR: 0x%08lX\r\n"
+        "BFAR:  0x%08lX\r\n",
+        (unsigned long)hfsr,
+        (unsigned long)cfsr,
+        (unsigned long)mmfar,
+        (unsigned long)bfar);
+
+    // Assumes UART is still functional
+    HAL_UART_Transmit(&huart3, (uint8_t*)buf, strlen(buf), 1000);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -199,6 +228,92 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles RTC wake-up interrupt through EXTI line 20.
+  */
+void RTC_WKUP_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
+  wake_source = 1;  
+  //HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+  /* USER CODE END RTC_WKUP_IRQn 0 */
+  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
+  /* USER CODE BEGIN RTC_WKUP_IRQn 1 */
+
+  /* USER CODE END RTC_WKUP_IRQn 1 */
+}
+
+/**
+  * @brief This function handles RCC global interrupt.
+  */
+void RCC_IRQHandler(void)
+{
+  /* USER CODE BEGIN RCC_IRQn 0 */
+
+  /* USER CODE END RCC_IRQn 0 */
+  /* USER CODE BEGIN RCC_IRQn 1 */
+
+  /* USER CODE END RCC_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel5 global interrupt.
+  */
+void DMA1_Channel5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel5_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+  /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART2 global interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+  
+  //HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+  wake_source = 2;
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(D_WAKE_Pin);
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+
+  /* USER CODE END EXTI15_10_IRQn 1 */
+}
+
+/**
   * @brief This function handles SDMMC1 global interrupt.
   */
 void SDMMC1_IRQHandler(void)
@@ -210,6 +325,49 @@ void SDMMC1_IRQHandler(void)
   /* USER CODE BEGIN SDMMC1_IRQn 1 */
 
   /* USER CODE END SDMMC1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 channel4 global interrupt.
+  */
+void DMA2_Channel4_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Channel4_IRQn 0 */
+
+  /* USER CODE END DMA2_Channel4_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_sdmmc1_rx);
+  /* USER CODE BEGIN DMA2_Channel4_IRQn 1 */
+
+  /* USER CODE END DMA2_Channel4_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 channel5 global interrupt.
+  */
+void DMA2_Channel5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Channel5_IRQn 0 */
+
+  /* USER CODE END DMA2_Channel5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_sdmmc1_tx);
+  /* USER CODE BEGIN DMA2_Channel5_IRQn 1 */
+
+  /* USER CODE END DMA2_Channel5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles LPUART1 global interrupt.
+  */
+void LPUART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN LPUART1_IRQn 0 */
+
+  wake_source = 3;
+  /* USER CODE END LPUART1_IRQn 0 */
+  HAL_UART_IRQHandler(&hlpuart1);
+  /* USER CODE BEGIN LPUART1_IRQn 1 */
+
+  /* USER CODE END LPUART1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

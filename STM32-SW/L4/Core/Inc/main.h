@@ -31,6 +31,20 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+void UART_SendString(UART_HandleTypeDef *huart, char *str);
+extern UART_HandleTypeDef huart3;
+
+#define UART_DMA_BUF_SIZE  512 // SHARC BUOY INCOMING BUFFER SIZE
+
+/* Raw DMA landing buffer — do not read from this directly */
+extern uint8_t  uart_dma_buf[UART_DMA_BUF_SIZE];
+
+/* Your circular buffer instance goes here */
+/* extern YourCircBuf_t circ_buf; */
+
+/* Flags set by DMA callbacks */
+extern volatile uint8_t cb_write_first_half;
+extern volatile uint8_t cb_write_second_half;
 
 /* USER CODE END Includes */
 
@@ -65,10 +79,6 @@ void Error_Handler(void);
 #define Wi_EN_GPIO_Port GPIOC
 #define Wi_RST_Pin GPIO_PIN_3
 #define Wi_RST_GPIO_Port GPIOC
-#define Wi_USART2_CTS_Pin GPIO_PIN_0
-#define Wi_USART2_CTS_GPIO_Port GPIOA
-#define Wi_USART2_RTS_Pin GPIO_PIN_1
-#define Wi_USART2_RTS_GPIO_Port GPIOA
 #define Wi_USART2_TX_Pin GPIO_PIN_2
 #define Wi_USART2_TX_GPIO_Port GPIOA
 #define Wi_USART2_RX_Pin GPIO_PIN_3
@@ -101,8 +111,13 @@ void Error_Handler(void);
 #define Wi_WAKE_GPIO_Port GPIOC
 #define Wi_GPIO_0_Pin GPIO_PIN_7
 #define Wi_GPIO_0_GPIO_Port GPIOC
-#define D_wakeup_Pin GPIO_PIN_11
-#define D_wakeup_GPIO_Port GPIOA
+#define D_USART_RX_Pin GPIO_PIN_9
+#define D_USART_RX_GPIO_Port GPIOA
+#define D_USART_TX_Pin GPIO_PIN_10
+#define D_USART_TX_GPIO_Port GPIOA
+#define D_WAKE_Pin GPIO_PIN_11
+#define D_WAKE_GPIO_Port GPIOA
+#define D_WAKE_EXTI_IRQn EXTI15_10_IRQn
 #define D_GPIO0_Pin GPIO_PIN_12
 #define D_GPIO0_GPIO_Port GPIOA
 

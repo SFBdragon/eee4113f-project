@@ -1,0 +1,19 @@
+# Build output
+build/
+
+# IDE files
+EWARM/
+*.cfg
+*.yaml
+
+# Map and linker output
+*.map
+*.bin
+*.hex
+*.elf
+*.o
+*.d
+*.lst
+
+# CubeMX backup files
+*.bak

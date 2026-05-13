@@ -1,6 +1,11 @@
-fn main() {
-    let config = slint_build::CompilerConfiguration::new()
-        .with_style("fluent".into());
+// use std::{collections::HashMap, path::PathBuf};
 
-    slint_build::compile_with_config("ui/main.slint", config).unwrap();
+fn main() {
+    // let library = HashMap::from([("lucide".to_string(), PathBuf::from(lucide_slint::lib()))]);
+
+    let config = slint_build::CompilerConfiguration::new()
+        // .with_library_paths(library)
+        .with_style("fluent-light".into());
+
+    slint_build::compile_with_config("ui/main.slint", config).expect("Slint build failed");
 }

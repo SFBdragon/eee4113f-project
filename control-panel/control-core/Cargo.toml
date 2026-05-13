@@ -10,8 +10,7 @@ crc = "3.4.0"
 crossbeam-channel = "0.5.15"
 rand = "0.10.1"
 crc-fast = "1.10.0"
-smol = "2.0.2"
+tracing = "0.1.44"
 
 [dev-dependencies]
 control-protocol = { path = "../control-protocol", features = ["test-utils"]}
-

@@ -1,91 +1,361 @@
-import { VerticalBox, HorizontalBox, Palette, StyleMetrics, Button } from "std-widgets.slint";
-import { StatusBar } from "statusbar.slint";
+import {
+    VerticalBox,
+    HorizontalBox,
+    Palette,
+    StyleMetrics,
+    Button,
+    Switch,
+    Slider,
+    LineEdit,
+    SpinBox,
+    ComboBox,
+    GridBox,
+    ScrollView,
+} from "std-widgets.slint";
+
+import "../assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf";
+import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+import { LoRa } from "lora.slint";
+import { Storage } from "storage.slint";
+import { WiFi } from "wifi.slint";
+import { DataDump } from "datadump.slint";
+import { Export } from "export.slint";
+
+export { Theme }
 
 export global GlobalAppState {
-    in-out property <bool> lora_attached: true;
-    in-out property <bool> lora_connected: false;
+    in-out property <int> controller_addr;
+
+    in-out property <bool> lora_attached: false;
+    in-out property <string> lora_module_addr: "FF:FF";
 
     in-out property <bool> wifi_attached: false;
     in-out property <bool> wifi_connected: false;
+    in-out property <string> wifi_connected_mac: "Not Connected";
 
+    in property <[string]> none_and_addresses;
 
+    in property <int> bytes_per_block;
+}
+
+export struct BlockId {
+    lo: int,
+    hi: int,
+}
+
+export global ModuleState {
+    // in-out property <bool> storage_readonly;
+    in-out property <bool> storage_overwrite;
+    in-out property <int> storage_total;
+    in-out property <BlockId> storage_available_begin;
+    in-out property <BlockId> storage_available_end;
+    in-out property <BlockId> storage_overwriteable_upto;
+
+    in-out property <int> lora_recv_win_on_period;
+    in-out property <int> lora_recv_win_total_period;
+
+    in-out property <bool> wifi_enabled;
+    in-out property <bool> wifi_data_dumping;
+
+    in property <int> downloaded_bytes;
+    in property <int> remote_only_bytes;
+}
+
+export global DebugAppState {
+    in-out property <bool> lora_mod_attached: true;
+    in-out property <bool> wifi_mod_attached: true;
 }
 
 export component AppWindow inherits Window {
 
     title: "Communication Module Control Panel";
-    preferred-width: 1200px;
-    preferred-height: 800px;
-    min-width: 400px;
+    preferred-width: 1000px;
+    preferred-height: 1000px;
+    min-width: 600px;
     min-height: 300px;
     icon: @image-url("../assets/app_icon.png");
+    background: Palette.alternate-background;
 
-    background: black;
+    default-font-size: Theme.default-font-size;
+    default-font-weight: Theme.default-font-weight;
+    default-font-family: Theme.default-font-family;
 
-    HorizontalLayout {
-        spacing: 1px;
+    callback lora_ping(string);
+    callback set_lora_recv_window(string, int, int);
+    callback set_storage_overwrite(string, bool);
+    callback set_overwritable_upto(string, int);
 
-        Rectangle {
-            background: Palette.background;
-            width: 50%;
+    callback set_wifi_enabled(string, bool);
+    callback request_wifi_data_dump(string, BlockId, BlockId);
+    callback cancel_wifi_data_dump(string);
 
-            VerticalLayout {
-                lora_status := StatusBar {
-                    subject: "LoRa";
-                    attached: GlobalAppState.lora_attached;
-                    connected: GlobalAppState.lora_connected;
-                    instruction: "Pinging...";
-                }
+    callback data_export(string);
 
-                VerticalLayout {
-                    alignment: LayoutAlignment.start;
-                    padding: 4px;
-                    spacing: 4px;
+    callback debug_set_lora_module_attached(bool);
+    callback debug_set_wifi_module_attached(bool);
+    callback debug_set_lora_send_fails(bool);
+    callback debug_set_wifi_send_fails(bool);
+    callback debug_set_lora_recv_fails(bool);
+    callback debug_set_wifi_recv_fails(bool);
 
+    // callback popup_confirmed;
+    // callback show_confirm_popup;
 
-                    Text {
-                        text: "TODO";
-                        horizontal-alignment: center;
-                    }
+    // show_confirm_popup => {
+    //     confirm_popup.show();
+    // }
 
+    // confirm_popup := PopupWindow {
+    //     x: 40px;
+    //     y: 100px;
+    //     width: min(confirm_popup_layout.preferred-width, root.width - 80px);
 
-                    Rectangle {}
-                }
-            }
+    //     Rectangle {
+    //         background: Palette.background;
+    //         border-color: Palette.border;
+    //         border-width: 1px;
+    //     }
 
+    //     confirm_popup_layout := Dialog {
+    //         height: 100%;
+    //         width: 100%;
+    //         background: transparent;
 
+    //         confirm_popup_text := Text {
+    //             text: "Some items are not done, are you sure you wish to quit?";
+    //             wrap: word-wrap;
+    //         }
+
+    //         StandardButton {
+    //             kind: yes;
+    //             clicked => {
+    //                 root.popup_confirmed();
+    //             }
+    //         }
+
+    //         StandardButton {
+    //             kind: no;
+    //         }
+    //     }
+    // }
+
+    // -------------------------------------------------------- //
+
+    private property <duration> time_since_lora_reply: 100000000s;
+    private property <bool> are_we_lora_yet: false;
+
+    lora_time_since_reply_timer := Timer {
+        interval: 1s;
+        running: true;
+
+        triggered => {
+            time_since_lora_reply += 1s;
+        }
+    }
+
+    public function on_lora_reply() {
+        time_since_lora_reply = 0;
+        lora_time_since_reply_timer.restart();
+        are_we_lora_yet = true;
+    }
+
+    private property <duration> since_on_wifi_recv: 100000000s;
+    private property <bool> are_we_wifi_yet: false;
+
+    since_on_wifi_recv_timer := Timer {
+        interval: 1s;
+        running: true;
+
+        triggered => {
+            since_on_wifi_recv += 1s;
+        }
+    }
+
+    public function on_wifi_recv() {
+        since_on_wifi_recv = 0;
+        since_on_wifi_recv_timer.restart();
+        are_we_wifi_yet = true;
+    }
+
+    // -------------------------------------------------------- //
+
+    callback storage_mark_obtained_overwritable(string, BlockId);
+    callback storage_mark_all_overwritable(string, BlockId);
+    callback storage_unmark_overwritable(string, BlockId);
+
+    out property <int> storage_bar_width: storage_section.storage_bar_width;
+    in-out property <image> storage_bar_image;
+
+    out property <int> download_bar_width: datadump_section.download_bar_width;
+    in-out property <image> download_bar_image;
+
+    // -------------------------------------------------------- //
+
+    private property <bool> scrollview-has-more-below: true;
+
+    scroll := ScrollView {
+        vertical-stretch: 0;
+        mouse-drag-pan-enabled: true;
+
+        scrolled => {
+            scrollview-has-more-below = (-self.viewport-y + self.height) < self.viewport-height;
         }
 
-        Rectangle {
-            background: Palette.background;
-            width: 50%;
+        VerticalBox {
+            alignment: start;
+            vertical-stretch: 0;
+            max-width: 700px;
 
-            VerticalLayout {
-                wifi_status := StatusBar {
-                    subject: "WiFi";
-                    attached: GlobalAppState.wifi_attached;
-                    connected: GlobalAppState.wifi_connected;
-                    instruction: "First connect via LoRa, then enable WiFi";
+            lora_section := LoRa {
+                lora_attached: GlobalAppState.lora_attached;
+                are_we_lora_yet: root.are_we_lora_yet;
+                module_address: GlobalAppState.lora_module_addr;
+                time_since_lora_reply: root.time_since_lora_reply;
+
+                lora_recv_window_active: ModuleState.lora_recv_win_on_period;
+                lora_recv_window_period: ModuleState.lora_recv_win_total_period;
+
+                lora_ping(a) => {
+                    root.lora_ping(a);
                 }
 
-                VerticalLayout {
-                    padding: 4px;
-                    spacing: 4px;
-
-
-                    Button {
-                        horizontal-stretch: 0;
-                        vertical-stretch: 0;
-
-                        text: "Dump Data";
-                        enabled: GlobalAppState.wifi_connected;
-
-                        
-                    }
-
-                    Rectangle {}
+                set_lora_recv_window(addr, active, period) => {
+                    root.set_lora_recv_window(addr, active, period);
                 }
             }
+
+            storage_section := Storage {
+                // readonly: ModuleState.storage_readonly;
+                // storage_readonly(r) => root.set_storage_policy(GlobalAppState.lora_module_addr, r ? "Readonly" : self.overwrite ? "Overwrite" : "Preserve");
+                enable_control: GlobalAppState.lora_attached && root.are_we_lora_yet;
+                overwrite: ModuleState.storage_overwrite;
+
+                storage_set_policy_overwrite(r) => {
+                    root.set_storage_overwrite(GlobalAppState.lora_module_addr, r);
+                }
+
+                storage_mark_obtained_overwritable() => {
+                    root.storage_mark_obtained_overwritable(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin);
+                }
+                storage_mark_all_overwritable() => {
+                    root.storage_mark_all_overwritable(GlobalAppState.lora_module_addr, ModuleState.storage_available_end);
+                }
+                storage_unmark_overwritable() => {
+                    root.storage_unmark_overwritable(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin);
+                }
+
+                storage_bar_image: root.storage_bar_image;
+            }
+
+            wifi_section := WiFi {
+                enabled_prereq: GlobalAppState.lora_attached && root.are_we_lora_yet;
+                wifi_attached: GlobalAppState.wifi_attached;
+                wifi_powered: ModuleState.wifi_enabled;
+                module_address: GlobalAppState.lora_module_addr;
+                time_since_wifi_recv: since_on_wifi_recv;
+
+                set_wifi_enabled(addr, powered) => {
+                    set_wifi_enabled(addr, powered)
+                }
+            }
+
+            datadump_section := DataDump {
+                enable_control: ModuleState.wifi_enabled && root.are_we_wifi_yet && GlobalAppState.lora_attached && root.are_we_lora_yet;
+
+                wifi_connected: GlobalAppState.wifi_connected;
+                wifi_dumping: ModuleState.wifi_data_dumping;
+
+                download_bar_image: root.download_bar_image;
+
+                remote_only_bytes: ModuleState.remote_only_bytes;
+
+                data_transfer_all() => {
+                    root.request_wifi_data_dump(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin, ModuleState.storage_available_end);
+                }
+                data_transfer_cancel => {
+                    root.cancel_wifi_data_dump(GlobalAppState.lora_module_addr);
+                }
+            }
+
+            export_section := Export {
+                none_and_addresses: GlobalAppState.none_and_addresses;
+
+                export(addr) => {
+                    data_export(addr);
+                }
+            }
+
+            VerticalBox {
+                // DEBUG CONTROLS
+
+                Switch {
+                    text: "DEBUG: LoRa module attached";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_lora_module_attached(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: LoRa send fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_lora_send_fails(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: LoRa recv fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_lora_recv_fails(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: WiFi module attached";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_wifi_module_attached(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: WiFi send fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_wifi_send_fails(self.checked)
+                    }
+                }
+
+                Switch {
+                    text: "DEBUG: WiFi recv fails";
+                    checked: false;
+
+                    toggled => {
+                        debug_set_wifi_recv_fails(self.checked)
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        width: 100%;
+        height: 12px;
+        y: root.height - self.height;
+        background: @linear-gradient(180deg, #ffffff00 0%, #44444466 100%);
+
+        opacity: scrollview-has-more-below ? 1.0 : 0.0;
+        animate opacity {
+            duration: 200ms;
+            easing: ease-out;
         }
     }
 }
