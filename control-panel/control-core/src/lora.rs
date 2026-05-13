@@ -121,8 +121,7 @@ fn connector(
 
             events.send(LoraEvent::Attached)?;
 
-            // Don't ? this
-            lora_thread(controller_addr, &commands, &events, hal.as_ref());
+            let _ = lora_thread(controller_addr, &commands, &events, hal.as_ref());
 
             events.send(LoraEvent::Detached)?;
         }
@@ -171,9 +170,9 @@ fn lora_thread(
             lora_frame.extend_from_slice(&cmds);
 
             // LoRa does not support fragmentation. All commands must fit.
-            while let Some(f) = cmd_queue
-                .pop_front_if(|f| f.0 == target_dev && cmds.len() + f.1.len() < lora::MAX_PAYLOAD)
-            {
+            while let Some(f) = cmd_queue.pop_front_if(|f| {
+                f.0 == target_dev && lora_frame.len() + f.1.len() < lora::MAX_PAYLOAD
+            }) {
                 lora_frame.extend_from_slice(&f.1);
             }
             let crc = compute_crc(&lora_frame);

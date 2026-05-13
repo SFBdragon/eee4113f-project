@@ -1,0 +1,425 @@
+import {
+    HorizontalBox,
+    Palette,
+    VerticalBox,
+    Switch,
+    Button,
+} from "std-widgets.slint";
+import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+import { IconDisplay, IconSet, IconDisplay } from "lucida.slint";
+import { RadioButton } from "radio.slint";
+
+export component Storage inherits HorizontalBox {
+
+    // in property <bool> readonly;
+    // callback storage_readonly(bool);
+
+    in property <bool> enable_control;
+
+    in property <bool> overwrite;
+    callback storage_set_policy_overwrite(bool);
+
+    callback storage_mark_obtained_overwritable();
+    callback storage_mark_all_overwritable();
+    callback storage_unmark_overwritable();
+
+    out property <int> storage_bar_width: storage-bar.width / 1phx;
+    in property <image> storage_bar_image;
+
+    in property <string> total_bytes;
+    in property <string> stored_bytes;
+    in property <string> reserved_bytes;
+
+    Rectangle {
+        background: enable_control ? Palette.background : Palette.alternate-background;
+        width: 100%;
+        border-radius: 4pt;
+        border-color: Palette.border;
+        border-width: 1px;
+
+        VerticalBox {
+            alignment: start;
+            spacing: 0pt;
+
+            HorizontalBox {
+                spacing: 4pt;
+                alignment: start;
+
+                VerticalLayout {
+                    alignment: center;
+                    IconDisplay {
+                        icon: IconSet.CardSim;
+                        stroke: Palette.foreground;
+                        stroke-width: 2;
+                        size: 25pt;
+                    }
+                }
+
+                Text {
+                    text: "Module Storage Configuration";
+                    font-weight: Theme.bold-font-weight;
+                    font-size: Theme.large-font-size;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            HorizontalBox {
+
+                HorizontalLayout {
+                    alignment: center;
+                    width: Theme.first-col;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.RefreshCw;
+                            stroke: Palette.foreground;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    // ow_oldest := Switch {
+                    //     enabled: enable_control;
+                    //     transform-scale: Theme.switch-scale;
+                    //     toggled => {
+                    //         storage_set_policy_overwrite(self.checked)
+                    //     }
+                    // }
+                }
+
+                VerticalLayout {
+                    HorizontalLayout {
+                        Text {
+                            text: "When module storage is full...";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "";
+                            font-weight: Theme.light-font-weight;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    property <bool> selected_overwrite: overwrite;
+
+                    HorizontalLayout {
+                        spacing: 8pt;
+
+                        RadioButton {
+                            text: "Overwrite Oldest Data";
+                            checked: selected_overwrite && enable_control;
+                            enabled: enable_control;
+                            toggled => {
+                                selected_overwrite = true;
+                                storage_set_policy_overwrite(true);
+                            }
+                        }
+
+                        RadioButton {
+                            text: "Discard New Data";
+                            checked: !selected_overwrite && enable_control;
+                            enabled: enable_control;
+                            toggled => {
+                                selected_overwrite = false;
+                                storage_set_policy_overwrite(false);
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    // greedy spacer
+                    horizontal-stretch: 1;
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    width: 120pt;
+                    spacing: 5pt;
+                    visible: enable_control;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: overwrite ? IconSet.FileClock : IconSet.FileLock;
+                            stroke: Palette.foreground;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: overwrite ? "Overwriting When Full" : "Preserving When Full";
+                        vertical-alignment: center;
+                        wrap: TextWrap.word-wrap;
+                    }
+                }
+            }
+
+            VerticalBox {
+
+                HorizontalLayout {
+
+                    Text {
+                        text: "Storage Occupancy";
+                        font-weight: Theme.bold-font-weight;
+                        vertical-alignment: center;
+                        width: 120pt;
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 5.0;
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        spacing: 4pt;
+
+                        Rectangle {
+                            background: Theme.warn-orange;
+                            border-radius: 3pt;
+                            width: 1.5rem;
+                        }
+
+                        Text {
+                            text: "Reclaimable";
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        spacing: 4pt;
+
+                        Rectangle {
+                            background: Theme.active-blue;
+                            border-radius: 3pt;
+                            width: 1.5rem;
+                        }
+
+                        Text {
+                            text: "Used";
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        spacing: 4pt;
+
+                        Rectangle {
+                            background: Theme.empty-grey;
+                            border-radius: 3pt;
+                            width: 1.5rem;
+                        }
+
+                        Text {
+                            text: "Free";
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+
+                storage-bar := ColorBar {
+                    segment-image: storage_bar_image;
+                }
+            }
+
+            HorizontalBox {
+
+                Rectangle {
+                    width: Theme.first-col;
+                    height: 2.6rem;
+
+                    Button {
+                        primary: true;
+                        // text: "Mark";
+                        enabled: enable_control;
+                        height: 100%;
+                        width: 100%;
+
+                        clicked => {
+                            storage_mark_obtained_overwritable()
+                        }
+                    }
+
+                    VerticalLayout {
+                        alignment: center;
+                        HorizontalLayout {
+                            alignment: center;
+                            IconDisplay {
+                                icon: IconSet.BrushCleaning;
+                                stroke: Palette.background;
+                                stroke-width: 1.5;
+                                size: 25pt;
+                            }
+                        }
+                    }
+                }
+
+                VerticalLayout {
+
+                    HorizontalLayout {
+                        alignment: start;
+                        Text {
+                            text: "Mark Downloaded ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "Reclaimable";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                            color: Theme.warn-orange;
+                        }
+                    }
+
+                    Text {
+                        text: "Data copied to this device may be overwritten on the module.";
+                        font-weight: Theme.light-font-weight;
+                        vertical-alignment: center;
+                        wrap: TextWrap.word-wrap;
+                    }
+                }
+            }
+
+            HorizontalBox {
+                alignment: start;
+
+                Rectangle {
+                    width: Theme.first-col;
+                    height: 2.6rem;
+
+                    Button {
+                        primary: true;
+                        enabled: enable_control;
+                        height: 100%;
+                        width: 100%;
+
+                        clicked => {
+                            storage_mark_all_overwritable()
+                        }
+                    }
+
+                    VerticalLayout {
+                        alignment: center;
+                        HorizontalLayout {
+                            alignment: center;
+                            IconDisplay {
+                                icon: IconSet.Trash;
+                                stroke: Palette.background;
+                                stroke-width: 1.5;
+                                size: 25pt;
+                            }
+                        }
+                    }
+                }
+
+                VerticalLayout {
+
+                    HorizontalLayout {
+                        alignment: start;
+                        Text {
+                            text: "Mark All ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "Reclaimable";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                            color: Theme.warn-orange;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+
+                        Text {
+                            text: "All current data may be overwritten on the module.";
+                            vertical-alignment: center;
+                            font-weight: Theme.light-font-weight;
+                        }
+                    }
+                }
+            }
+
+            HorizontalBox {
+
+                Rectangle {
+                    width: Theme.first-col;
+                    height: 2.6rem;
+
+                    Button {
+                        primary: true;
+                        enabled: enable_control;
+                        height: 100%;
+                        width: 100%;
+
+                        clicked => {
+                            storage_unmark_overwritable()
+                        }
+                    }
+
+                    VerticalLayout {
+                        alignment: center;
+                        HorizontalLayout {
+                            alignment: center;
+                            IconDisplay {
+                                icon: IconSet.LifeBuoy;
+                                stroke: Palette.background;
+                                stroke-width: 1.5;
+                                size: 25pt;
+                            }
+                        }
+                    }
+                }
+
+                VerticalLayout {
+
+                    Text {
+                        text: "Unmark Reclaimable";
+                        font-weight: Theme.bold-font-weight;
+                        vertical-alignment: center;
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        Text {
+                            text: "Revert all ";
+                            vertical-alignment: center;
+                            font-weight: Theme.light-font-weight;
+                        }
+
+                        Text {
+                            text: "Reclaimable";
+                            vertical-alignment: center;
+                            font-weight: Theme.light-font-weight;
+                            color: Theme.warn-orange;
+                        }
+
+                        Text {
+                            text: " memory to ";
+                            vertical-alignment: center;
+                            font-weight: Theme.light-font-weight;
+                        }
+
+                        Text {
+                            text: "Used";
+                            vertical-alignment: center;
+                            font-weight: Theme.light-font-weight;
+                            color: Theme.active-blue;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
