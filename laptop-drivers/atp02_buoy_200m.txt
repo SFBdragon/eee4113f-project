@@ -1,25 +1,25 @@
 # WiFi ATP test results (send side)
-# Generated 2026-05-14 18:27:39
+# Generated 2026-05-14 18:37:36
 
 [results]
 mode = send
-timestamp = 2026-05-14 18:27:39
-duration_sec = 25.311
+timestamp = 2026-05-14 18:37:36
+duration_sec = 25.364
 bytes_sent = 1048576
 bytes_sent_mb = 1.000
 packets_sent = 2073
 packet_size_bytes = 506
 uart_failures = 0
-esp32_nacks = 0
+esp32_nacks = 79
 pace_us = 10000
-throughput_mbps = 0.3314
+throughput_mbps = 0.3307
 rssi_samples = 0
 
 [plaintext]
 === SEND RESULTS ===
-Duration:        25.31 s (incl. pipeline drain)
+Duration:        25.36 s (incl. pipeline drain)
 Bytes sent:      1048576 (1.00 MB)
 Packets sent:    2073
 UART failures:   0
-ESP32 NACKs:     0
+ESP32 NACKs:     79
 Throughput:      0.331 Mbps
