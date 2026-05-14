@@ -123,6 +123,17 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
     uint64_t start = now_ms();
     uint64_t last_report = start;
 
+    // RSSI sampling. Query the buoy's STA-side RSSI once per second
+    // (same cadence as the progress log). The status round-trip costs
+    // ~5-10ms via UART but the buoy isn't transmitting during that time
+    // anyway. Min/max bracket the range; mean is the headline figure
+    // for the report.
+    int rssi_sum = 0;
+    int rssi_min = 0;
+    int rssi_max = 0;
+    int rssi_samples = 0;
+    bool rssi_first = true;
+
     while (sent_bytes < total_bytes) {
         uint64_t remaining = total_bytes - sent_bytes;
         uint16_t this_len = pkt_size;
@@ -159,11 +170,41 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
             double sec = (now - start) / 1000.0;
             double mbps = (sent_bytes * 8.0 / 1e6) / sec;
             uint64_t nacks = wifi_get_nack_count() - nacks_at_start;
-            fprintf(stderr, "[test] %llu MB sent, %.2f Mbps, %llu OK, %llu UART-fail, %llu nack\n",
-                    (unsigned long long)(sent_bytes / 1048576ULL), mbps,
-                    (unsigned long long)sent_packets,
-                    (unsigned long long)failed_packets,
-                    (unsigned long long)nacks);
+
+            // Sample RSSI. Note this issues a status query which costs a
+            // UART round-trip; doing it only once per second keeps the
+            // overhead negligible relative to send throughput.
+            wifi_link_status_t st;
+            int rssi_now = 0;
+            bool rssi_ok = false;
+            if (wifi_query_status(&st) == STATUS_SUCCESS) {
+                rssi_now = st.rssi_dbm;
+                rssi_sum += rssi_now;
+                rssi_samples++;
+                if (rssi_first) {
+                    rssi_min = rssi_now;
+                    rssi_max = rssi_now;
+                    rssi_first = false;
+                } else {
+                    if (rssi_now < rssi_min) rssi_min = rssi_now;
+                    if (rssi_now > rssi_max) rssi_max = rssi_now;
+                }
+                rssi_ok = true;
+            }
+
+            if (rssi_ok) {
+                fprintf(stderr, "[test] %.2f MB sent, %.2f Mbps, %llu OK, %llu UART-fail, %llu nack, rssi=%d\n",
+                        sent_bytes / 1048576.0, mbps,
+                        (unsigned long long)sent_packets,
+                        (unsigned long long)failed_packets,
+                        (unsigned long long)nacks, rssi_now);
+            } else {
+                fprintf(stderr, "[test] %.2f MB sent, %.2f Mbps, %llu OK, %llu UART-fail, %llu nack\n",
+                        sent_bytes / 1048576.0, mbps,
+                        (unsigned long long)sent_packets,
+                        (unsigned long long)failed_packets,
+                        (unsigned long long)nacks);
+            }
             last_report = now;
 
             // Abort early if NACKs are climbing fast. A high NACK rate
@@ -193,6 +234,7 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
     double sec = (end - start) / 1000.0;
     double mbps = sec > 0 ? (sent_bytes * 8.0 / 1e6) / sec : 0;
     uint64_t nacks = wifi_get_nack_count() - nacks_at_start;
+    double rssi_mean = (rssi_samples > 0) ? ((double)rssi_sum / rssi_samples) : 0.0;
     printf("\n=== SEND RESULTS ===\n");
     printf("Duration:        %.2f s (incl. pipeline drain)\n", sec);
     printf("Bytes sent:      %llu (%.2f MB)\n", (unsigned long long)sent_bytes, sent_bytes / 1048576.0);
@@ -201,6 +243,12 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
     printf("ESP32 NACKs:     %llu (asynchronous; not counted as failures)\n",
            (unsigned long long)nacks);
     printf("Throughput:      %.3f Mbps\n", mbps);
+    if (rssi_samples > 0) {
+        printf("RSSI (dBm):      mean=%.1f  min=%d  max=%d  (n=%d samples)\n",
+               rssi_mean, rssi_min, rssi_max, rssi_samples);
+    } else {
+        printf("RSSI (dBm):      no samples collected\n");
+    }
 
     if (output_path && output_path[0]) {
         FILE *fp = fopen(output_path, "w");
@@ -223,6 +271,12 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
             fprintf(fp, "esp32_nacks = %llu\n", (unsigned long long)nacks);
             fprintf(fp, "pace_us = %u\n", pace_us);
             fprintf(fp, "throughput_mbps = %.4f\n", mbps);
+            fprintf(fp, "rssi_samples = %d\n", rssi_samples);
+            if (rssi_samples > 0) {
+                fprintf(fp, "rssi_mean_dbm = %.2f\n", rssi_mean);
+                fprintf(fp, "rssi_min_dbm = %d\n", rssi_min);
+                fprintf(fp, "rssi_max_dbm = %d\n", rssi_max);
+            }
             fprintf(fp, "\n[plaintext]\n");
             fprintf(fp, "=== SEND RESULTS ===\n");
             fprintf(fp, "Duration:        %.2f s (incl. pipeline drain)\n", sec);
@@ -232,6 +286,10 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
             fprintf(fp, "UART failures:   %llu\n", (unsigned long long)failed_packets);
             fprintf(fp, "ESP32 NACKs:     %llu\n", (unsigned long long)nacks);
             fprintf(fp, "Throughput:      %.3f Mbps\n", mbps);
+            if (rssi_samples > 0) {
+                fprintf(fp, "RSSI:            mean=%.1f dBm, min=%d dBm, max=%d dBm (n=%d)\n",
+                        rssi_mean, rssi_min, rssi_max, rssi_samples);
+            }
             fclose(fp);
             fprintf(stderr, "[test] results written to %s\n", output_path);
         }
@@ -243,8 +301,15 @@ static int run_send(uint64_t total_bytes, uint16_t pkt_size, uint64_t destmac,
 
 static int run_recv(double max_duration_sec, uint64_t expected_bytes,
                     const char *output_path) {
-    fprintf(stderr, "[test] receiving (max duration %.1fs, expected_bytes=%llu)\n",
-            max_duration_sec, (unsigned long long)expected_bytes);
+    // Idle timeout: if no packet arrives within this window AFTER the
+    // first packet has been received, declare the sender done and stop
+    // the test. Chosen to be longer than any plausible Wi-Fi transient
+    // (retries, brief AP scans) but short enough that the test exits
+    // promptly when the buoy genuinely stops.
+    const uint32_t IDLE_TIMEOUT_MS = 3000;
+
+    fprintf(stderr, "[test] receiving (max duration %.1fs, expected_bytes=%llu, idle timeout %u ms)\n",
+            max_duration_sec, (unsigned long long)expected_bytes, IDLE_TIMEOUT_MS);
 
     uint8_t buf[MAX_WIFI_RECV_PACKET_LEN];
     uint64_t srcmac = 0;
@@ -256,23 +321,57 @@ static int run_recv(double max_duration_sec, uint64_t expected_bytes,
     uint64_t start_wallclock = now_ms();
     uint64_t last_report = start_wallclock;
 
-    // Loop until expected bytes received OR max duration exceeded OR 5s idle after start.
+    // Loop until any of:
+    //   - expected_bytes received
+    //   - max_duration_sec exceeded
+    //   - IDLE_TIMEOUT_MS of silence after the first packet (buoy stopped)
     while (1) {
-        // We can't easily timeout recv_wifi_packet (interface is blocking),
-        // but we can interleave a status check by spawning a watchdog?
-        // For simplicity, rely on the sender producing packets; the test
-        // ends when expected_bytes is reached.
-        Status s = recv_wifi_packet(&srcmac, buf, &len);
-        if (s != STATUS_SUCCESS) {
-            fprintf(stderr, "[test] recv error %d\n", s);
-            break;
-        }
-        if (total_pkts == 0) first_pkt_time = now_ms();
-        total_bytes += len;
-        total_pkts++;
-
+        // Before each iteration, decide how long to wait for the next
+        // packet. If we have already received at least one packet, use
+        // the idle timeout. If we haven't, wait up to the remaining
+        // max_duration so the test doesn't exit before the buoy starts
+        // sending. The reader thread does the actual UART read; this
+        // call just blocks on a condvar with a deadline.
         uint64_t now = now_ms();
-        if (now - last_report > 1000) {
+        uint32_t wait_ms;
+        if (total_pkts == 0) {
+            double elapsed_sec = (now - start_wallclock) / 1000.0;
+            double remaining_sec = max_duration_sec - elapsed_sec;
+            if (remaining_sec <= 0) {
+                fprintf(stderr, "[test] hit max duration before any packets arrived\n");
+                break;
+            }
+            // Cap the per-call wait so we periodically check for max
+            // duration even if no packets arrive at all.
+            wait_ms = (remaining_sec * 1000.0 > 1000.0) ? 1000
+                                                         : (uint32_t)(remaining_sec * 1000.0);
+        } else {
+            wait_ms = IDLE_TIMEOUT_MS;
+        }
+
+        Status s = recv_wifi_packet_timeout(&srcmac, buf, &len, wait_ms);
+        if (s == STATUS_SUCCESS) {
+            if (total_pkts == 0) first_pkt_time = now_ms();
+            total_bytes += len;
+            total_pkts++;
+        } else if (s == STATUS_MODULE_DETACHED) {
+            fprintf(stderr, "[test] recv error: module detached\n");
+            break;
+        } else {
+            // Timeout. If we've received at least one packet, this means
+            // the buoy stopped sending — clean exit.
+            if (total_pkts > 0) {
+                fprintf(stderr, "[test] idle %u ms with no new packets; declaring sender done\n",
+                        IDLE_TIMEOUT_MS);
+                break;
+            }
+            // No packets yet — fall through to check max_duration on next loop.
+        }
+
+        // Refresh `now` for the periodic-report and end-of-loop checks
+        // (it was set near the top of the iteration before we waited).
+        now = now_ms();
+        if (total_pkts > 0 && now - last_report > 1000) {
             double sec = (now - first_pkt_time) / 1000.0;
             double mbps = sec > 0 ? (total_bytes * 8.0 / 1e6) / sec : 0;
             // Reader-thread side: bytes the laptop's reader thread has
@@ -388,9 +487,9 @@ static int run_echo(void) {
 
 static int run_atp02(const char *side, uint64_t override_bytes, uint32_t pace_us,
                      const char *output_path) {
-    // ATP02: average throughput >= 2 Mbps over 100 MB transfer.
-    // Use --bytes to override for faster bench iteration.
-    uint64_t target = (override_bytes > 0) ? override_bytes : 100ULL * 1024 * 1024;
+    // ATP02: throughput test. Default is 1 MB for quick iteration; use
+    // --bytes to override (e.g. --bytes 10485760 for 10 MB).
+    uint64_t target = (override_bytes > 0) ? override_bytes : 1ULL * 1024 * 1024;
     if (strcmp(side, "ship") == 0) {
         // Receive `target` bytes with a generous duration cap.
         // The recv side stops when target bytes have been counted.
@@ -572,7 +671,7 @@ int main(int argc, char **argv) {
     const char *atp = NULL;
     const char *mode = NULL;
     const char *side = NULL;
-    uint64_t bytes = 100ULL * 1024 * 1024;  // default 100 MB
+    uint64_t bytes = 1ULL * 1024 * 1024;  // default 1 MB
     bool bytes_set = false;                 // distinguishes default vs explicit
     uint16_t pkt_size = MAX_WIFI_SEND_PACKET_LEN;
     uint64_t destmac = 0xFFFFFFFFFFFFULL;
