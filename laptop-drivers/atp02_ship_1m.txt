@@ -1,4 +1,5 @@
 # WiFi ATP test results (recv side)
+<<<<<<< HEAD
 # Generated 2026-05-14 18:12:50
 
 [results]
@@ -22,3 +23,28 @@ Packets:         634
 Reader-thread:   634 frames, 0.31 MB
 Throughput:      0.137 Mbps
 Delivery:        30.59% of expected 1.00 MB
+=======
+# Generated 2026-05-14 18:26:31
+
+[results]
+mode = recv
+timestamp = 2026-05-14 18:26:31
+duration_sec = 25.338
+bytes_received = 1048576
+bytes_received_mb = 1.000
+expected_bytes = 1048576
+delivery_pct = 100.00
+packets = 2073
+reader_thread_frames = 2073
+reader_thread_bytes = 1048576
+throughput_mbps = 0.3311
+
+[plaintext]
+=== RECV RESULTS ===
+Duration:        25.34 s
+Bytes received:  1048576 (1.00 MB)
+Packets:         2073
+Reader-thread:   2073 frames, 1.00 MB
+Throughput:      0.331 Mbps
+Delivery:        100.00% of expected 1.00 MB
+>>>>>>> 7844522 (buoy side atp02 test results)
