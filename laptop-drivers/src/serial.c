@@ -23,11 +23,21 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/select.h>
 #include <termios.h>
 #include <unistd.h>
+
+#ifdef __APPLE__
+  // Apple's <termios.h> only exposes baud constants up to B230400.
+  // For 460800, 921600, and arbitrary rates, the kernel provides
+  // IOSSIOSPEED via <IOKit/serial/ioss.h>. We set a placeholder baud
+  // with tcsetattr, then override it via ioctl.
+  #include <IOKit/serial/ioss.h>
+  #include <sys/ioctl.h>
+#endif
 
 // Map a baud-rate int to the speed_t constant termios wants.
 // Add more cases as needed.
@@ -53,10 +63,22 @@ static speed_t baud_to_speed(uint32_t baud) {
 
 serial_handle_t serial_open(const char *device, uint32_t baud) {
     speed_t speed = baud_to_speed(baud);
+
+#ifdef __APPLE__
+    // On macOS, fall back to IOSSIOSPEED for baud rates not in <termios.h>
+    // (typically anything above 230400). We still need a valid speed_t to
+    // pass through cfsetispeed/cfsetospeed before the ioctl override.
+    bool needs_iossiospeed = false;
+    if (speed == B0) {
+        speed = B9600;          // placeholder; will be overridden below
+        needs_iossiospeed = true;
+    }
+#else
     if (speed == B0) {
         fprintf(stderr, "serial_open: unsupported baud %u\n", baud);
         return SERIAL_INVALID;
     }
+#endif
 
     // O_NOCTTY: don't make this our controlling terminal.
     // O_NONBLOCK: open without blocking; we'll switch to blocking reads via select later.
@@ -111,6 +133,21 @@ serial_handle_t serial_open(const char *device, uint32_t baud) {
         close(fd);
         return SERIAL_INVALID;
     }
+
+#ifdef __APPLE__
+    if (needs_iossiospeed) {
+        // IOSSIOSPEED takes a speed_t (unsigned long on macOS) by pointer
+        // containing the actual baud rate in bps. Must be called AFTER
+        // tcsetattr; if you call it before, tcsetattr will reset the speed.
+        speed_t bps = (speed_t)baud;
+        if (ioctl(fd, IOSSIOSPEED, &bps) == -1) {
+            fprintf(stderr, "serial_open: IOSSIOSPEED(%u): %s\n",
+                    baud, strerror(errno));
+            close(fd);
+            return SERIAL_INVALID;
+        }
+    }
+#endif
 
     // Drain any junk that was buffered before we configured the port.
     tcflush(fd, TCIOFLUSH);

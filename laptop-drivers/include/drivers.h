@@ -31,9 +31,12 @@ typedef uint16_t BufLen;
 #define MAX_LORA_RECV_PACKET_LEN 64
 #define MAX_LORA_SEND_PACKET_LEN 64
 
-// These are not final. Alter these if necessary.
-#define MAX_WIFI_RECV_PACKET_LEN 250
-#define MAX_WIFI_SEND_PACKET_LEN 250
+// WiFi payload limits. The UART framing protocol allocates 512 bytes per
+// frame; the SEND frame format is [6-byte destmac][actual payload], so
+// 506 is the largest payload that fits in one frame without changing the
+// protocol (see wifi_protocol.h: WIFI_MAX_PAYLOAD = 512).
+#define MAX_WIFI_RECV_PACKET_LEN 506
+#define MAX_WIFI_SEND_PACKET_LEN 506
 
 #define STATUS_SUCCESS 0
 #define STATUS_RECEIVE_TIMEOUT -3

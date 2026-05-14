@@ -1,32 +1,30 @@
-# Simple Makefile for the LoRa driver test program.
-# Cross-platform (Mac + Linux) POSIX C99.
-#
-# Targets:
-#   make            - builds test_lora
-#   make lib        - builds liblora.a (for Shaun's Rust integration)
-#   make clean      - removes build artifacts
-
 CC      ?= cc
 CFLAGS  := -Wall -Wextra -Wno-unused-parameter -std=c99 -O2 -I include
-LDFLAGS :=
+LDFLAGS := -pthread
 
-SRC_LIB  := src/serial.c src/at_protocol.c src/lora.c
-OBJ_LIB  := $(SRC_LIB:.c=.o)
+SRC_LORA := src/serial.c src/at_protocol.c src/lora.c
+SRC_WIFI := src/serial.c src/wifi.c
 
-all: test_lora
+OBJ_LORA := $(SRC_LORA:.c=.o)
+OBJ_WIFI := $(SRC_WIFI:.c=.o)
 
-test_lora: $(OBJ_LIB) src/test_lora.o
+all: test_lora test_wifi
+
+test_lora: $(OBJ_LORA) src/test_lora.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
-lib: liblora.a
+test_wifi: $(OBJ_WIFI) src/test_wifi.o
+	$(CC) $(LDFLAGS) -o $@ $^
 
-liblora.a: $(OBJ_LIB)
+lib: libdrivers.a
+
+libdrivers.a: $(OBJ_LORA) $(OBJ_WIFI)
 	ar rcs $@ $^
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f src/*.o test_lora liblora.a
+	rm -f src/*.o test_lora test_wifi libdrivers.a liblora.a
 
 .PHONY: all lib clean
