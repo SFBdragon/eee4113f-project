@@ -4,33 +4,33 @@
 
 // --------------- LoRa --------------- //
 
-// Returns whether the LoRa module is visible as a device plugged into the computer.
-bool is_lora_module_attached() {
-    return true;
-}
+// // Returns whether the LoRa module is visible as a device plugged into the computer.
+// bool is_lora_module_attached() {
+//     return true;
+// }
 
-// This is called to perform all the LoRa module setup.
-// Once it returns, the LoRa module should be listening for packets, if successful.
-Status initialize_lora_module() {
-    return STATUS_SUCCESS;
-}
+// // This is called to perform all the LoRa module setup.
+// // Once it returns, the LoRa module should be listening for packets, if successful.
+// Status initialize_lora_module() {
+//     return STATUS_SUCCESS;
+// }
 
-// This is called to perform all the LoRa module shutdown.
-// Once it returns, send/recv will no longer be called until initialize is called again.
-void shutdown_lora_module() {
+// // This is called to perform all the LoRa module shutdown.
+// // Once it returns, send/recv will no longer be called until initialize is called again.
+// void shutdown_lora_module() {
 
-}
+// }
 
-// Read the memory from [data, data + len) bytes and send it as the data payload for a LoRa packet.
-Status send_lora_packet(uint8_t *data, BufLen len) {
-    return STATUS_SUCCESS;
-}
+// // Read the memory from [data, data + len) bytes and send it as the data payload for a LoRa packet.
+// Status send_lora_packet(uint8_t *data, BufLen len) {
+//     return STATUS_SUCCESS;
+// }
 
-// Block until a LoRa packet data payload is received.
-// Writes the payload bytes into `data` and the payload length into `len`.
-Status recv_lora_packet(uint8_t data[MAX_LORA_RECV_PACKET_LEN], BufLen *len, uint32_t timeout_ms) {
-    while (1) { }
-}
+// // Block until a LoRa packet data payload is received.
+// // Writes the payload bytes into `data` and the payload length into `len`.
+// Status recv_lora_packet(uint8_t data[MAX_LORA_RECV_PACKET_LEN], BufLen *len, uint32_t timeout_ms) {
+//     while (1) { }
+// }
 
 // --------------- WiFi --------------- //
 
