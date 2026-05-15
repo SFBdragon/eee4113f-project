@@ -20,5 +20,7 @@ void              SD_Stream_Init             (UART_HandleTypeDef *uartHandle);
 HAL_StatusTypeDef SD_Stream_WriteBlock       (uint8_t *block);
 void              SD_Stream_ReadDebug        (uint32_t start_sector, uint32_t num_blocks);
 uint32_t          SD_Stream_GetCurrentSector (void);
+void                SD_BruteSpeedTest       (void);
+void SD_MassAccuracyTest                    (uint32_t iterations);
 
 #endif

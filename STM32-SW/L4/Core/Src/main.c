@@ -75,8 +75,8 @@ static uint8_t packedBlocks[NUM_BLOCKS][SD_BLOCK_SIZE];
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 // all for for testing
-#define LARGE_TEST_TOTAL_SIZE (16 * 1024 * 1024) // 16 MB
-#define LARGE_TEST_BURST_SIZE (16 * 1024)        // 16 KB bursts (32 blocks)
+#define LARGE_TEST_TOTAL_SIZE (1 * 1024 * 1024) // 16 MB
+#define LARGE_TEST_BURST_SIZE (1 * 1024)        // 16 KB bursts (32 blocks)
 #define LARGE_TEST_BLOCKS     (LARGE_TEST_BURST_SIZE / 512)
 /* USER CODE END PM */
 
@@ -278,8 +278,11 @@ int main(void)
 
   total_uptime = SD_ReadUptime();
   SD_Stream_Init(&huart3);
-  HAL_Delay(500);
 
+  //UART_SendString(&huart3, "Begin write in 2 sec\r\n");
+  //HAL_Delay(2000);
+  //SD_BruteSpeedTest();
+  //SD_MassAccuracyTest(100);
     // SPEED TEST
   //SD_SpeedTest();
   //HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_RESET);
@@ -535,11 +538,11 @@ int main(void)
 
       // Check time 
       // Re-configure RTC wakeup
-      HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+      HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 30, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
     }
 
     // TEMP OUTSIDE TO FORCE INTERRUTP 
-    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 30, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
     
     //============================= WATCH DOG TIMER ==========================
     // TODO
@@ -553,12 +556,15 @@ int main(void)
 // ====================== GOING TO SLEEP =========================
     // ENTER STOP MODE
     wake_source = 0; // reset wake source for next loop
-    // UART_SendString(&huart3, "Going to bed\r\n");
+    UART_SendString(&huart3, "Going to bed in 2s \r\n");
+    HAL_Delay(3000);
     HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
-    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
-    //HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
+    //HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
+    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
     SystemClock_Config();
     HAL_ResumeTick();
+    UART_SendString(&huart3, "Woke up \r\n");
+
   /*
     
     UART_SendString(&huart3, "DEBUG: Checking wake source\r\n");
@@ -570,7 +576,7 @@ int main(void)
     }
 
     */
-     /* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -583,7 +589,7 @@ int main(void)
   uint32_t sectors_written_read = SD_Stream_GetCurrentSector() - DATA_START_SECTOR;
 
 
-  SD_Stream_ReadDebug(DATA_START_SECTOR, DATA_START_SECTOR + sectors_written_read);
+  //SD_Stream_ReadDebug(DATA_START_SECTOR, DATA_START_SECTOR + sectors_written_read);
   //SD_Stream_ReadDebug(DATA_START_SECTOR, sectors_written_read);
 
 
@@ -603,7 +609,6 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
- 
   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
   {
     Error_Handler();
@@ -1314,17 +1319,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
 }
 
-
-
 void lora_send(uint8_t *pData, uint16_t size) {
   // Wrapper function for sending data over LORA
     // RE-ASSERT Power to LORA
     HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, SET);
     HAL_UART_Transmit(&hlpuart1, pData, size, 100);
 }
-
-
-
 
 void SD_SpeedTest(void) {
     char uart[128];
