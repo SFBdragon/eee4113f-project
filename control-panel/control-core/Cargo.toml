@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-control-sys = { path = "../control-sys" }
+control-data-link = { path = "../control-data-link" }
 control-protocol = { path = "../control-protocol" }
 crc = "3.4.0"
 crossbeam-channel = "0.5.15"

@@ -23,31 +23,26 @@ pub mod hal {
         fn is_module_attached(&self) -> bool;
         fn initialize_module(&self) -> Result<(), StatusError>;
         fn shutdown_module(&self);
-        fn get_byterate(&self) -> u32;
         fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError>;
         fn recv_packet(&self) -> Result<WiFiPacket, StatusError>;
     }
-    pub struct WiFiModule;
+    pub struct WiFiRadio;
 
-    impl WiFiInterface for WiFiModule {
+    impl WiFiInterface for WiFiRadio {
         fn is_module_attached(&self) -> bool {
-            control_sys::is_lora_module_attached()
+            control_data_link::is_lora_module_attached()
         }
 
         fn initialize_module(&self) -> Result<(), StatusError> {
-            from_ffi(control_sys::initialize_lora_module())
+            from_ffi(control_data_link::initialize_lora_module())
         }
 
         fn shutdown_module(&self) {
-            control_sys::shutdown_lora_module();
-        }
-
-        fn get_byterate(&self) -> u32 {
-            control_sys::get_lora_byterate()
+            control_data_link::shutdown_lora_module();
         }
 
         fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError> {
-            from_ffi(control_sys::send_wifi_packet(
+            from_ffi(control_data_link::send_wifi_packet(
                 dst_mac.to_u64(),
                 bytes.as_ptr(),
                 bytes.len() as _,
@@ -58,7 +53,7 @@ pub mod hal {
             let mut src_mac = 0u64;
             let mut len = 0u16;
             let mut vec = vec![0u8; MAX_WIFI_RECV_PACKET_LEN];
-            from_ffi(control_sys::recv_wifi_packet(
+            from_ffi(control_data_link::recv_wifi_packet(
                 &mut src_mac,
                 vec.as_mut_array::<MAX_WIFI_RECV_PACKET_LEN>().unwrap(),
                 &mut len,
@@ -94,7 +89,7 @@ pub enum WiFiEvent {
 }
 
 pub fn start_wifi_listener_thread(controller_addr: LoRaAddr) -> Receiver<WiFiEvent> {
-    start_wifi_listener_thread_with_hal(controller_addr, Arc::new(hal::WiFiModule))
+    start_wifi_listener_thread_with_hal(controller_addr, Arc::new(hal::WiFiRadio))
 }
 
 pub fn start_wifi_listener_thread_with_hal(

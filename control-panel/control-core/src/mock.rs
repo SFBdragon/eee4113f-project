@@ -142,9 +142,9 @@ impl crate::lora::hal::LoRaInterface for MockModule {
     }
 
     fn send_packet(&self, bytes: &[u8]) -> Result<(), crate::drivers::StatusError> {
-        fn set_timer_no_op(_t_ms: u32) {}
-        fn cancel_timer_no_op() {}
-        fn get_time() -> u32 {
+        extern "C" fn set_timer_no_op(_t_ms: u32) {}
+        extern "C" fn cancel_timer_no_op() {}
+        extern "C" fn get_time() -> u32 {
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -282,10 +282,6 @@ impl hal::WiFiInterface for MockModule {
     }
 
     fn shutdown_module(&self) {}
-
-    fn get_byterate(&self) -> u32 {
-        todo!()
-    }
 
     fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), crate::drivers::StatusError> {
         let mut state = self.state();

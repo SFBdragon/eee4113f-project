@@ -38,27 +38,30 @@ pub mod hal {
             timeout_ms: u32,
         ) -> Result<(), StatusError>;
     }
-    pub struct LoRaSys;
+    pub struct LoRaRadio;
 
-    impl LoRaInterface for LoRaSys {
+    impl LoRaInterface for LoRaRadio {
         fn is_module_attached(&self) -> bool {
-            control_sys::is_lora_module_attached()
+            control_data_link::is_lora_module_attached()
         }
 
         fn initialize_module(&self) -> Result<(), StatusError> {
-            from_ffi(control_sys::initialize_lora_module())
+            from_ffi(control_data_link::initialize_lora_module())
         }
 
         fn shutdown_module(&self) {
-            control_sys::shutdown_lora_module();
+            control_data_link::shutdown_lora_module();
         }
 
         fn get_lora_byterate(&self) -> u32 {
-            control_sys::get_lora_byterate()
+            control_data_link::get_lora_byterate()
         }
 
         fn send_packet(&self, bytes: &[u8]) -> Result<(), StatusError> {
-            from_ffi(control_sys::send_lora_packet(bytes.as_ptr(), bytes.len()))
+            from_ffi(control_data_link::send_lora_packet(
+                bytes.as_ptr(),
+                bytes.len(),
+            ))
         }
 
         fn recv_packet(
@@ -67,7 +70,7 @@ pub mod hal {
             len: &mut usize,
             timeout_ms: u32,
         ) -> Result<(), StatusError> {
-            from_ffi(control_sys::recv_lora_packet(
+            from_ffi(control_data_link::recv_lora_packet(
                 buffer.as_mut_ptr().cast(),
                 len,
                 timeout_ms,
@@ -89,7 +92,7 @@ pub enum LoraEvent {
 }
 
 pub fn start_lora_thread(controller_addr: LoRaAddr) -> (Sender<LoraCommand>, Receiver<LoraEvent>) {
-    start_lora_thread_with_hal(controller_addr, Arc::new(hal::LoRaSys))
+    start_lora_thread_with_hal(controller_addr, Arc::new(hal::LoRaRadio))
 }
 
 pub fn start_lora_thread_with_hal(

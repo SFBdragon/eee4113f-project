@@ -848,13 +848,21 @@ dependencies = [
 name = "control-core"
 version = "0.1.0"
 dependencies = [
+ "control-data-link",
  "control-protocol",
- "control-sys",
  "crc",
  "crc-fast",
  "crossbeam-channel",
  "rand 0.10.1",
  "tracing",
+]
+
+[[package]]
+name = "control-data-link"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "control-protocol",
 ]
 
 [[package]]
@@ -883,15 +891,6 @@ version = "0.1.0"
 name = "control-protocol-static"
 version = "0.1.0"
 dependencies = [
- "control-protocol",
- "panic-halt",
-]
-
-[[package]]
-name = "control-sys"
-version = "0.1.0"
-dependencies = [
- "cc",
  "control-protocol",
 ]
 
@@ -2878,6 +2877,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mock-module"
+version = "0.1.0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "moxcms"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3502,12 +3508,6 @@ checksum = "36820e9051aca1014ddc75770aab4d68bc1e9e632f0f5627c4086bc216fb583b"
 dependencies = [
  "ttf-parser",
 ]
-
-[[package]]
-name = "panic-halt"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de96540e0ebde571dc55c73d60ef407c653844e6f9a1e2fdbd40c07b9252d812"
 
 [[package]]
 name = "parking"

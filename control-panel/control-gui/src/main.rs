@@ -61,7 +61,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let (controller, mock) = control_core::Controller::mocked();
+    let (controller, mock) = control_core::Controller::mocked2();
 
     info!(%controller.addr, "Controller address selected.");
 
@@ -471,6 +471,8 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
                         let (block_index, block) =
                             message.split_first_chunk::<{ size_of::<u64>() }>().unwrap();
                         let block_id = u64::from_le_bytes(*block_index);
+
+                        tracing::warn!(%block_id, "block_id received");
 
                         let db_conn = db::Database::open().unwrap();
                         db_conn.write_block(addr, block_id, block).unwrap();

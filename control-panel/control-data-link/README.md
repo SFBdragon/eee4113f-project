@@ -1,4 +1,4 @@
-# `control-sys`
+# `control-data-link`
 
 Defines the interface between the Control Panel App and the C/C++ network I/O
 drivers written by Tamryn.

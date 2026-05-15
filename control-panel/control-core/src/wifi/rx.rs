@@ -86,6 +86,8 @@ impl WiFiRx {
             // The sync word is allowing us to single out the device we want to connect to,
             // as determined by the LoRa-based control communication.
 
+            tracing::debug!("FLAG SYN");
+
             if frame.payload == &self.controller_addr.to_le_bytes() {
                 // Prepare to sync to this connection if we hear back again.
                 self.syn_ack.insert(module_mac, frame.seq);
@@ -266,7 +268,7 @@ impl Connection {
     }
 }
 
-fn compute_crc_raw(data: *const u8, len: usize) -> u16 {
+extern "C" fn compute_crc_raw(data: *const u8, len: usize) -> u16 {
     let buf = unsafe { std::slice::from_raw_parts(data, len) };
     crate::crc::compute_crc(buf)
 }

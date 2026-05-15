@@ -12,9 +12,9 @@ use super::common::*;
 pub struct Sender {
     pub state: SenderState,
 
-    pub set_timer: fn(u32),
-    pub cancel_timer: fn(),
-    pub get_time_ms: fn() -> u32,
+    pub set_timer: extern "C" fn(u32),
+    pub cancel_timer: extern "C" fn(),
+    pub get_time_ms: extern "C" fn() -> u32,
     pub crc_fn: CrcFn,
 }
 
@@ -31,16 +31,16 @@ pub enum SenderState {
     },
 }
 
-fn default_set_timer(_: u32) {
+extern "C" fn default_set_timer(_: u32) {
     panic!()
 }
-fn default_cancel_timer() {
+extern "C" fn default_cancel_timer() {
     panic!()
 }
-fn default_get_time() -> u32 {
+extern "C" fn default_get_time() -> u32 {
     panic!()
 }
-fn default_crc_fn(_: *const u8, _: usize) -> u16 {
+extern "C" fn default_crc_fn(_: *const u8, _: usize) -> u16 {
     panic!()
 }
 
@@ -63,9 +63,9 @@ impl Sender {
     pub fn connect(
         &mut self,
         controller_addr: LoRaAddr,
-        set_timer: fn(u32),
-        cancel_timer: fn(),
-        get_time: fn() -> u32,
+        set_timer: extern "C" fn(u32),
+        cancel_timer: extern "C" fn(),
+        get_time: extern "C" fn() -> u32,
         crc_fn: CrcFn,
     ) {
         self.set_timer = set_timer;
@@ -148,7 +148,7 @@ impl Sender {
                 SenderState::Syn { syn_sent, .. } => {
                     if *syn_sent && raw[0] & FLAG_ACK != 0 && raw[0] & FLAG_SYN != 0 {
                         (self.cancel_timer)();
-                        let mut conn = SenderConn::new(
+                        let conn = SenderConn::new(
                             self.set_timer,
                             self.cancel_timer,
                             self.get_time_ms,
@@ -213,16 +213,16 @@ pub struct SenderConn {
     pub rtt: RttEstimator,
     pub aimd: WindowController,
     pub crc_fn: CrcFn,
-    pub set_timer: fn(u32),
-    pub cancel_timer: fn(),
-    pub get_time_ms: fn() -> u32,
+    pub set_timer: extern "C" fn(u32),
+    pub cancel_timer: extern "C" fn(),
+    pub get_time_ms: extern "C" fn() -> u32,
 }
 
 impl SenderConn {
     pub const fn new(
-        set_timer: fn(u32),
-        cancel_timer: fn(),
-        get_time_ms: fn() -> u32,
+        set_timer: extern "C" fn(u32),
+        cancel_timer: extern "C" fn(),
+        get_time_ms: extern "C" fn() -> u32,
         crc_fn: CrcFn,
     ) -> Self {
         Self {
@@ -350,7 +350,7 @@ impl SenderConn {
     pub fn on_recv_ack(&mut self, raw: &[u8]) -> bool {
         let ack = match AckFrame::parse(raw, self.crc_fn) {
             Ok(a) => a,
-            Err(e) => return false,
+            Err(_) => return false,
         };
 
         // Handling ack_base advance.

@@ -1,0 +1,10 @@
+[package]
+name = "mock-module"
+version = "0.1.0"
+edition = "2024"
+links = "stm"
+
+[dependencies]
+
+[build-dependencies]
+cc = "1"

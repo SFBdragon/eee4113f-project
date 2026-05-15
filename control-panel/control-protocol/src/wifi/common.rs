@@ -259,7 +259,7 @@ pub mod test_utils {
 
     /// Fake CRC: XOR all bytes into the low byte, high byte always 0xAB.
     /// Deterministic and collision-free enough for unit tests.
-    pub fn test_crc(data: *const u8, len: usize) -> u16 {
+    pub extern "C" fn test_crc(data: *const u8, len: usize) -> u16 {
         let buf = unsafe { std::slice::from_raw_parts(data, len) };
         let low = buf.iter().fold(0u8, |acc, &b| acc ^ b);
         0xAB00 | low as u16
@@ -290,9 +290,9 @@ pub mod test_utils {
         }
     }
 
-    pub fn noop_timer_set(_ms: u32) {}
-    pub fn noop_timer_cancel() {}
-    pub fn time_zero() -> u32 {
+    pub extern "C" fn noop_timer_set(_ms: u32) {}
+    pub extern "C" fn noop_timer_cancel() {}
+    pub extern "C" fn time_zero() -> u32 {
         0
     }
 }

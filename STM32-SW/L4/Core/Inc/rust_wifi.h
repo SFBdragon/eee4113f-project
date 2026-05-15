@@ -15,10 +15,7 @@ typedef uint32_t (*WifiGetTimeFn)(void);
 
 // --- WiFi Ping Functions ---
 
-/**
-* Returns the required buffer size for a ping packet.
-*/
-uint16_t wifi_ping_len(void);
+#define WIFI_PING_SIZE 7
 
 /**
 * Writes the bytes of a ping to a buffer.
