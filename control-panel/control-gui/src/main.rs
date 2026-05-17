@@ -61,7 +61,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let (controller, mock) = control_core::Controller::mocked2();
+    let (controller, mock) = control_core::Controller::mocked();
 
     info!(%controller.addr, "Controller address selected.");
 

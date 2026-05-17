@@ -1,11 +1,8 @@
 use std::path::Path;
 
-
 const SOURCE_DIR: &str = "../../laptop-drivers/src";
 
-const C_SOURCE_FILES: [&str; 1] = [
-    "lib.c",
-];
+const C_SOURCE_FILES: [&str; 5] = ["lib.c", "lora.c", "at_protocol.c", "serial.c", "wifi.c"];
 
 const INCLUDE_DIR: &str = "../../laptop-drivers/include";
 
@@ -19,7 +16,7 @@ fn main() {
     for c_file in sources.iter() {
         println!("cargo::rerun-if-changed={}", c_file.display());
     }
-    
+
     // Build the C files as object files and statically link them.
     cc::Build::new()
         .files(sources.iter())
