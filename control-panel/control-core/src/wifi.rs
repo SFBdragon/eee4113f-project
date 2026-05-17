@@ -28,46 +28,46 @@ pub mod hal {
     }
     pub struct WiFiRadio;
 
-    impl WiFiInterface for WiFiRadio {
-        fn is_module_attached(&self) -> bool {
-            control_data_link::is_lora_module_attached()
-        }
+    // impl WiFiInterface for WiFiRadio {
+    //     fn is_module_attached(&self) -> bool {
+    //         control_data_link::is_lora_module_attached()
+    //     }
 
-        fn initialize_module(&self) -> Result<(), StatusError> {
-            from_ffi(control_data_link::initialize_wifi_module())
-        }
+    //     fn initialize_module(&self) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::initialize_wifi_module())
+    //     }
 
-        fn shutdown_module(&self) {
-            control_data_link::shutdown_lora_module();
-        }
+    //     fn shutdown_module(&self) {
+    //         control_data_link::shutdown_lora_module();
+    //     }
 
-        fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError> {
-            from_ffi(control_data_link::send_wifi_packet(
-                dst_mac.to_u64(),
-                bytes.as_ptr(),
-                bytes.len() as _,
-            ))
-        }
+    //     fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::send_wifi_packet(
+    //             dst_mac.to_u64(),
+    //             bytes.as_ptr(),
+    //             bytes.len() as _,
+    //         ))
+    //     }
 
-        fn recv_packet(&self) -> Result<WiFiPacket, StatusError> {
-            let mut src_mac = 0u64;
-            let mut len = 0u16;
-            let mut vec = vec![0u8; MAX_WIFI_RECV_PACKET_LEN];
-            from_ffi(control_data_link::recv_wifi_packet(
-                &mut src_mac,
-                vec.as_mut_array::<MAX_WIFI_RECV_PACKET_LEN>().unwrap(),
-                &mut len,
-            ))
-            .map(|_| {
-                vec.truncate(len as _);
+    //     fn recv_packet(&self) -> Result<WiFiPacket, StatusError> {
+    //         let mut src_mac = 0u64;
+    //         let mut len = 0u16;
+    //         let mut vec = vec![0u8; MAX_WIFI_RECV_PACKET_LEN];
+    //         from_ffi(control_data_link::recv_wifi_packet(
+    //             &mut src_mac,
+    //             vec.as_mut_array::<MAX_WIFI_RECV_PACKET_LEN>().unwrap(),
+    //             &mut len,
+    //         ))
+    //         .map(|_| {
+    //             vec.truncate(len as _);
 
-                WiFiPacket {
-                    from: Mac::from(src_mac),
-                    data: vec,
-                }
-            })
-        }
-    }
+    //             WiFiPacket {
+    //                 from: Mac::from(src_mac),
+    //                 data: vec,
+    //             }
+    //         })
+    //     }
+    // }
 }
 
 #[derive(Debug)]
@@ -86,10 +86,6 @@ pub enum WiFiEvent {
 
     /// Got a ping over WiFi.
     Ping((Mac, LoRaAddr)),
-}
-
-pub fn start_wifi_listener_thread(controller_addr: LoRaAddr) -> Receiver<WiFiEvent> {
-    start_wifi_listener_thread_with_hal(controller_addr, Arc::new(hal::WiFiRadio))
 }
 
 pub fn start_wifi_listener_thread_with_hal(

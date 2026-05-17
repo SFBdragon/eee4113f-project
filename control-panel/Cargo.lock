@@ -860,7 +860,6 @@ dependencies = [
 name = "control-core"
 version = "0.1.0"
 dependencies = [
- "control-data-link",
  "control-protocol",
  "crc",
  "crc-fast",

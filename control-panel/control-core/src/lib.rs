@@ -26,21 +26,21 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn new() -> Self {
-        let addr = LoRaAddr::from_raw(rand::random());
+    // pub fn new() -> Self {
+    //     let addr = LoRaAddr::from_raw(rand::random());
 
-        let wifi_hal = Arc::new(wifi::hal::WiFiRadio);
-        let wifi_receiver = wifi::start_wifi_listener_thread_with_hal(addr, wifi_hal.clone());
-        let (lora_commands, lora_events) = lora::start_lora_thread(addr);
+    //     let wifi_hal = Arc::new(wifi::hal::WiFiRadio);
+    //     let wifi_receiver = wifi::start_wifi_listener_thread_with_hal(addr, wifi_hal.clone());
+    //     let (lora_commands, lora_events) = lora::start_lora_thread_with_hal(addr);
 
-        Self {
-            addr,
-            wifi_hal,
-            wifi_receiver,
-            lora_commands,
-            lora_events,
-        }
-    }
+    //     Self {
+    //         addr,
+    //         wifi_hal,
+    //         wifi_receiver,
+    //         lora_commands,
+    //         lora_events,
+    //     }
+    // }
 
     pub fn mocked() -> (Self, Arc<MockModule>) {
         let addr = LoRaAddr::from_raw(0x1CAD);
