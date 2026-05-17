@@ -10,6 +10,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install System Dependencies (Linux Only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfontconfig1-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
