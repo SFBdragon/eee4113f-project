@@ -36,7 +36,7 @@ fn main() {
 fn build_protocol_static() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let sub_crate_path = manifest_dir.join("../control-protocol-static");
+    let crate_path = manifest_dir.join("../control-protocol-static");
 
     // Run cargo build on the sub-crate
     let profile = env::var("PROFILE").unwrap(); // "debug" or "release"
@@ -49,10 +49,8 @@ fn build_protocol_static() {
         .env_remove("CARGO_ENCODED_RUSTFLAGS")
         .env("RUSTFLAGS", "-C panic=abort")
         .arg("build")
-        .arg("--features")
-        .arg("for-rust")
         .arg("--manifest-path")
-        .arg(sub_crate_path.join("Cargo.toml"))
+        .arg(crate_path.join("Cargo.toml"))
         .arg("--target-dir")
         .arg(&out_dir)
         .args(profile_arg)
@@ -76,6 +74,10 @@ fn build_protocol_static() {
     // Re-run this script if the sub-crate source changes
     println!(
         "cargo:rerun-if-changed={}",
-        sub_crate_path.join("src").display()
+        crate_path.join("src").display()
+    );
+    println!(
+        "cargo:rerun-if-changed={}",
+        crate_path.join("Cargo.toml").display()
     );
 }

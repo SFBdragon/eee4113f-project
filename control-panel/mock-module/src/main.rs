@@ -8,13 +8,24 @@ mod injector;
 mod netio_impl;
 mod state;
 
-use std::io::{self, BufRead, Write};
 use std::net::UdpSocket;
-use std::os::unix::net::UnixDatagram;
 use std::time::Duration;
 
-use ffi::Policy;
-use state::sim;
+const WIFI_RELIABILITY_TEST: bool = false;
+const WIFI_RECV_DROP_RATE: f64 = 0.33;
+const WIFI_SEND_DROP_RATE: f64 = 0.33;
+
+const WIFI_CORRUPT_TEST: bool = false;
+const WIFI_RECV_BITFLIP_RATE: f64 = 0.0001;
+const WIFI_SEND_BITFLIP_RATE: f64 = 0.0001;
+
+const LORA_RELIABILITY_TEST: bool = true;
+const LORA_RECV_DROP_RATE: f64 = 0.33;
+const LORA_SEND_DROP_RATE: f64 = 0.33;
+
+const LORA_CORRUPT_TEST: bool = true;
+const LORA_RECV_BITFLIP_RATE: f64 = 0.0001;
+const LORA_SEND_BITFLIP_RATE: f64 = 0.0001;
 
 fn main() {
     let lora_sock = UdpSocket::bind("127.0.0.1:12001").unwrap();
@@ -34,31 +45,23 @@ fn main() {
     netio_impl::init_sockets(lora_sock, wifi_sock);
 
     // Kick off the block injector thread.
-    std::thread::spawn(injector::run_injector);
+    // std::thread::spawn(injector::run_injector);
 
-    // Call Shaun's C init.  This will call back into initialize_networking(),
-    // initialize_lora(), initialize_wifi() etc., which are all resolved above.
+    {
+        // Seed initial state for ATPs.
+        let lock = state::sim();
+        let mut state = lock.lock().unwrap();
+
+        let block = (0..200u8).into_iter().collect::<Vec<_>>();
+        for i in 0..100 {
+            state.append_block(&block).unwrap();
+        }
+    }
+
     eprintln!("[stm32_sim] calling protocol_init()");
     unsafe { ffi::protocol_init() };
     eprintln!("[stm32_sim] protocol_init() returned — entering event loop");
     println!("Type 'help' for commands.");
-
-    // // Event loop: poll sockets + timers on a tight sleep, handle stdin lines.
-    // let stdin = io::stdin();
-    // let stdin_lines = stdin.lock().lines().collect::<Vec<_>>();
-
-    // // We need non-blocking stdin.  On Linux we can just use a separate thread.
-    // let (tx, rx) = std::sync::mpsc::channel::<String>();
-    // std::thread::spawn(move || {
-    //     for line in stdin_lines {
-    //         match line {
-    //             Ok(l) => {
-    //                 let _ = tx.send(l);
-    //             }
-    //             Err(_) => break,
-    //         }
-    //     }
-    // });
 
     let poll_interval = Duration::from_millis(10);
 

@@ -6,8 +6,6 @@
 //
 // Nothing in here is `unsafe`-masked — callers decide that.
 
-use std::ffi::c_void;
-
 // ---------- Types mirrored from netio.h ---------- //
 
 pub type Status = u16;
@@ -15,10 +13,10 @@ pub type BufLen = u16;
 
 pub const STATUS_SUCCESS: Status = 0;
 
-pub const MAX_LORA_RECV_PACKET_LEN: usize = 64;
-pub const MAX_LORA_SEND_PACKET_LEN: usize = 64;
-pub const MAX_WIFI_RECV_PACKET_LEN: usize = 255;
-pub const MAX_WIFI_SEND_PACKET_LEN: usize = 255;
+pub const MAX_LORA_RECV_PACKET_LEN: usize = 255;
+pub const MAX_LORA_SEND_PACKET_LEN: usize = 255;
+pub const MAX_WIFI_RECV_PACKET_LEN: usize = 506;
+pub const MAX_WIFI_SEND_PACKET_LEN: usize = 506;
 
 // ---------- Types mirrored from control.h ---------- //
 
@@ -38,8 +36,8 @@ pub struct RecordHeader {
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Policy {
-    Overwrite = 0,
-    Preserve = 1,
+    Preserve = 0,
+    Overwrite = 1,
 }
 
 // ---------- Functions implemented in protocol.c, called by Rust ---------- //

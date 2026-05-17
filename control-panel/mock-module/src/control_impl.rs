@@ -4,27 +4,19 @@
 // These are the STM32L4 core / HAL shims.  The C code (protocol.c) calls
 // into these via normal linking; no dynamic dispatch needed.
 
-use std::ffi::c_void;
 use std::time::Instant;
 
 use crate::ffi::Policy;
 use crate::state::{Interval, PendingTimeout, TOTAL_BLOCKS, sim};
 
-// ------------------------------------------------------------------
 // Networking bootstrap
-// ------------------------------------------------------------------
 
-/// Called by Shaun's code at startup.  Our Rust main drives startup
-/// sequencing, so this is a no-op here — the socket threads are already
-/// running when protocol_init() is called.
 #[unsafe(no_mangle)]
 pub extern "C" fn initialize_networking() {
     eprintln!("[sim] initialize_networking() called");
 }
 
-// ------------------------------------------------------------------
-// Timer
-// ------------------------------------------------------------------
+// Timers
 
 #[unsafe(no_mangle)]
 pub extern "C" fn call_after_n_ms(n: u32, callback: Option<unsafe extern "C" fn()>) {
@@ -35,14 +27,14 @@ pub extern "C" fn call_after_n_ms(n: u32, callback: Option<unsafe extern "C" fn(
         fires_at,
         callback: cb,
     });
-    eprintln!("[sim] call_after_n_ms({n}) armed");
+    // eprintln!("[sim] call_after_n_ms({n}) armed");
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn cancel_timeout() {
     let mut state = sim().lock().unwrap();
     if state.timeout.take().is_some() {
-        eprintln!("[sim] cancel_timeout()");
+        // eprintln!("[sim] cancel_timeout()");
     }
 }
 
@@ -69,20 +61,16 @@ pub extern "C" fn cancel_timeout_wifi_ping() {
     }
 }
 
-// ------------------------------------------------------------------
-// Wallclock (sim epoch)
-// ------------------------------------------------------------------
+// Wallclock
 
 #[unsafe(no_mangle)]
 pub extern "C" fn get_time_since_epoch_ms() -> u32 {
     let state = sim().lock().unwrap();
-    let elapsed = state.epoch.elapsed().as_millis() as u32; // wraps at ~49 days, matches declaration
+    let elapsed = state.epoch.elapsed().as_millis() as u32;
     elapsed
 }
 
-// ------------------------------------------------------------------
 // LoRa receive window
-// ------------------------------------------------------------------
 
 #[unsafe(no_mangle)]
 pub extern "C" fn set_lora_recv_window(on_period: u16, total_period: u16) {
@@ -92,9 +80,7 @@ pub extern "C" fn set_lora_recv_window(on_period: u16, total_period: u16) {
     eprintln!("[sim] set_lora_recv_window(on={on_period}s, total={total_period}s)");
 }
 
-// ------------------------------------------------------------------
 // Storage
-// ------------------------------------------------------------------
 
 #[unsafe(no_mangle)]
 pub extern "C" fn storage_total_blocks() -> u64 {
@@ -165,7 +151,7 @@ pub extern "C" fn allow_overwrite(upto_block: u64) {
 /// No-op in sim: we have no write-back buffer.
 #[unsafe(no_mangle)]
 pub extern "C" fn flush_block_buffer_to_disk() {
-    eprintln!("[sim] flush_block_buffer_to_disk() (no-op in sim)");
+    eprintln!("[sim] flush_block_buffer_to_disk()");
 }
 
 // Slow manual version of the CRC used in the app.
@@ -175,8 +161,8 @@ pub extern "C" fn crc16(data: *const u8, len: usize) -> u16 {
     for i in 0..len {
         let byte = unsafe { data.wrapping_add(i).read() } as u16;
         crc ^= byte << 8;
-        for b in 0..8 {
-            if (crc & 0x8000 != 0) {
+        for _b in 0..8 {
+            if crc & 0x8000 != 0 {
                 crc = crc << 1 as u16 ^ 0xA7D3;
             } else {
                 crc <<= 1;

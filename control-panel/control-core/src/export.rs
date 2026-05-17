@@ -1,8 +1,8 @@
 use crate::db;
 
-use control_core::protocol::LoRaAddr;
+use crate::protocol::LoRaAddr;
 use rfd::FileDialog;
-use serde::Serialize;
+use serde_derive::Serialize;
 
 use std::{
     fs::{self},
@@ -62,7 +62,7 @@ fn write_export(json_p: PathBuf, bin_p: PathBuf, addr: LoRaAddr) {
         let entry = Entry {
             block_id: block,
             offset: pos,
-            length: pos + data.len() as u64,
+            length: data.len() as u64,
         };
         entries.push(entry);
 

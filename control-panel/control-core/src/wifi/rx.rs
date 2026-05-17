@@ -151,7 +151,7 @@ impl WiFiRx {
 
 struct Connection {
     /// Ring buffer indexed by seq mod MAX_WINDOW.
-    slots: [RecvSlot; MAX_WINDOW],
+    slots: [RecvSlot; WINDOW_LEN],
     recv_base: u8,
     /// Frames received since last ACK (for delayed-ACK N-frame trigger).
     frames_since_ack: usize,
@@ -173,25 +173,20 @@ impl Connection {
         }
     }
 
-    /// Build the current ACK bitmap reflecting which slots in [recv_base,
-    /// recv_base + MAX_WINDOW) have been received.
-    fn build_bitmap(&self) -> WindowBitMap {
+    /// Serialize an ACK frame for the current window state.
+    fn make_ack(&self) -> [u8; ACK_SIZE] {
         let mut bitmap = 0;
-        for i in 0..MAX_WINDOW {
-            let idx = (self.recv_base as usize + i) % MAX_WINDOW;
+        for i in 0..WINDOW_LEN {
+            let idx = (self.recv_base as usize + i) % WINDOW_LEN;
             if self.slots[idx].data.is_some() {
                 bitmap |= 1 << i;
             }
         }
-        bitmap
-    }
 
-    /// Serialize an ACK frame for the current window state.
-    fn make_ack(&self) -> [u8; ACK_SIZE] {
         let frame = AckFrame {
             flags: FLAG_ACK,
             ack_base: self.recv_base,
-            bitmap: self.build_bitmap(),
+            bitmap,
         };
         frame.to_bytes(compute_crc_raw)
     }
@@ -199,7 +194,7 @@ impl Connection {
     /// Drain in-order frames from recv_base and return the first one ready for
     /// delivery (caller must call repeatedly until None to drain the full run).
     fn drain(&mut self) -> Option<(u8, Box<[u8]>)> {
-        let idx = (self.recv_base as usize) % MAX_WINDOW;
+        let idx = (self.recv_base as usize) % WINDOW_LEN;
         if self.slots[idx].data.is_some() {
             let payload = self.slots[idx].data.take().unwrap();
             let flags = self.slots[idx].flags;
@@ -218,16 +213,12 @@ impl Connection {
         timer: &mut Option<crossbeam_channel::Receiver<Instant>>,
         mut on_message: impl FnMut(Vec<u8>),
     ) -> Option<[u8; ACK_SIZE]> {
-        let seq = frame.seq;
-
-        // Discard duplicates or frames outside our window
-        if !seq_in_window(seq, self.recv_base, MAX_WINDOW as u8) {
-            // Out of window — send an ACK anyway (may be a retransmit of
-            // something we already ACKed; ACK helps the sender advance)
+        if !seq_in_window(frame.seq, self.recv_base, WINDOW_LEN as u8) {
+            // ACK to advance sender window
             return Some(self.make_ack());
         }
 
-        let idx = (seq as usize) % MAX_WINDOW;
+        let idx = (frame.seq as usize) % WINDOW_LEN;
         if self.slots[idx].data.is_none() {
             let boxed = frame.payload.to_vec().into_boxed_slice();
             self.slots[idx].data = Some(boxed);
@@ -296,7 +287,7 @@ mod tests {
         let frame = DataFrame {
             flags,
             seq,
-            len: payload.len() as u8,
+            len: payload.len() as _,
             payload,
         };
         let len = frame.serialize(&mut buf, compute_crc_raw);
@@ -650,7 +641,7 @@ mod tests {
         let mut messages = Vec::new();
         // recv_base is 1 after establish (seq 0 drained); window is [1, 1+MAX_WINDOW).
         // MAX_WINDOW = 32, so seq 33 is out of window.
-        let oow = make_data_frame(1 + MAX_WINDOW as u8, FLAG_END, b"oow");
+        let oow = make_data_frame(1 + WINDOW_LEN as u8, FLAG_END, b"oow");
         let ack = feed(&mut recv, some_mac(), &oow, &mut messages);
 
         assert_eq!(
@@ -885,9 +876,7 @@ mod tests {
     #[test]
     fn integration_single_message_round_trip() {
         // Establish: use sender helpers from test_utils
-        let mut sender = make_sender();
-        sender.aimd.cwnd = MAX_WINDOW as u8;
-
+        let mut sender = make_sender_pump_1();
         let mut recv = make_connected(some_mac(), 0);
 
         // Push a short message through the sender.
@@ -925,9 +914,7 @@ mod tests {
 
     #[test]
     fn integration_selective_retransmit_fills_gap() {
-        let mut sender = make_sender();
-        sender.aimd.cwnd = MAX_WINDOW as u8;
-
+        let mut sender = make_sender_pump_1();
         let mut recv = make_connected(some_mac(), 0);
 
         // Push three single-frame messages.
@@ -980,9 +967,7 @@ mod tests {
 
     #[test]
     fn integration_large_transfer_all_messages_delivered() {
-        let mut sender = make_sender();
-        sender.aimd.cwnd = MAX_WINDOW as u8;
-
+        let mut sender = make_sender_pump_1();
         let mut recv = make_connected(some_mac(), 0);
 
         let total = 50usize;
@@ -993,7 +978,6 @@ mod tests {
         let mut all_messages: Vec<Vec<u8>> = Vec::new();
 
         for payload in &payloads {
-            sender.aimd.cwnd = MAX_WINDOW as u8; // keep window pinned for delivery test
             sender.push_message(payload);
 
             let mut data = std::ptr::null();

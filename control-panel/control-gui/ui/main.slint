@@ -21,6 +21,7 @@ import { Storage } from "storage.slint";
 import { WiFi } from "wifi.slint";
 import { DataDump } from "datadump.slint";
 import { Export } from "export.slint";
+import { Status } from "status.slint";
 
 export { Theme }
 
@@ -52,14 +53,23 @@ export global ModuleState {
     in-out property <BlockId> storage_available_end;
     in-out property <BlockId> storage_overwriteable_upto;
 
-    in-out property <int> lora_recv_win_on_period;
-    in-out property <int> lora_recv_win_total_period;
+    in-out property <int> lora_recv_win_on_period: 5;
+    in-out property <int> lora_recv_win_total_period: 5;
+
+    in-out property <string> lat_lon: "Unknown";
 
     in-out property <bool> wifi_enabled;
     in-out property <bool> wifi_data_dumping;
 
-    in property <int> downloaded_bytes;
-    in property <int> remote_only_bytes;
+    private property <string> default_bytes:  "  0.0 B  ";
+    in property <string> total_bytes: default_bytes;
+    in property <string> protocted_bytes: default_bytes;
+    in property <string> overwritable_bytes: default_bytes;
+    in property <string> free_bytes: default_bytes;
+    in property <string> downloaded_bytes: default_bytes;
+    in property <string> remote_only_bytes: default_bytes;
+    in property <string> total_db_bytes: default_bytes;
+    in property <string> total_available_bytes: default_bytes;
 }
 
 export global DebugAppState {
@@ -71,7 +81,7 @@ export component AppWindow inherits Window {
 
     title: "Communication Module Control Panel";
     preferred-width: 1000px;
-    preferred-height: 1000px;
+    preferred-height: 940px;
     min-width: 600px;
     min-height: 300px;
     icon: @image-url("../assets/app_icon.png");
@@ -195,8 +205,9 @@ export component AppWindow inherits Window {
     private property <bool> scrollview-has-more-below: true;
 
     scroll := ScrollView {
-        vertical-stretch: 0;
-        mouse-drag-pan-enabled: true;
+        width: 100%;
+        height: 100%;
+        mouse-drag-pan-enabled: false;
 
         scrolled => {
             scrollview-has-more-below = (-self.viewport-y + self.height) < self.viewport-height;
@@ -205,9 +216,9 @@ export component AppWindow inherits Window {
         VerticalBox {
             alignment: start;
             vertical-stretch: 0;
-            max-width: 700px;
 
             lora_section := LoRa {
+
                 lora_attached: GlobalAppState.lora_attached;
                 are_we_lora_yet: root.are_we_lora_yet;
                 module_address: GlobalAppState.lora_module_addr;
@@ -223,6 +234,12 @@ export component AppWindow inherits Window {
                 set_lora_recv_window(addr, active, period) => {
                     root.set_lora_recv_window(addr, active, period);
                 }
+            }
+
+            status_section := Status {
+                enabled_prereq: GlobalAppState.lora_attached && root.are_we_lora_yet;
+                lat_lon: ModuleState.lat_lon;
+                module_addr: GlobalAppState.lora_module_addr;
             }
 
             storage_section := Storage {
@@ -246,6 +263,11 @@ export component AppWindow inherits Window {
                 }
 
                 storage_bar_image: root.storage_bar_image;
+
+                total_bytes: ModuleState.total_bytes;
+                reserved_bytes: ModuleState.protocted_bytes;
+                overwritable_bytes: ModuleState.overwritable_bytes;
+                free_bytes: ModuleState.free_bytes;
             }
 
             wifi_section := WiFi {
@@ -268,14 +290,16 @@ export component AppWindow inherits Window {
 
                 download_bar_image: root.download_bar_image;
 
-                remote_only_bytes: ModuleState.remote_only_bytes;
-
                 data_transfer_all() => {
                     root.request_wifi_data_dump(GlobalAppState.lora_module_addr, ModuleState.storage_available_begin, ModuleState.storage_available_end);
                 }
                 data_transfer_cancel => {
                     root.cancel_wifi_data_dump(GlobalAppState.lora_module_addr);
                 }
+
+                downloaded_bytes: ModuleState.downloaded_bytes;
+                remote_only_bytes: ModuleState.remote_only_bytes;
+                total_available_bytes: ModuleState.total_available_bytes;
             }
 
             export_section := Export {

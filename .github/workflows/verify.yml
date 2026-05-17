@@ -1,0 +1,27 @@
+name: Verify Cross-Platform Build
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        # runs-on handles the actual OS environment
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of zip
+          name: slint-app-${{ matrix.os }}
+          # Possible paths to executable
+          path: |
+            target/release/your-app-name
+            target/release/your-app-name.exe

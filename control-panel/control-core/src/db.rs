@@ -1,4 +1,4 @@
-use control_core::protocol::LoRaAddr;
+use crate::protocol::LoRaAddr;
 use rusqlite::{Connection, OptionalExtension, params};
 use std::path::PathBuf;
 
@@ -140,7 +140,7 @@ impl Database {
     /// Returns the first block_id strictly after `after` that is absent for `address`.
     /// Returns `None` if all blocks from `after+1` to `BLOCK_ID_MAX` are present,
     /// which in practice won't happen.
-    pub fn first_missing_after(
+    pub fn first_missing_from(
         &self,
         address: LoRaAddr,
         after: u64,
@@ -334,25 +334,25 @@ mod tests {
         }
         // Gap at 13 after a run of 10,11,12
         assert_eq!(
-            db.first_missing_after(LoRaAddr::from_raw(0x0001), 9)
+            db.first_missing_from(LoRaAddr::from_raw(0x0001), 10)
                 .unwrap(),
             13
         );
         // After 12, same gap
         assert_eq!(
-            db.first_missing_after(LoRaAddr::from_raw(0x0001), 12)
+            db.first_missing_from(LoRaAddr::from_raw(0x0001), 12)
                 .unwrap(),
             13
         );
         // 13 itself is missing, so after 12 → 13; after 13 → 14
         assert_eq!(
-            db.first_missing_after(LoRaAddr::from_raw(0x0001), 13)
+            db.first_missing_from(LoRaAddr::from_raw(0x0001), 13)
                 .unwrap(),
-            14
+            13
         );
         // After the last present block, next sequential id is missing
         assert_eq!(
-            db.first_missing_after(LoRaAddr::from_raw(0x0001), 16)
+            db.first_missing_from(LoRaAddr::from_raw(0x0001), 16)
                 .unwrap(),
             17
         );

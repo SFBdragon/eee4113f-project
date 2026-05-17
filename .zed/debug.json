@@ -1,0 +1,24 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "control-core: all tests",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "target/debug/control_core",
+    "args": ["test", "--package", "control-core", "--", "--nocapture"],
+    "cwd": "${ZED_WORKTREE_ROOT}/control-panel",
+    "env": {},
+  },
+  {
+    "label": "control-core: specific test",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "/usr/bin/cargo",
+    "args": ["test", "--package", "control-core", "--", "${ZED_CUSTOM_ARGS}", "--nocapture"],
+    "cwd": "${ZED_WORKTREE_ROOT}/control-panel",
+    "env": {},
+  },
+]

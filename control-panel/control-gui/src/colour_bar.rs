@@ -15,7 +15,7 @@ pub fn rasterize_range(buf: &mut [u8], colour: [u8; 4], lo: u64, hi: u64, total:
     let px_hi = hi * buf.len() as u64 / total / 4;
 
     // if lo <= hi {
-    for px in px_lo..px_hi {
+    for px in px_lo..=px_hi {
         let base = (px * 4) as usize;
         buf[base..(base + 4)].copy_from_slice(&colour);
     }

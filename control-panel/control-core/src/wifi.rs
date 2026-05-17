@@ -34,7 +34,7 @@ pub mod hal {
         }
 
         fn initialize_module(&self) -> Result<(), StatusError> {
-            from_ffi(control_data_link::initialize_lora_module())
+            from_ffi(control_data_link::initialize_wifi_module())
         }
 
         fn shutdown_module(&self) {
@@ -153,22 +153,26 @@ fn wifi_listener(
             };
 
             let to_send = match either {
-                Either::A(Ok(packet)) => rx.on_recv(
-                    packet.from,
-                    &packet.data,
-                    |mac| {
-                        let _ = sender.send(WiFiEvent::Connected(mac));
-                    },
-                    |mac| {
-                        let _ = sender.send(WiFiEvent::Disconnected(mac));
-                    },
-                    |m| {
-                        let _ = sender.send(WiFiEvent::ReceiveMessage(m));
-                    },
-                    |(m, a)| {
-                        let _ = sender.send(WiFiEvent::Ping((m, a)));
-                    },
-                ),
+                Either::A(Ok(packet)) => {
+                    tracing::debug!(?packet.data, "Received a packet");
+
+                    rx.on_recv(
+                        packet.from,
+                        &packet.data,
+                        |mac| {
+                            let _ = sender.send(WiFiEvent::Connected(mac));
+                        },
+                        |mac| {
+                            let _ = sender.send(WiFiEvent::Disconnected(mac));
+                        },
+                        |m| {
+                            let _ = sender.send(WiFiEvent::ReceiveMessage(m));
+                        },
+                        |(m, a)| {
+                            let _ = sender.send(WiFiEvent::Ping((m, a)));
+                        },
+                    )
+                }
                 Either::A(Err(status)) => match status {
                     StatusError::ModuleDetached => return Err(Disconnected),
                     StatusError::ReceiveTimeout => unreachable!(),

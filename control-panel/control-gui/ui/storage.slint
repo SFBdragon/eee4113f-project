@@ -27,9 +27,20 @@ export component Storage inherits HorizontalBox {
     out property <int> storage_bar_width: storage-bar.width / 1phx;
     in property <image> storage_bar_image;
 
-    in property <string> total_bytes;
-    in property <string> stored_bytes;
-    in property <string> reserved_bytes;
+    in property <string> total_bytes: "0 MiB";
+    in property <string> overwritable_bytes: "0 MiB";
+    in property <string> reserved_bytes: "0 MiB";
+    in property <string> free_bytes: "0 MiB";
+
+    property <bool> selected_overwrite: overwrite;
+
+    public function focus-me() {
+        if selected_overwrite {
+            preserve_radio.focus-me();
+        } else {
+            overwrite_radio.focus-me();
+        }
+    }
 
     Rectangle {
         background: enable_control ? Palette.background : Palette.alternate-background;
@@ -105,12 +116,10 @@ export component Storage inherits HorizontalBox {
                         }
                     }
 
-                    property <bool> selected_overwrite: overwrite;
-
                     HorizontalLayout {
                         spacing: 8pt;
 
-                        RadioButton {
+                        overwrite_radio := RadioButton {
                             text: "Overwrite Oldest Data";
                             checked: selected_overwrite && enable_control;
                             enabled: enable_control;
@@ -120,7 +129,7 @@ export component Storage inherits HorizontalBox {
                             }
                         }
 
-                        RadioButton {
+                        preserve_radio := RadioButton {
                             text: "Discard New Data";
                             checked: !selected_overwrite && enable_control;
                             enabled: enable_control;
@@ -164,17 +173,27 @@ export component Storage inherits HorizontalBox {
             VerticalBox {
 
                 HorizontalLayout {
+                    alignment: space-between;
 
                     Text {
                         text: "Storage Occupancy";
                         font-weight: Theme.bold-font-weight;
                         vertical-alignment: center;
-                        width: 120pt;
                     }
 
-                    Rectangle {
-                        horizontal-stretch: 5.0;
+                    Text {
+                        text: "Total Storage: " + total_bytes;
+                        font-weight: Theme.bold-font-weight;
+                        vertical-alignment: center;
                     }
+                }
+
+                storage-bar := ColorBar {
+                    segment-image: storage_bar_image;
+                }
+
+                HorizontalLayout {
+                    alignment: space-between;
 
                     HorizontalLayout {
                         alignment: start;
@@ -187,10 +206,14 @@ export component Storage inherits HorizontalBox {
                         }
 
                         Text {
-                            text: "Reclaimable";
+                            text: "Reclaimable: " + overwritable_bytes;
                             vertical-alignment: center;
                         }
                     }
+
+                    // Rectangle {
+                    //     horizontal-stretch: 1.0;
+                    // }
 
                     HorizontalLayout {
                         alignment: start;
@@ -203,10 +226,14 @@ export component Storage inherits HorizontalBox {
                         }
 
                         Text {
-                            text: "Used";
+                            text: "Used: " + reserved_bytes;
                             vertical-alignment: center;
                         }
                     }
+
+                    // Rectangle {
+                    //     horizontal-stretch: 1.0;
+                    // }
 
                     HorizontalLayout {
                         alignment: start;
@@ -219,14 +246,10 @@ export component Storage inherits HorizontalBox {
                         }
 
                         Text {
-                            text: "Free";
+                            text: "Free: " + free_bytes;
                             vertical-alignment: center;
                         }
                     }
-                }
-
-                storage-bar := ColorBar {
-                    segment-image: storage_bar_image;
                 }
             }
 

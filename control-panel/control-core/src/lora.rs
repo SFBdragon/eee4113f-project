@@ -248,7 +248,7 @@ fn lora_thread(
                     }
                     Err(e) => {
                         tracing::warn!(error = ?e, "Failed to parse LoRa frame.");
-                        continue 'retrans;
+                        break;
                     }
                 }
             }

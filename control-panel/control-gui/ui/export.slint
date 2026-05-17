@@ -16,6 +16,10 @@ export component Export inherits HorizontalBox {
 
     callback export(string);
 
+    public function focus-me() {
+        select-combo.focus();
+    }
+
     Rectangle {
         background: Palette.background;
         width: 100%;
@@ -55,15 +59,10 @@ export component Export inherits HorizontalBox {
 
             HorizontalBox {
 
-                Button {
-                    primary: true;
-                    text: "Export";
-                    enabled: select-combo.current-index > 0;
+                select-combo := ComboBox {
+                    model: none_and_addresses;
+                    current-index: 0;
                     width: Theme.first-col;
-
-                    clicked => {
-                        export(select-combo.current-value)
-                    }
                 }
 
                 VerticalLayout {
@@ -85,9 +84,15 @@ export component Export inherits HorizontalBox {
                     horizontal-stretch: 1.0;
                 }
 
-                select-combo := ComboBox {
-                    model: none_and_addresses;
-                    current-index: 0;
+                Button {
+                    primary: true;
+                    text: "Export";
+                    enabled: select-combo.current-index > 0;
+                    width: Theme.first-col;
+
+                    clicked => {
+                        export(select-combo.current-value)
+                    }
                 }
             }
         }

@@ -21,6 +21,10 @@ export component WiFi inherits HorizontalBox {
 
     callback set_wifi_enabled(string, bool);
 
+    public function focus-me() {
+        wifi_switch.focus();
+    }
+
     Rectangle {
         background: Palette.background;
         width: 100%;

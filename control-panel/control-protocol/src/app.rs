@@ -311,8 +311,8 @@ impl StorageInfo {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GpsInfo {
-    pub lat: u32,
-    pub lon: u32,
+    pub lat: i32,
+    pub lon: i32,
 }
 
 impl GpsInfo {
@@ -322,8 +322,8 @@ impl GpsInfo {
     }
 
     pub fn parse(buf: &[u8], pos: &mut usize) -> Result<Self, ParseError> {
-        let lat = read_next!(u32, buf, pos)?;
-        let lon = read_next!(u32, buf, pos)?;
+        let lat = read_next!(i32, buf, pos)?;
+        let lon = read_next!(i32, buf, pos)?;
 
         Ok(Self { lat, lon })
     }

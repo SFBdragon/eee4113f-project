@@ -10,7 +10,7 @@
 use crate::state::sim;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-const BLOCK_INTERVAL_MS: u64 = 2_000; // new block every 2 s
+const BLOCK_INTERVAL_MS: u64 = 1_000; // new block every 2 s
 const PRINT_INTERVAL_MS: u64 = 5_000; // status every 5 s
 
 pub fn run_injector() {

@@ -8,7 +8,9 @@ use crate::{mock::MockModule, mock2::UdpMockRadios};
 pub use control_protocol as protocol;
 
 mod crc;
+pub mod db;
 mod drivers;
+pub mod export;
 pub mod lora;
 pub mod mock;
 pub mod mock2;

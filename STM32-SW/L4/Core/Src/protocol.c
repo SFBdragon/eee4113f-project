@@ -3,7 +3,6 @@
 // Application/transport/network layer for LoRa + WiFi communication.
 // Sits between netio.h (link layer) and control.h (STM32/storage layer).
 
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -16,23 +15,10 @@
 // Compile-time configuration
 // ---------------------------------------------------------------------------
 
-// Fallback if Glen hasn't defined this yet.
-#ifndef STORAGE_BLOCK_SIZE
-#  define STORAGE_BLOCK_SIZE 512
-#endif
-
 // LoRa device address for this module.
-// Should be set per-device (e.g. from flash / provisioning).
 #ifndef MODULE_LORA_ADDR
 #  define MODULE_LORA_ADDR ((uint16_t)0x0001u)
 #endif
-
-// How long to wait before re-sending a LoRa reply if we don't hear a new
-// packet (guards against the ACK-less stop-and-wait transport losing our
-// reply).  The controller owns retry, so we only keep our last reply around;
-// we don't retransmit autonomously.
-#define LORA_REPLY_HOLD_MS 5000u
-
 
 // ---------------------------------------------------------------------------
 // LoRa packet wire format
@@ -52,9 +38,9 @@
 //  last-1  2     crc16             — CRC-16 over bytes [0 .. len-2]
 // ---------------------------------------------------------------------------
 
-#define LORA_HDR_LEN    4u
-#define LORA_CRC_LEN    2u
-#define LORA_MIN_LEN    (LORA_HDR_LEN + LORA_CRC_LEN)   // 7
+#define LORA_HDR_LEN 4u
+#define LORA_CRC_LEN 2u
+#define LORA_MIN_LEN (LORA_HDR_LEN + LORA_CRC_LEN)
 
 // LoRaModuleState serialised size (from app.rs):
 //   status_flags(1) + storage_policy(1) + StorageInfo(4+8+4+4) + LoRaRecvWindow(2+2) + GpsInfo(4+4)
@@ -63,7 +49,7 @@
 
 // Total reply packet length:
 //   src(2) + dst_and_seq(2) + state(30) + crc(2) = 36 bytes
-#define LORA_REPLY_LEN  (2u + 2u + LORA_STATE_SERIALISED_LEN + LORA_CRC_LEN)
+#define LORA_REPLY_LEN (2u + 2u + LORA_STATE_SERIALISED_LEN + LORA_CRC_LEN)
 
 _Static_assert(LORA_REPLY_LEN <= MAX_LORA_SEND_PACKET_LEN,
     "LoRa reply exceeds MAX_LORA_SEND_PACKET_LEN");
@@ -149,8 +135,8 @@ typedef struct {
 static ModuleState g_state = {
     .status_flags            = 0,
     .storage_policy          = STORAGE_POLICY_PRESERVE,
-    .lora_recv_window_on     = 1,
-    .lora_recv_window_total  = 10,
+    .lora_recv_window_on     = 5,
+    .lora_recv_window_total  = 5,
 };
 
 
@@ -257,6 +243,12 @@ void recv_lora_packet(uint8_t *data, BufLen len)
 
 static void process_lora_command(const uint8_t *buf, BufLen len, uint16_t controller_addr)
 {
+    if (g_dump_active && g_dump_last_block < g_dump_next_block && wifi_sent_all()) {
+        g_dump_active = false;
+        g_state.status_flags &= (uint8_t)~STATUS_WIFI_DUMPING;
+        cancel_timeout();
+    }
+
     BufLen pos = 0;
 
     while (pos < len) {
@@ -597,8 +589,6 @@ void recv_wifi_packet(uint64_t *macsrc, uint8_t *data, uint16_t len)
         wifi_do_send_next();
     }
 
-    printf("recv wifi packet %d", g_dump_next_block);
-
     // If the Rust layer has consumed some of its buffer, try to top it up.
     if (g_dump_active) {
         bool also_send = fill_wifi_buffer();
@@ -634,13 +624,6 @@ static bool fill_wifi_buffer(void)
         bool rts = wifi_push_message(g_block_buf, (uint16_t)(bytes_read + 8));
         ready_to_send |= rts;
         g_dump_next_block++;
-    }
-
-    // If we've exhausted the requested range, the dump is done.
-    if (g_dump_next_block > g_dump_last_block) {
-        // TODO SHAUN
-        // g_dump_active = false;
-        // g_state.status_flags &= (uint8_t)~STATUS_WIFI_DUMPING;
     }
 
     return ready_to_send;

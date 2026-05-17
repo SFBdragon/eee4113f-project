@@ -5,6 +5,7 @@
 
 pub mod app;
 pub mod byteutils;
+pub mod encoding;
 pub mod lora;
 pub mod phy;
 pub mod rtt;

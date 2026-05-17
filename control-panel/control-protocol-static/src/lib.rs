@@ -1,10 +1,6 @@
 #![feature(linkage)]
 #![no_std]
 
-// #[cfg(not(feature = "for-rust"))]
-// use panic_halt as _;
-
-// #[cfg(feature = "for-rust")]
 #[linkage = "weak"]
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
@@ -110,4 +106,10 @@ pub unsafe extern "C" fn wifi_available_payload_bytes() -> u32 {
             .as_mut_unchecked()
             .available_payload_bytes()
     }
+}
+
+// Returns true if there are no queued packets to send.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wifi_sent_all() -> bool {
+    unsafe { WIFI_SENDER.0.get().as_mut_unchecked().sent_all() }
 }

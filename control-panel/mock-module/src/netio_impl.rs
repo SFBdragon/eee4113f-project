@@ -16,8 +16,10 @@
 // These globals are written once at startup before any C code runs.
 
 use std::net::UdpSocket;
-use std::os::unix::net::UnixDatagram;
 use std::sync::{Mutex, OnceLock};
+use std::time::Duration;
+
+use rand::RngExt;
 
 use crate::ffi::{
     BufLen, MAX_LORA_RECV_PACKET_LEN, MAX_LORA_SEND_PACKET_LEN, MAX_WIFI_RECV_PACKET_LEN,
@@ -70,7 +72,19 @@ pub extern "C" fn send_lora_packet(data: *const u8, len: BufLen) -> Status {
         "[sim] send_lora_packet({len} bytes): {:02x?}",
         &slice[..slice.len().min(16)]
     );
-    match with_sockets(|s| s.lora.send_to(slice, "127.0.0.1:12000")) {
+
+    if crate::LORA_RELIABILITY_TEST {
+        if rand::random::<f64>() < crate::LORA_SEND_DROP_RATE {
+            return STATUS_SUCCESS;
+        }
+    }
+
+    let mut buf = slice.to_vec();
+    if crate::LORA_CORRUPT_TEST {
+        flip_bits_with_probability(&mut buf, crate::LORA_SEND_BITFLIP_RATE);
+    };
+
+    match with_sockets(|s| s.lora.send_to(&buf, "127.0.0.1:12000")) {
         Some(Ok(_)) => STATUS_SUCCESS,
         Some(Err(e)) => {
             eprintln!("[sim] send_lora_packet error: {e}");
@@ -125,8 +139,19 @@ pub extern "C" fn send_wifi_packet(
     frame.extend_from_slice(payload);
     eprintln!(
         "[sim] send_wifi_packet(src={MODULE_MAC_ADDRESS:#018x} dst={macdst:#018x}, {len} bytes): {:02x?}",
-        &payload[..payload.len().min(16)]
+        &payload[..payload.len().min(24)]
     );
+
+    if crate::WIFI_RELIABILITY_TEST {
+        if rand::random::<f64>() < crate::WIFI_SEND_DROP_RATE {
+            return 0;
+        }
+    }
+
+    if crate::WIFI_CORRUPT_TEST {
+        flip_bits_with_probability(&mut frame, crate::WIFI_SEND_BITFLIP_RATE);
+    }
+
     match with_sockets(|s| s.wifi.send_to(&frame, "127.0.0.1:12010")) {
         Some(Ok(_)) => 0,
         Some(Err(e)) => {
@@ -167,6 +192,17 @@ pub fn poll_lora_recv() -> bool {
                 "[sim] recv_lora_packet({n} bytes): {:02x?}",
                 &buf[..n.min(16)]
             );
+
+            if crate::LORA_RELIABILITY_TEST {
+                if rand::random::<f64>() < crate::LORA_RECV_DROP_RATE {
+                    return false;
+                }
+            }
+
+            if crate::LORA_CORRUPT_TEST {
+                flip_bits_with_probability(&mut buf, crate::LORA_RECV_BITFLIP_RATE);
+            }
+
             // SAFETY: buf is valid, n <= MAX_LORA_RECV_PACKET_LEN
             unsafe { recv_lora_packet(buf.as_ptr(), n as BufLen) };
             true
@@ -192,15 +228,26 @@ pub fn poll_wifi_recv() -> bool {
             let payload_len = n - 16;
             if macdst != 0xffffffffffff && macdst != MODULE_MAC_ADDRESS {
                 eprintln!(
-                    "[sim] recv_wifi_packet(src={macsrc:#018x}, payload={:?}) BAD DESTINATION",
+                    "[sim] recv_wifi_packet(src={macsrc:#018x}, payload={:02x?}) BAD DESTINATION",
                     &buf[16..n]
                 );
                 return false;
             }
             eprintln!(
-                "[sim] recv_wifi_packet(src={macsrc:#018x}, payload={:?})",
+                "[sim] recv_wifi_packet(src={macsrc:#018x}, payload={:02x?})",
                 &buf[16..n]
             );
+
+            if crate::WIFI_RELIABILITY_TEST {
+                if rand::random::<f64>() < crate::WIFI_RECV_DROP_RATE {
+                    return false;
+                }
+            }
+
+            if crate::WIFI_CORRUPT_TEST {
+                flip_bits_with_probability(&mut buf, crate::WIFI_RECV_BITFLIP_RATE);
+            }
+
             // SAFETY: pointers valid, sizes bounded
             unsafe {
                 recv_wifi_packet(
@@ -220,6 +267,21 @@ pub fn poll_wifi_recv() -> bool {
             eprint!("wifi recv of some description");
 
             false
+        }
+    }
+}
+
+/// Flips bits in a mutable byte slice based on a probability `p`.
+///
+/// Slow implementation but should be good enough.
+fn flip_bits_with_probability(data: &mut [u8], p: f64) {
+    let mut rng = rand::rng();
+
+    for byte in data.iter_mut() {
+        for bit_idx in 0..8 {
+            if rng.random_bool(p) {
+                *byte ^= 1 << bit_idx;
+            }
         }
     }
 }

@@ -54,13 +54,12 @@ pub struct SimState {
     pub first_protected: u64,
     /// One-past-last writable block (wraps in ring fashion).
     pub write_head: u64,
-
+    /// What to do when we're out of memory.
     pub overwrite_policy: Policy,
 
-    // -- Timing --
     pub epoch: Instant,
 
-    // -- Pending timer --
+    // Timers
     pub timeout: Option<PendingTimeout>,
     pub ping_timer: Option<Interval>,
 
@@ -73,7 +72,7 @@ pub struct SimState {
 }
 
 /// Total number of blocks in our simulated storage ring.
-pub const TOTAL_BLOCKS: u64 = 256;
+pub const TOTAL_BLOCKS: u64 = 130;
 
 impl SimState {
     fn new() -> Self {
@@ -90,8 +89,8 @@ impl SimState {
             epoch: Instant::now(),
             timeout: None,
             ping_timer: None,
-            lora_on_period_s: 1,
-            lora_total_period_s: 10,
+            lora_on_period_s: 5,
+            lora_total_period_s: 20,
             wifi_up: false,
         }
     }
@@ -112,9 +111,9 @@ impl SimState {
     /// Returns the block id assigned, or None if storage is full and policy is Preserve.
     pub fn append_block(&mut self, data: &[u8]) -> Option<u64> {
         let total = TOTAL_BLOCKS;
-        let used_blocks = self.write_head - self.first_readable;
+        let protected_blocks = self.write_head - self.first_protected;
 
-        if used_blocks >= total {
+        if protected_blocks >= total {
             match self.overwrite_policy {
                 Policy::Preserve => return None,
                 Policy::Overwrite => {
@@ -136,15 +135,20 @@ impl SimState {
         block.used = copy_len;
 
         let id = self.write_head;
+
+        if id == self.first_readable + TOTAL_BLOCKS {
+            self.first_readable += 1;
+        }
+
+        if id == self.first_protected + TOTAL_BLOCKS {
+            self.first_protected += 1;
+        }
+
         self.write_head += 1;
         Some(id)
     }
 
     pub fn last_readable(&self) -> u64 {
-        if self.write_head == 0 {
-            0
-        } else {
-            self.write_head - 1
-        }
+        self.write_head
     }
 }

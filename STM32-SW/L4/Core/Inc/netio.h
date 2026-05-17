@@ -27,11 +27,11 @@ typedef uint16_t BufLen;
 //
 // LoRa packets are going to vary considerably in size but be small.
 // 64 bytes is enough.
-#define MAX_LORA_RECV_PACKET_LEN 64
-#define MAX_LORA_SEND_PACKET_LEN 64
+#define MAX_LORA_RECV_PACKET_LEN 255
+#define MAX_LORA_SEND_PACKET_LEN 255
 
-#define MAX_WIFI_RECV_PACKET_LEN 255
-#define MAX_WIFI_SEND_PACKET_LEN 255
+#define MAX_WIFI_RECV_PACKET_LEN 506
+#define MAX_WIFI_SEND_PACKET_LEN 506
 
 #define STATUS_SUCCESS 0
 // add more statusses as necessary
