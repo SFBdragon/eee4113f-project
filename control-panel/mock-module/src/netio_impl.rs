@@ -142,6 +142,8 @@ pub extern "C" fn send_wifi_packet(
         &payload[..payload.len().min(24)]
     );
 
+    std::thread::sleep(Duration::from_millis(10));
+
     if crate::WIFI_RELIABILITY_TEST {
         if rand::random::<f64>() < crate::WIFI_SEND_DROP_RATE {
             return 0;

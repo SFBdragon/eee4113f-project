@@ -19,11 +19,11 @@ const WIFI_CORRUPT_TEST: bool = false;
 const WIFI_RECV_BITFLIP_RATE: f64 = 0.0001;
 const WIFI_SEND_BITFLIP_RATE: f64 = 0.0001;
 
-const LORA_RELIABILITY_TEST: bool = true;
+const LORA_RELIABILITY_TEST: bool = false;
 const LORA_RECV_DROP_RATE: f64 = 0.33;
 const LORA_SEND_DROP_RATE: f64 = 0.33;
 
-const LORA_CORRUPT_TEST: bool = true;
+const LORA_CORRUPT_TEST: bool = false;
 const LORA_RECV_BITFLIP_RATE: f64 = 0.0001;
 const LORA_SEND_BITFLIP_RATE: f64 = 0.0001;
 

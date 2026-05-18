@@ -22,8 +22,10 @@ import { WiFi } from "wifi.slint";
 import { DataDump } from "datadump.slint";
 import { Export } from "export.slint";
 import { Status } from "status.slint";
+import { LaunchErrorDialog } from "launch_error.slint";
 
 export { Theme }
+export { LaunchErrorDialog }
 
 export global GlobalAppState {
     in-out property <int> controller_addr;
@@ -81,7 +83,7 @@ export component AppWindow inherits Window {
 
     title: "Communication Module Control Panel";
     preferred-width: 1000px;
-    preferred-height: 940px;
+    preferred-height: 970px;
     min-width: 600px;
     min-height: 300px;
     icon: @image-url("../assets/app_icon.png");
@@ -207,9 +209,10 @@ export component AppWindow inherits Window {
     scroll := ScrollView {
         width: 100%;
         height: 100%;
-        mouse-drag-pan-enabled: false;
+        mouse-drag-pan-enabled: false; // very annoying with sliders
 
         scrolled => {
+            // scrollview-has-more-below = false;
             scrollview-has-more-below = (-self.viewport-y + self.height) < self.viewport-height;
         }
 
@@ -310,70 +313,70 @@ export component AppWindow inherits Window {
                 }
             }
 
-            VerticalBox {
-                // DEBUG CONTROLS
+            // VerticalBox {
+            //     // DEBUG CONTROLS
 
-                Switch {
-                    text: "DEBUG: LoRa module attached";
-                    checked: false;
+            //     Switch {
+            //         text: "DEBUG: LoRa module attached";
+            //         checked: false;
 
-                    toggled => {
-                        debug_set_lora_module_attached(self.checked)
-                    }
-                }
+            //         toggled => {
+            //             debug_set_lora_module_attached(self.checked)
+            //         }
+            //     }
 
-                Switch {
-                    text: "DEBUG: LoRa send fails";
-                    checked: false;
+            //     Switch {
+            //         text: "DEBUG: LoRa send fails";
+            //         checked: false;
 
-                    toggled => {
-                        debug_set_lora_send_fails(self.checked)
-                    }
-                }
+            //         toggled => {
+            //             debug_set_lora_send_fails(self.checked)
+            //         }
+            //     }
 
-                Switch {
-                    text: "DEBUG: LoRa recv fails";
-                    checked: false;
+            //     Switch {
+            //         text: "DEBUG: LoRa recv fails";
+            //         checked: false;
 
-                    toggled => {
-                        debug_set_lora_recv_fails(self.checked)
-                    }
-                }
+            //         toggled => {
+            //             debug_set_lora_recv_fails(self.checked)
+            //         }
+            //     }
 
-                Switch {
-                    text: "DEBUG: WiFi module attached";
-                    checked: false;
+            //     Switch {
+            //         text: "DEBUG: WiFi module attached";
+            //         checked: false;
 
-                    toggled => {
-                        debug_set_wifi_module_attached(self.checked)
-                    }
-                }
+            //         toggled => {
+            //             debug_set_wifi_module_attached(self.checked)
+            //         }
+            //     }
 
-                Switch {
-                    text: "DEBUG: WiFi send fails";
-                    checked: false;
+            //     Switch {
+            //         text: "DEBUG: WiFi send fails";
+            //         checked: false;
 
-                    toggled => {
-                        debug_set_wifi_send_fails(self.checked)
-                    }
-                }
+            //         toggled => {
+            //             debug_set_wifi_send_fails(self.checked)
+            //         }
+            //     }
 
-                Switch {
-                    text: "DEBUG: WiFi recv fails";
-                    checked: false;
+            //     Switch {
+            //         text: "DEBUG: WiFi recv fails";
+            //         checked: false;
 
-                    toggled => {
-                        debug_set_wifi_recv_fails(self.checked)
-                    }
-                }
-            }
+            //         toggled => {
+            //             debug_set_wifi_recv_fails(self.checked)
+            //         }
+            //     }
+            // }
         }
     }
 
     Rectangle {
         width: 100%;
         height: 12px;
-        y: root.height - self.height;
+        y: parent.height - self.height;
         background: @linear-gradient(180deg, #ffffff00 0%, #44444466 100%);
 
         opacity: scrollview-has-more-below ? 1.0 : 0.0;

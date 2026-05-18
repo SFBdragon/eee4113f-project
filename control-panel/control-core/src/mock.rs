@@ -59,10 +59,10 @@ impl MockModuleInner {
         Self {
             addr,
             mac,
-            is_laptop_lora_module_attached: false,
+            is_laptop_lora_module_attached: true,
             is_lora_send_failing: false,
             is_lora_recv_failing: false,
-            is_laptop_wifi_module_attached: false,
+            is_laptop_wifi_module_attached: true,
             is_wifi_send_failing: false,
             is_wifi_recv_failing: false,
             is_module_wifi_on: false,

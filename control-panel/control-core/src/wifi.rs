@@ -10,9 +10,9 @@ mod rx;
 // ------------------------- DEVICE I/O ABSTRACTION ------------------------- //
 
 pub mod hal {
-    use control_protocol::{phy::*, wifi::Mac};
+    use control_protocol::wifi::Mac;
 
-    use crate::drivers::{StatusError, from_ffi};
+    use crate::drivers::StatusError;
 
     pub struct WiFiPacket {
         pub from: Mac,

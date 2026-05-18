@@ -549,8 +549,10 @@ static uint8_t WIFI_PING_BUF[WIFI_PING_SIZE];
 
 static void wifi_ping_handler()
 {
-    wifi_ping_write(MODULE_LORA_ADDR, crc16, WIFI_PING_BUF);
-    send_wifi_packet(MAC_BCAST, WIFI_PING_BUF, WIFI_PING_SIZE);
+    // if (!g_dump_active) {
+        wifi_ping_write(MODULE_LORA_ADDR, crc16, WIFI_PING_BUF);
+        send_wifi_packet(MAC_BCAST, WIFI_PING_BUF, WIFI_PING_SIZE);
+    // }
 }
 
 static void wifi_ping_arm(void)

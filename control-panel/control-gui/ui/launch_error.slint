@@ -1,0 +1,23 @@
+import { StandardButton, VerticalBox } from "std-widgets.slint";
+
+export component LaunchErrorDialog inherits Dialog {
+
+    title: "Control Panel Launch Error";
+    icon: @image-url("../assets/app_icon.png");
+
+    VerticalBox {
+        alignment: start;
+        Text {
+            text: "Another instance is already running. Multiple instances per computer is unsupported.";
+            wrap: TextWrap.word-wrap;
+        }
+    }
+
+    StandardButton {
+        kind: ok;
+        primary: true;
+        clicked => {
+            root.hide();
+        }
+    }
+}

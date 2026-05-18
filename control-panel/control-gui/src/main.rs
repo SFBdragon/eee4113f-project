@@ -49,9 +49,17 @@ fn main() {
     match single_instance::SingleInstance::new("comms-module-controller") {
         Ok(si) => {
             if !si.is_single() {
-                error!(
-                    "Another app instance is already running. This is not supported. Quiting..."
-                );
+                error!("Another app instance is already running. This is not supported.");
+
+                let led = LaunchErrorDialog::new().unwrap();
+                led.run().unwrap();
+
+                // let _ = rfd::MessageDialog::new()
+                //     .set_title("Communication Module Control Panel")
+                //     .set_level(rfd::MessageLevel::Error)
+                //     .set_description("Another running instance was detected. Running multiple instances on one computer is unsupported.")
+                //     .set_buttons(rfd::MessageButtons::Ok)
+                //     .show();
 
                 std::process::exit(1);
             } else {
@@ -61,7 +69,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let (controller, mock) = control_core::Controller::mocked();
+    let (controller, mock) = control_core::Controller::mocked2();
 
     info!(%controller.addr, "Controller address selected.");
 

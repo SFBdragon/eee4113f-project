@@ -200,7 +200,7 @@ export component Storage inherits HorizontalBox {
                         spacing: 4pt;
 
                         Rectangle {
-                            background: Theme.warn-orange;
+                            background: enable_control ? Theme.warn-orange : Theme.empty-grey;
                             border-radius: 3pt;
                             width: 1.5rem;
                         }
@@ -220,7 +220,7 @@ export component Storage inherits HorizontalBox {
                         spacing: 4pt;
 
                         Rectangle {
-                            background: Theme.active-blue;
+                            background: enable_control ? Theme.active-blue : Theme.empty-grey;
                             border-radius: 3pt;
                             width: 1.5rem;
                         }
@@ -290,7 +290,20 @@ export component Storage inherits HorizontalBox {
                     HorizontalLayout {
                         alignment: start;
                         Text {
-                            text: "Mark Downloaded ";
+                            text: "Mark ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "Downloaded ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                            color: enable_control ? Theme.ok-green : Theme.empty-grey;
+                        }
+
+                        Text {
+                            text: "as ";
                             font-weight: Theme.bold-font-weight;
                             vertical-alignment: center;
                         }
@@ -299,7 +312,7 @@ export component Storage inherits HorizontalBox {
                             text: "Reclaimable";
                             font-weight: Theme.bold-font-weight;
                             vertical-alignment: center;
-                            color: Theme.warn-orange;
+                            color: enable_control ? Theme.warn-orange : Theme.empty-grey;
                         }
                     }
 
@@ -349,7 +362,20 @@ export component Storage inherits HorizontalBox {
                     HorizontalLayout {
                         alignment: start;
                         Text {
-                            text: "Mark All ";
+                            text: "Mark ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "Used ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                            color: enable_control ? Theme.active-blue : Theme.empty-grey;
+                        }
+
+                        Text {
+                            text: "as ";
                             font-weight: Theme.bold-font-weight;
                             vertical-alignment: center;
                         }
@@ -358,7 +384,7 @@ export component Storage inherits HorizontalBox {
                             text: "Reclaimable";
                             font-weight: Theme.bold-font-weight;
                             vertical-alignment: center;
-                            color: Theme.warn-orange;
+                            color: enable_control ? Theme.warn-orange : Theme.empty-grey;
                         }
                     }
 
@@ -407,38 +433,41 @@ export component Storage inherits HorizontalBox {
 
                 VerticalLayout {
 
-                    Text {
-                        text: "Unmark Reclaimable";
-                        font-weight: Theme.bold-font-weight;
-                        vertical-alignment: center;
+                    HorizontalLayout {
+                        alignment: start;
+                        Text {
+                            text: "Mark ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "Reclaimable ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                            color: enable_control ? Theme.warn-orange : Theme.empty-grey;
+                        }
+
+                        Text {
+                            text: "as ";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "Used";
+                            font-weight: Theme.bold-font-weight;
+                            vertical-alignment: center;
+                            color: enable_control ? Theme.active-blue : Theme.empty-grey;
+                        }
                     }
 
                     HorizontalLayout {
                         alignment: start;
                         Text {
-                            text: "Revert all ";
+                            text: "Revert all Reclaimable memory to Used, preserving the data unless overriden.";
                             vertical-alignment: center;
                             font-weight: Theme.light-font-weight;
-                        }
-
-                        Text {
-                            text: "Reclaimable";
-                            vertical-alignment: center;
-                            font-weight: Theme.light-font-weight;
-                            color: Theme.warn-orange;
-                        }
-
-                        Text {
-                            text: " memory to ";
-                            vertical-alignment: center;
-                            font-weight: Theme.light-font-weight;
-                        }
-
-                        Text {
-                            text: "Used";
-                            vertical-alignment: center;
-                            font-weight: Theme.light-font-weight;
-                            color: Theme.active-blue;
                         }
                     }
                 }
