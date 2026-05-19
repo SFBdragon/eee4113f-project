@@ -45,6 +45,10 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 extern volatile uint8_t wake_source;
+extern volatile uint8_t RTC_WAKE_FLAG;
+extern volatile uint8_t LORA_WAKE_FLAG;
+extern volatile uint8_t DMA_WAKE_FLAG;
+extern volatile uint8_t SHARC_WAKE_FLAG;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -233,6 +237,7 @@ void SysTick_Handler(void)
 void RTC_WKUP_IRQHandler(void)
 {
   /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
+  RTC_WAKE_FLAG = 1;
   wake_source = 1;  
   //HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
   /* USER CODE END RTC_WKUP_IRQn 0 */
@@ -305,6 +310,7 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
   
   //HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+  SHARC_WAKE_FLAG = 1;
   wake_source = 2;
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(D_WAKE_Pin);
@@ -361,7 +367,7 @@ void DMA2_Channel5_IRQHandler(void)
 void LPUART1_IRQHandler(void)
 {
   /* USER CODE BEGIN LPUART1_IRQn 0 */
-
+  LORA_WAKE_FLAG = 1; // Technically we're processing the recieved data, flag doesnt matter
   wake_source = 3;
   /* USER CODE END LPUART1_IRQn 0 */
   HAL_UART_IRQHandler(&hlpuart1);
