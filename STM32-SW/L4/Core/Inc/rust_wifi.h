@@ -15,10 +15,7 @@ typedef uint32_t (*WifiGetTimeFn)(void);
 
 // --- WiFi Ping Functions ---
 
-/**
-* Returns the required buffer size for a ping packet.
-*/
-uint16_t wifi_ping_len(void);
+#define WIFI_PING_SIZE 8
 
 /**
 * Writes the bytes of a ping to a buffer.
@@ -71,3 +68,8 @@ bool wifi_push_message(const uint8_t* data, uint16_t len);
 * Returns how many bytes are currently available in the outbound buffer.
 */
 uint32_t wifi_available_payload_bytes(void);
+
+/**
+* Returns true if there are no queued packets to send.
+*/
+bool wifi_sent_all(void);

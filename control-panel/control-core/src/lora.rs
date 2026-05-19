@@ -38,42 +38,45 @@ pub mod hal {
             timeout_ms: u32,
         ) -> Result<(), StatusError>;
     }
-    pub struct LoRaSys;
+    pub struct LoRaRadio;
 
-    impl LoRaInterface for LoRaSys {
-        fn is_module_attached(&self) -> bool {
-            control_sys::is_lora_module_attached()
-        }
+    // impl LoRaInterface for LoRaRadio {
+    //     fn is_module_attached(&self) -> bool {
+    //         control_data_link::is_lora_module_attached()
+    //     }
 
-        fn initialize_module(&self) -> Result<(), StatusError> {
-            from_ffi(control_sys::initialize_lora_module())
-        }
+    //     fn initialize_module(&self) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::initialize_lora_module())
+    //     }
 
-        fn shutdown_module(&self) {
-            control_sys::shutdown_lora_module();
-        }
+    //     fn shutdown_module(&self) {
+    //         control_data_link::shutdown_lora_module();
+    //     }
 
-        fn get_lora_byterate(&self) -> u32 {
-            control_sys::get_lora_byterate()
-        }
+    //     fn get_lora_byterate(&self) -> u32 {
+    //         control_data_link::get_lora_byterate()
+    //     }
 
-        fn send_packet(&self, bytes: &[u8]) -> Result<(), StatusError> {
-            from_ffi(control_sys::send_lora_packet(bytes.as_ptr(), bytes.len()))
-        }
+    //     fn send_packet(&self, bytes: &[u8]) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::send_lora_packet(
+    //             bytes.as_ptr(),
+    //             bytes.len(),
+    //         ))
+    //     }
 
-        fn recv_packet(
-            &self,
-            buffer: &mut [u8; MAX_LORA_RECV_PACKET_LEN],
-            len: &mut usize,
-            timeout_ms: u32,
-        ) -> Result<(), StatusError> {
-            from_ffi(control_sys::recv_lora_packet(
-                buffer.as_mut_ptr().cast(),
-                len,
-                timeout_ms,
-            ))
-        }
-    }
+    //     fn recv_packet(
+    //         &self,
+    //         buffer: &mut [u8; MAX_LORA_RECV_PACKET_LEN],
+    //         len: &mut usize,
+    //         timeout_ms: u32,
+    //     ) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::recv_lora_packet(
+    //             buffer.as_mut_ptr().cast(),
+    //             len,
+    //             timeout_ms,
+    //         ))
+    //     }
+    // }
 }
 
 pub struct LoraCommand(pub LoRaAddr, pub Vec<u8>);
@@ -86,10 +89,6 @@ pub enum LoraEvent {
     TimedOut(LoRaAddr),
 
     Message(Vec<u8>),
-}
-
-pub fn start_lora_thread(controller_addr: LoRaAddr) -> (Sender<LoraCommand>, Receiver<LoraEvent>) {
-    start_lora_thread_with_hal(controller_addr, Arc::new(hal::LoRaSys))
 }
 
 pub fn start_lora_thread_with_hal(
@@ -245,7 +244,7 @@ fn lora_thread(
                     }
                     Err(e) => {
                         tracing::warn!(error = ?e, "Failed to parse LoRa frame.");
-                        continue 'retrans;
+                        break;
                     }
                 }
             }

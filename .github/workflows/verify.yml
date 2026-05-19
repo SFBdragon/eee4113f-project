@@ -1,0 +1,34 @@
+name: Verify Cross-Platform Build
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        # runs-on handles the actual OS environment
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install System Dependencies (Linux Only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfontconfig1-dev libx11-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cd control-panel && cargo build -p control-gui --release
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of zip
+          name: slint-app-${{ matrix.os }}
+          # Possible paths to executable
+          path: |
+            control-panel/target/release/control-gui
+            control-panel/target/release/control-gui.exe

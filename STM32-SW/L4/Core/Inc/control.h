@@ -13,17 +13,18 @@
 // - Starts LoRa listening.
 //
 // Defined by Shaun. Called by Glen at startup.
-void initialize_networking();
+void protocol_init();
 
 
 // Call `callback(ctx)` after `n` milliseconds.
 // Defined by Glen. Called by Shaun for delays.
-void call_after_n_ms(uint32_t n, void (*callback)(void *ctx), void *ctx);
-
+void call_after_n_ms(uint32_t n, void (*callback)());
 // Cancel the active `call_after_n_ms` countdown, if there is ine.
 void cancel_timeout();
-
-
+// Defined by Glen.
+void call_repeatedly_after_n_ms_wifi_ping(uint32_t n, void (*callback)());
+// Defined by Glen.
+void cancel_timeout_wifi_ping();
 
 // Return the number of milliseconds from some arbitrary fixed epoch (e.g. since startup).
 // Defined by Glen. Called by Shaun for timing information.
@@ -33,6 +34,9 @@ uint32_t get_time_since_epoch_ms();
 // Units are in seconds.
 // Defined by Glen. Called by Shaun to configure the LoRa receive window.
 void set_lora_recv_window(uint16_t on_period, uint16_t total_period);
+
+// CRC using poly=0xA7D3, init=0xffff, no reflect
+uint16_t crc16(const uint8_t *data, uintptr_t len);
 
 // ------------ Bulk Record/Data Storage Control ------------ //
 
@@ -96,9 +100,7 @@ void flush_block_buffer_to_disk();
 // Defined by Glen.
 typedef struct {
     uint16_t len;
-    // ?? datetime?
-
-    // [len bytes follow]
+    // [len bytes follow, split across blocks]
 } RecordHeader;
 
 // TODO GPS STUFF ?

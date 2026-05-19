@@ -2,8 +2,8 @@
 resolver = "3"
 
 members = [
-    "control-sys",
+    "control-data-link",
     "control-core",
     "control-gui",
-    "control-protocol", "control-protocol-static",
+    "control-protocol", "control-protocol-static", "mock-module",
 ]

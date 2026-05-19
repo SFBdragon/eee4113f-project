@@ -24,16 +24,17 @@ typedef uint16_t BufLen;
 // Unlimited-length mode: 0-? bytes (disables a bunch of features though)
 // https://www.alldatasheet.com/datasheet-pdf/download/800241/SEMTECH/SX1278.html
 //
-// Note that LoRa packets range from pings and status information to control
-// messages, so a fixed-length is unlikely to be a good idea.
-// I'm hoping that I can fit all the message lengths into less than 256 bytes
-// or break up the messages across multiple packets. 
-#define MAX_LORA_RECV_PACKET_LEN 64
-#define MAX_LORA_SEND_PACKET_LEN 64
+// I'm planning to use variable length mode as all my packets are small but
+// vary considerably in size.
+#define MAX_LORA_RECV_PACKET_LEN 255
+#define MAX_LORA_SEND_PACKET_LEN 255
 
-// These are not final. Alter these if necessary.
-#define MAX_WIFI_RECV_PACKET_LEN 250
-#define MAX_WIFI_SEND_PACKET_LEN 250
+// WiFi payload limits. The UART framing protocol allocates 512 bytes per
+// frame; the SEND frame format is [6-byte destmac][actual payload], so
+// 506 is the largest payload that fits in one frame without changing the
+// protocol (see wifi_protocol.h: WIFI_MAX_PAYLOAD = 512).
+#define MAX_WIFI_RECV_PACKET_LEN 506
+#define MAX_WIFI_SEND_PACKET_LEN 506
 
 #define STATUS_SUCCESS 0
 #define STATUS_RECEIVE_TIMEOUT -3
@@ -71,7 +72,7 @@ Status send_lora_packet(uint8_t *data, BufLen len);
 // This is not called while `send_lora_packet` is executing.
 //
 // `data` and `len` must describe one entire packet or nothing once this function returns.
-// Feel free to overwrite `data` partially, fully, or not at all regardless of `len`. 
+// Feel free to overwrite `data` partially, fully, or not at all regardless of `len`.
 Status recv_lora_packet(uint8_t data[MAX_LORA_RECV_PACKET_LEN], BufLen *len, uint32_t timeout_ms);
 
 // --------------- WiFi --------------- //

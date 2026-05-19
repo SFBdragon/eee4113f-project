@@ -5,6 +5,7 @@
 
 pub mod app;
 pub mod byteutils;
+pub mod encoding;
 pub mod lora;
 pub mod phy;
 pub mod rtt;
@@ -66,7 +67,7 @@ impl core::fmt::Display for LoRaAddr {
 
 /// Caller provides this. Receives the full frame bytes *before* the CRC field.
 /// Returns a 2-byte CRC in little-endian order packed into the low 16 bits.
-pub type CrcFn = fn(data: *const u8, len: usize) -> u16;
+pub type CrcFn = extern "C" fn(data: *const u8, len: usize) -> u16;
 
 fn call_crc_fn(f: CrcFn, buf: &[u8]) -> u16 {
     f(buf.as_ptr(), buf.len())

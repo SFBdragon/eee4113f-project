@@ -1,0 +1,161 @@
+import {
+    HorizontalBox,
+    Palette,
+    VerticalBox,
+    Switch,
+    Button,
+    Slider,
+} from "std-widgets.slint";
+import { Theme } from "theme.slint";
+import { ColorBar } from "colour_bar.slint";
+
+import { IconDisplay, IconSet } from "lucida.slint";
+
+export component Status inherits HorizontalBox {
+
+    in property <bool> enabled_prereq;
+    in property <string> lat_lon;
+    in property <string> module_addr;
+
+    Rectangle {
+        background: enabled_prereq ? Palette.background : Palette.alternate-background;
+        width: 100%;
+        border-radius: 4pt;
+        border-color: Palette.border;
+        border-width: 1px;
+
+        VerticalBox {
+            alignment: start;
+
+            HorizontalBox {
+
+                HorizontalLayout {
+                    spacing: 4pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.Info;
+                            stroke: Palette.foreground;
+                            stroke-width: 2;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: "Status";
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        font-weight: Theme.bold-font-weight;
+                        font-size: Theme.large-font-size;
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1.0;
+                    }
+
+                    // HorizontalLayout {
+                    //     alignment: start;
+                    //     width: 120pt;
+                    //     spacing: 5pt;
+
+                    //     VerticalLayout {
+                    //         alignment: center;
+                    //         IconDisplay {
+                    //             icon: wifi_attached ? IconSet.SatelliteDish : IconSet.SatelliteDish;
+                    //             stroke: wifi_attached ? Theme.ok-green : Theme.err-red;
+                    //             stroke-width: 1.5;
+                    //             size: 25pt;
+                    //         }
+                    //     }
+
+                    //     Text {
+                    //         text: wifi_attached ? "Plugged In" : "Not Plugged In";
+                    //         vertical-alignment: center;
+                    //     }
+                    // }
+
+                    // HorizontalLayout {
+                    //     alignment: start;
+                    //     width: 120pt;
+                    //     spacing: 5pt;
+
+                    //     VerticalLayout {
+                    //         alignment: center;
+                    //         IconDisplay {
+                    //             icon: IconSet.Timer;
+                    //             stroke: !wifi_attached ? Theme.err-red : time_since_wifi_recv > 4s ? Theme.err-red : time_since_wifi_recv > 2s ? Theme.warn-orange : Theme.ok-green;
+                    //             stroke-width: 1.5;
+                    //             size: 25pt;
+                    //         }
+                    //     }
+
+                    //     Text {
+                    //         text: time_since_wifi_recv >= 100000000s ? "No packets yet" : "Last reply from " + module_address + " " + time_since_wifi_recv / 1s + "s ago";
+                    //         vertical-alignment: center;
+                    //         wrap: TextWrap.word-wrap;
+                    //     }
+                    // }
+                }
+            }
+
+            HorizontalBox {
+
+                HorizontalLayout {
+                    alignment: start;
+                    width: Theme.first-col;
+                    spacing: 5pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: IconSet.FingerprintPattern;
+                            stroke: Palette.foreground;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: "Module Identifier: " + (enabled_prereq ? module_addr : "Unknown");
+                        vertical-alignment: center;
+                        font-weight: Theme.bold-font-weight;
+                    }
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1.0;
+                }
+            }
+
+            HorizontalBox {
+
+                HorizontalLayout {
+                    alignment: start;
+                    width: Theme.first-col;
+                    spacing: 5pt;
+
+                    VerticalLayout {
+                        alignment: center;
+                        IconDisplay {
+                            icon: enabled_prereq ? IconSet.Locate : IconSet.LocateOff;
+                            stroke: Palette.foreground;
+                            stroke-width: 1.5;
+                            size: 25pt;
+                        }
+                    }
+
+                    Text {
+                        text: "Module Location: " + lat_lon;
+                        vertical-alignment: center;
+                        font-weight: Theme.bold-font-weight;
+                    }
+                }
+
+                Rectangle {
+                    horizontal-stretch: 1.0;
+                }
+            }
+        }
+    }
+}

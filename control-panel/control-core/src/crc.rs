@@ -35,7 +35,7 @@ pub fn compute_crc(buf: &[u8]) -> u16 {
     checksum_with_params(params, &buf) as _
 }
 
-pub fn compute_crc_raw(data: *const u8, len: usize) -> u16 {
+pub extern "C" fn compute_crc_raw(data: *const u8, len: usize) -> u16 {
     let buf = unsafe { std::slice::from_raw_parts(data, len) };
     crate::crc::compute_crc(buf)
 }

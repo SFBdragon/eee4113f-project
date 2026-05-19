@@ -4,8 +4,6 @@ pub mod sender;
 
 pub use sender::Sender;
 
-// pub struct WiFi
-
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Mac(u64);
 impl Mac {

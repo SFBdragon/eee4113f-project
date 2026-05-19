@@ -12,9 +12,9 @@ use super::common::*;
 pub struct Sender {
     pub state: SenderState,
 
-    pub set_timer: fn(u32),
-    pub cancel_timer: fn(),
-    pub get_time_ms: fn() -> u32,
+    pub set_timer: extern "C" fn(u32),
+    pub cancel_timer: extern "C" fn(),
+    pub get_time_ms: extern "C" fn() -> u32,
     pub crc_fn: CrcFn,
 }
 
@@ -31,16 +31,16 @@ pub enum SenderState {
     },
 }
 
-fn default_set_timer(_: u32) {
+extern "C" fn default_set_timer(_: u32) {
     panic!()
 }
-fn default_cancel_timer() {
+extern "C" fn default_cancel_timer() {
     panic!()
 }
-fn default_get_time() -> u32 {
+extern "C" fn default_get_time() -> u32 {
     panic!()
 }
-fn default_crc_fn(_: *const u8, _: usize) -> u16 {
+extern "C" fn default_crc_fn(_: *const u8, _: usize) -> u16 {
     panic!()
 }
 
@@ -63,9 +63,9 @@ impl Sender {
     pub fn connect(
         &mut self,
         controller_addr: LoRaAddr,
-        set_timer: fn(u32),
-        cancel_timer: fn(),
-        get_time: fn() -> u32,
+        set_timer: extern "C" fn(u32),
+        cancel_timer: extern "C" fn(),
+        get_time: extern "C" fn() -> u32,
         crc_fn: CrcFn,
     ) {
         self.set_timer = set_timer;
@@ -100,7 +100,7 @@ impl Sender {
             } => {
                 if !*syn_sent {
                     *data = syn_packet_buf.as_ptr();
-                    *len = syn_packet_buf[DataFrame::LEN_OFFSET] as u16 + DG_OVERHEAD as u16;
+                    *len = crate::first!(u16, syn_packet_buf[2..]).1 + DG_OVERHEAD as u16;
                     *syn_sent = true;
                     *mac = Mac::bcast();
                     true
@@ -126,6 +126,14 @@ impl Sender {
         }
     }
 
+    pub fn sent_all(&self) -> bool {
+        match &self.state {
+            SenderState::None => true,
+            SenderState::Syn { .. } => true,
+            SenderState::Connected { conn, .. } => conn.sent_all(),
+        }
+    }
+
     pub fn push_message(&mut self, message: &[u8]) -> bool {
         match &mut self.state {
             SenderState::None => false,
@@ -148,7 +156,7 @@ impl Sender {
                 SenderState::Syn { syn_sent, .. } => {
                     if *syn_sent && raw[0] & FLAG_ACK != 0 && raw[0] & FLAG_SYN != 0 {
                         (self.cancel_timer)();
-                        let mut conn = SenderConn::new(
+                        let conn = SenderConn::new(
                             self.set_timer,
                             self.cancel_timer,
                             self.get_time_ms,
@@ -190,18 +198,16 @@ impl Sender {
 // ── Sender state machine ──────────────────────────────────────────────────────
 
 /// It is assumed that SEQ_SPACE (256) is a multiple of SLOT_LEN for the rotates.
-const SLOT_LEN: usize = 32;
+const SLOTS_LEN: usize = 32;
 type SlotBitMap = u32;
 
 #[derive(Debug)]
 pub struct SenderConn {
-    pub slots: [[u8; MAX_DATAGRAM]; SLOT_LEN],
+    pub slots: [[u8; MAX_DATAGRAM]; SLOTS_LEN],
     pub occupied: SlotBitMap,
     pub retransmitted: SlotBitMap,
-    pub sent_at_ms: [u32; SLOT_LEN],
-
-    // Base is send_base.
     pub to_retransmit: SlotBitMap,
+    pub sent_at_ms: [u32; SLOTS_LEN],
 
     /// The oldest unacknowledged slot. 0-SEQ_SPACE.
     pub send_base: u8,
@@ -211,25 +217,24 @@ pub struct SenderConn {
     pub seq_next: u8,
 
     pub rtt: RttEstimator,
-    pub aimd: WindowController,
     pub crc_fn: CrcFn,
-    pub set_timer: fn(u32),
-    pub cancel_timer: fn(),
-    pub get_time_ms: fn() -> u32,
+    pub set_timer: extern "C" fn(u32),
+    pub cancel_timer: extern "C" fn(),
+    pub get_time_ms: extern "C" fn() -> u32,
 }
 
 impl SenderConn {
     pub const fn new(
-        set_timer: fn(u32),
-        cancel_timer: fn(),
-        get_time_ms: fn() -> u32,
+        set_timer: extern "C" fn(u32),
+        cancel_timer: extern "C" fn(),
+        get_time_ms: extern "C" fn() -> u32,
         crc_fn: CrcFn,
     ) -> Self {
         Self {
-            slots: [[0u8; MAX_DATAGRAM]; SLOT_LEN],
+            slots: [[0u8; MAX_DATAGRAM]; SLOTS_LEN],
             occupied: 0,
             retransmitted: 0,
-            sent_at_ms: [0; SLOT_LEN],
+            sent_at_ms: [0; SLOTS_LEN],
 
             to_retransmit: 0,
 
@@ -238,7 +243,6 @@ impl SenderConn {
             seq_next: 0,
 
             rtt: RttEstimator::wifi(),
-            aimd: WindowController::new(),
             set_timer,
             cancel_timer,
             get_time_ms,
@@ -246,9 +250,13 @@ impl SenderConn {
         }
     }
 
+    pub fn sent_all(&self) -> bool {
+        self.send_base == self.seq_next
+    }
+
     #[inline]
     pub fn available_slots(&self) -> usize {
-        SLOT_LEN - self.seq_next.wrapping_sub(self.send_base) as usize
+        SLOTS_LEN - self.seq_next.wrapping_sub(self.send_base) as usize
     }
 
     #[inline]
@@ -264,7 +272,7 @@ impl SenderConn {
 
     /// Returns true if there is room to send a new frame (not a retransmit).
     pub fn can_send_new(&self) -> bool {
-        (self.in_flight() as usize) < self.aimd.window() as usize
+        (self.in_flight() as usize) < WINDOW_LEN
     }
 
     /// Call if `push_message` or `on_rx_ack` return true (should send).
@@ -273,23 +281,29 @@ impl SenderConn {
     pub fn send_next(&mut self, data: &mut *const u8, len: &mut u16) -> bool {
         let retransmit_slots = self.to_retransmit & self.occupied;
 
-        let seq = if retransmit_slots != 0 {
-            self.slots[retransmit_slots.trailing_zeros() as usize][DataFrame::SEQ_OFFSET]
+        let (seq, retransmission) = if retransmit_slots != 0 {
+            (
+                self.slots[retransmit_slots.trailing_zeros() as usize][DataFrame::SEQ_OFFSET],
+                true,
+            )
         } else if self.can_send_new() && self.seq_next != self.seq_send {
-            self.seq_send
+            (self.seq_send, false)
         } else {
             return false;
         };
 
-        let slot = seq as usize % SLOT_LEN;
+        let slot = seq as usize % SLOTS_LEN;
         *data = self.slots[slot].as_ptr();
-        *len = self.slots[slot][DataFrame::LEN_OFFSET] as u16 + DG_OVERHEAD as u16;
+        *len = crate::first!(u16, self.slots[slot][2..]).1 + DG_OVERHEAD as u16;
 
         self.sent_at_ms[slot] = (self.get_time_ms)();
-        self.to_retransmit &= !(1 << seq);
+        self.to_retransmit &= !(1 << slot);
 
         let was_idle = self.in_flight() == 0;
         if was_idle {
+            let rto = self.rtt.rto();
+            (self.set_timer)(rto);
+        } else if retransmission {
             let rto = self.rtt.rto();
             (self.set_timer)(rto);
         }
@@ -327,11 +341,11 @@ impl SenderConn {
             let dg = DataFrame {
                 flags,
                 seq: self.seq_next,
-                len: len as u8,
+                len: len as _,
                 payload: &message[b..(b + len)],
             };
 
-            let slot = self.seq_next as usize % SLOT_LEN;
+            let slot = self.seq_next as usize % SLOTS_LEN;
             dg.serialize(&mut self.slots[slot], self.crc_fn);
 
             let bit = (1 as SlotBitMap) << slot;
@@ -350,7 +364,7 @@ impl SenderConn {
     pub fn on_recv_ack(&mut self, raw: &[u8]) -> bool {
         let ack = match AckFrame::parse(raw, self.crc_fn) {
             Ok(a) => a,
-            Err(e) => return false,
+            Err(_) => return false,
         };
 
         // Handling ack_base advance.
@@ -365,24 +379,24 @@ impl SenderConn {
             // as ACKed, taking RTT samples where eligible.
             let now_ms = (self.get_time_ms)();
 
+            let slot = self.send_base as usize % SLOTS_LEN;
+
             // The frame at send_base should still be waiting there.
             // If not, the sender algo screwed up.
             // Crucially, it's the one we want to sample RTT against.
             //
             // If we didn't advance, the oldest frame wasn't ACK'd and must
             // be retransmitted, which means we mustn't sample with it.
-            debug_assert!(1 << self.send_base & self.occupied != 0);
+            debug_assert!(1 << slot & self.occupied != 0);
 
             // Karn's algorithm: don't sample retransmitted frames.
-            if 1 << self.send_base & self.retransmitted == 0 {
-                let slot = self.send_base as usize % SLOT_LEN;
+            if 1 << slot & self.retransmitted == 0 {
                 let rtt_sample = now_ms.wrapping_sub(self.sent_at_ms[slot]);
                 self.rtt.update(rtt_sample);
             }
 
             // Now set all the packets between send_base and ack_base to unoccupied.
-            let acked = (((1 as SlotBitMap) << base_offset) - 1)
-                .rotate_left(self.send_base as u32 % SLOT_LEN as u32);
+            let acked = (((1 as SlotBitMap) << base_offset) - 1).rotate_left(slot as _);
             self.occupied &= !acked;
             self.send_base = ack.ack_base;
         }
@@ -391,11 +405,6 @@ impl SenderConn {
         // Thus bitmap==0 indicated a clean ACK.
         // self.send_base..self.seq_send remains unacknowledged.
         if ack.bitmap == 0 {
-            // Clean ACK of more than one packet? Widen AIMD window.
-            if advanced {
-                self.aimd.on_clean_ack();
-            }
-
             // All in-flight packets received? Cancel timer.
             if self.send_base == self.seq_send {
                 (self.cancel_timer)();
@@ -417,15 +426,24 @@ impl SenderConn {
         // First, handle all the ACK'd frames.
         // The bitmap is relative to ack_base (== receiver's recv_base).
         // Bit i means seq (ack_base + i) mod 256 was received.
-        let acked = (ack.bitmap as SlotBitMap).rotate_left(ack.ack_base as u32 % SLOT_LEN as u32);
-        // Ignore acks for unoccupied (already-acked) frames.
+        let acked = (ack.bitmap as SlotBitMap).rotate_left(ack.ack_base as u32 % SLOTS_LEN as u32);
         let acked = acked & self.occupied;
         self.occupied &= !acked;
 
         // Assert that send_base is un-ACK'd. Should be the case.
-        debug_assert!(1 << self.send_base & self.occupied != 0);
+        debug_assert!(
+            (1 as SlotBitMap) << (self.send_base as SlotBitMap % SLOTS_LEN as SlotBitMap)
+                & self.occupied
+                != 0
+        );
 
         // Should we flag all unacked frames before the most recently acked from for retransmission here?
+
+        let unacked_from_ack_base = !ack.bitmap as SlotBitMap & ((1 << self.in_flight()) - 1);
+        let unacked =
+            unacked_from_ack_base.rotate_left(ack.ack_base as SlotBitMap % SLOTS_LEN as SlotBitMap);
+        self.to_retransmit |= unacked & self.occupied;
+        self.retransmitted |= unacked & self.occupied;
 
         true
     }
@@ -434,62 +452,15 @@ impl SenderConn {
     /// If this returns `true`, call `send_next` until it returns false to retransmit frames.
     pub fn on_timeout(&mut self) -> bool {
         self.rtt.on_timeout();
-        self.aimd.on_loss();
 
         let in_flight = self.in_flight() as usize;
 
         let mask = (((1 as SlotBitMap) << in_flight) - 1)
-            .rotate_left(self.send_base as u32 % SLOT_LEN as u32);
+            .rotate_left(self.send_base as u32 % SLOTS_LEN as u32);
         self.retransmitted |= mask & self.occupied;
         self.to_retransmit |= mask & self.occupied;
 
         self.to_retransmit & self.occupied != 0
-    }
-}
-
-// ── AIMD window controller ────────────────────────────────────────────────────
-
-#[derive(Debug)]
-pub struct WindowController {
-    pub cwnd: u8, // current window size [1, MAX_WINDOW]
-    pub ssthresh: u8,
-    /// Counts clean ACK rounds for additive increase.
-    pub ack_rounds: u8,
-}
-
-impl WindowController {
-    pub const fn new() -> Self {
-        Self {
-            cwnd: 1,
-            ssthresh: MAX_WINDOW as u8,
-            ack_rounds: 0,
-        }
-    }
-
-    /// Call when a batch of new frames is ACKed without loss.
-    pub fn on_clean_ack(&mut self) {
-        if self.cwnd < self.ssthresh {
-            // Slow start: double each round (clamp to ssthresh)
-            self.cwnd = (self.cwnd.saturating_mul(2)).min(self.ssthresh);
-        } else {
-            // Congestion avoidance: +1 per RTT (approximate: count rounds)
-            self.ack_rounds = self.ack_rounds.saturating_add(1);
-            if self.ack_rounds >= self.cwnd {
-                self.cwnd = (self.cwnd + 1).min(MAX_WINDOW as u8);
-                self.ack_rounds = 0;
-            }
-        }
-    }
-
-    /// Call on RTO timeout.
-    pub fn on_loss(&mut self) {
-        self.ssthresh = (self.cwnd / 2).max(1);
-        self.cwnd = 1; // reset to 1 on loss like TCP Reno
-    }
-
-    #[inline]
-    pub fn window(&self) -> u8 {
-        self.cwnd
     }
 }
 
@@ -498,8 +469,39 @@ pub mod test_utils {
     use super::*;
     use crate::wifi::common::test_utils::*;
 
+    // Slow manual version of the CRC used in the app.
+    #[unsafe(no_mangle)]
+    pub extern "C" fn crc16(data: *const u8, len: usize) -> u16 {
+        let mut crc = 0xFFFF;
+        for i in 0..len {
+            let byte = unsafe { data.wrapping_add(i).read() } as u16;
+            crc ^= byte << 8;
+            for _b in 0..8 {
+                if crc & 0x8000 != 0 {
+                    crc = crc << 1 as u16 ^ 0xA7D3;
+                } else {
+                    crc <<= 1;
+                }
+            }
+        }
+        return crc;
+    }
+
     pub fn make_sender() -> SenderConn {
-        SenderConn::new(noop_timer_set, noop_timer_cancel, time_zero, test_crc)
+        SenderConn::new(noop_timer_set, noop_timer_cancel, time_zero, crc16)
+    }
+
+    pub fn make_sender_pump_1() -> SenderConn {
+        let mut sender = SenderConn::new(noop_timer_set, noop_timer_cancel, time_zero, crc16);
+
+        sender.push_message(b"dummy");
+        let mut data = std::ptr::null();
+        let mut len = 0u16;
+
+        sender.send_next(&mut data, &mut len);
+        sender.on_recv_ack(&AckFrame::ack(1, 0).to_bytes(crc16));
+
+        sender
     }
 }
 
@@ -507,7 +509,7 @@ pub mod test_utils {
 mod sender_tests {
 
     use super::*;
-    use crate::wifi::common::test_utils::*;
+    use crate::wifi::{common::test_utils::*, sender::test_utils::crc16};
 
     // =========================================================================
     // Sender — SYN / SYN-ACK handshake
@@ -520,7 +522,7 @@ mod sender_tests {
             noop_timer_set,
             noop_timer_cancel,
             time_zero,
-            test_crc,
+            crc16,
         );
         s
     }
@@ -530,7 +532,7 @@ mod sender_tests {
     }
 
     fn syn_ack_bytes() -> Vec<u8> {
-        AckFrame::syn(0).to_bytes(test_crc).to_vec()
+        AckFrame::syn(0).to_bytes(crc16).to_vec()
     }
 
     // --- State before any interaction ---
@@ -580,7 +582,7 @@ mod sender_tests {
             noop_timer_set,
             noop_timer_cancel,
             time_zero,
-            test_crc,
+            crc16,
         );
 
         let mut mac = Mac::bcast();
@@ -592,7 +594,7 @@ mod sender_tests {
 
         // Read the full serialised SYN frame out of the buffer.
         let raw = unsafe { std::slice::from_raw_parts(data, len as usize) };
-        let parsed = DataFrame::parse(raw, test_crc).unwrap();
+        let parsed = DataFrame::parse(raw, crc16).unwrap();
 
         assert_ne!(parsed.flags & FLAG_SYN, 0);
         assert_eq!(parsed.seq, 0);
@@ -697,7 +699,7 @@ mod sender_tests {
         s.send_next(&mut mac, &mut data, &mut len);
 
         // Plain ACK (no SYN bit) must not transition.
-        let plain_ack = AckFrame::ack(0, 0).to_bytes(test_crc);
+        let plain_ack = AckFrame::ack(0, 0).to_bytes(crc16);
         s.on_recv_ack(some_mac(), &plain_ack);
 
         // Still in Syn: push_message rejected.
@@ -713,7 +715,7 @@ mod sender_tests {
 
         s.send_next(&mut mac, &mut data, &mut len);
 
-        let rst = AckFrame::rst().to_bytes(test_crc);
+        let rst = AckFrame::rst().to_bytes(crc16);
         s.on_recv_ack(some_mac(), &rst);
 
         assert!(!s.push_message(b"hello"));
@@ -725,9 +727,10 @@ mod connection_tests {
     // Test window management, ACK processing, AIMD, RTT estimation, timer arming,
     // retransmit on timeout, Karn's algorithm
 
+    use crate::first;
+
     use super::test_utils::*;
     use super::*;
-    use crate::wifi::common::test_utils::*;
 
     // =========================================================================
     // sender — initial state
@@ -743,7 +746,6 @@ mod connection_tests {
         assert_eq!(s.seq_send, 0);
         assert_eq!(s.seq_next, 0);
         assert_eq!(s.in_flight(), 0);
-        assert_eq!(s.aimd.window(), 1); // starts at cwnd=1
     }
 
     // =========================================================================
@@ -753,7 +755,6 @@ mod connection_tests {
     #[test]
     fn sender_push_single_frame_send_single_frame() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         let try_send = s.push_message(b"hello");
         assert!(try_send);
         assert_eq!(s.occupied, 1);
@@ -780,28 +781,8 @@ mod connection_tests {
     }
 
     #[test]
-    fn sender_push_frame_blocked_when_window_full() {
-        let mut s = make_sender();
-        s.aimd.cwnd = 2;
-
-        s.push_message(b"a");
-        s.push_message(b"b");
-        s.push_message(b"c");
-
-        let mut data = std::ptr::null();
-        let mut len = 0u16;
-
-        // Two slots in window
-        assert!(s.send_next(&mut data, &mut len));
-        assert!(s.send_next(&mut data, &mut len));
-        // Third blocked by cwnd
-        assert!(!s.send_next(&mut data, &mut len));
-    }
-
-    #[test]
     fn sender_push_message_fragments_oversized_payload() {
         let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
         let too_big = vec![0u8; MAX_PAYLOAD + 1];
         let try_send = s.push_message(&too_big);
         assert!(try_send);
@@ -820,7 +801,6 @@ mod connection_tests {
     #[test]
     fn sender_push_message_accepts_max_payload() {
         let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
         let exactly_max = vec![0xBBu8; MAX_PAYLOAD];
         // Should not panic; exactly one slot used
         s.push_message(&exactly_max);
@@ -831,12 +811,11 @@ mod connection_tests {
     #[test]
     fn sender_seq_numbers_increment_per_frame() {
         let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
 
         for expected_seq in 0u8..8 {
             s.push_message(b"x");
             // seq is stored at DataFrame::SEQ_OFFSET in the serialized slot
-            let slot = expected_seq as usize % SLOT_LEN;
+            let slot = expected_seq as usize % SLOTS_LEN;
             assert_eq!(
                 s.slots[slot][DataFrame::SEQ_OFFSET],
                 expected_seq,
@@ -849,14 +828,13 @@ mod connection_tests {
     #[test]
     fn sender_push_message_serializes_valid_data_frame() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         let payload = b"test payload";
         s.push_message(payload);
 
         // Reconstruct the frame length from the slot
         let slot = s.send_base as usize;
-        let frame_len = s.slots[slot][DataFrame::LEN_OFFSET] as usize + DG_OVERHEAD;
-        let parsed = DataFrame::parse(&s.slots[slot][..frame_len], test_crc).unwrap();
+        let frame_len = first!(u16, s.slots[slot][2..]).1 as usize + DG_OVERHEAD;
+        let parsed = DataFrame::parse(&s.slots[slot][..frame_len], crc16).unwrap();
         assert_eq!(parsed.seq, 0);
         assert_eq!(parsed.payload, payload);
     }
@@ -864,13 +842,12 @@ mod connection_tests {
     #[test]
     fn sender_push_message_sets_end_flag_on_last_fragment() {
         let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
 
         // Single-frame message: must have FLAG_END
         s.push_message(b"small");
         let slot = 0;
-        let frame_len = s.slots[slot][DataFrame::LEN_OFFSET] as usize + DG_OVERHEAD;
-        let parsed = DataFrame::parse(&s.slots[slot][..frame_len], test_crc).unwrap();
+        let frame_len = first!(u16, s.slots[slot][2..]).1 as usize + DG_OVERHEAD;
+        let parsed = DataFrame::parse(&s.slots[slot][..frame_len], crc16).unwrap();
         assert_ne!(
             parsed.flags & FLAG_END,
             0,
@@ -881,14 +858,13 @@ mod connection_tests {
     #[test]
     fn sender_push_message_only_last_fragment_has_end_flag() {
         let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
         let msg = vec![0u8; MAX_PAYLOAD + 1]; // forces 2 frames
         s.push_message(&msg);
 
         // First frame: no END
         let slot0 = 0usize;
-        let len0 = s.slots[slot0][DataFrame::LEN_OFFSET] as usize + DG_OVERHEAD;
-        let frame0 = DataFrame::parse(&s.slots[slot0][..len0], test_crc).unwrap();
+        let len0 = first!(u16, s.slots[slot0][2..]).1 as usize + DG_OVERHEAD;
+        let frame0 = DataFrame::parse(&s.slots[slot0][..len0], crc16).unwrap();
         assert_eq!(
             frame0.flags & FLAG_END,
             0,
@@ -897,8 +873,8 @@ mod connection_tests {
 
         // Second frame: END
         let slot1 = 1usize;
-        let len1 = s.slots[slot1][DataFrame::LEN_OFFSET] as usize + DG_OVERHEAD;
-        let frame1 = DataFrame::parse(&s.slots[slot1][..len1], test_crc).unwrap();
+        let len1 = first!(u16, s.slots[slot1][2..]).1 as usize + DG_OVERHEAD;
+        let frame1 = DataFrame::parse(&s.slots[slot1][..len1], crc16).unwrap();
         assert_ne!(
             frame1.flags & FLAG_END,
             0,
@@ -923,12 +899,11 @@ mod connection_tests {
     #[test]
     fn sender_clean_ack_advances_send_base() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 2);
 
         // ack_base=2 means receiver has fully delivered seqs 0 and 1.
         // bitmap=0 means no selective info (clean ACK).
-        let ack = AckFrame::ack(2, 0).to_bytes(test_crc);
+        let ack = AckFrame::ack(2, 0).to_bytes(crc16);
         let try_send = s.on_recv_ack(&ack);
 
         assert_eq!(s.send_base, 2);
@@ -940,11 +915,10 @@ mod connection_tests {
     #[test]
     fn sender_partial_clean_ack_leaves_remaining_in_flight() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 3); // seqs 0,1,2 in flight
 
         // Receiver has delivered 0 and 1 (ack_base=2), seq 2 still outstanding.
-        let ack = AckFrame::ack(2, 0).to_bytes(test_crc);
+        let ack = AckFrame::ack(2, 0).to_bytes(crc16);
         let try_send = s.on_recv_ack(&ack);
 
         assert_eq!(s.send_base, 2);
@@ -955,19 +929,18 @@ mod connection_tests {
     #[test]
     fn sender_selective_ack_marks_received_frames() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 3); // seqs 0,1,2
 
         // ack_base=0 (seq 0 not yet delivered); bitmap bit 1 means seq 1 received,
         // bit 2 means seq 2 received. Seq 0 still missing.
-        let ack = AckFrame::ack(0, 0b110).to_bytes(test_crc);
+        let ack = AckFrame::ack(0, 0b110).to_bytes(crc16);
         s.on_recv_ack(&ack);
 
         // send_base must not advance (ack_base didn't move)
         assert_eq!(s.send_base, 0);
         // Slots for seq 1 and 2 should be freed
-        let slot1_bit = 1u32 << (1usize % SLOT_LEN);
-        let slot2_bit = 1u32 << (2usize % SLOT_LEN);
+        let slot1_bit = 1u32 << (1usize % SLOTS_LEN);
+        let slot2_bit = 1u32 << (2usize % SLOTS_LEN);
         assert_eq!(s.occupied & slot1_bit, 0, "slot 1 should be freed");
         assert_eq!(s.occupied & slot2_bit, 0, "slot 2 should be freed");
     }
@@ -975,7 +948,6 @@ mod connection_tests {
     #[test]
     fn sender_ack_malformed_frame_is_ignored() {
         let mut s = make_sender();
-        s.aimd.cwnd = 2;
         push_and_send_n(&mut s, 1);
 
         let try_send = s.on_recv_ack(b"garbage bytes that are not a valid frame at all");
@@ -986,70 +958,12 @@ mod connection_tests {
     #[test]
     fn sender_ack_does_not_advance_base_past_seq_send() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 2); // seqs 0,1
 
         // ack_base=5 is beyond seq_send=2; should be ignored
-        let ack = AckFrame::ack(5, 0).to_bytes(test_crc);
+        let ack = AckFrame::ack(5, 0).to_bytes(crc16);
         s.on_recv_ack(&ack);
         assert_eq!(s.send_base, 0);
-    }
-
-    // =========================================================================
-    // sender — AIMD
-    // =========================================================================
-
-    #[test]
-    fn sender_aimd_slow_start_doubles_cwnd() {
-        let mut s = make_sender();
-        assert_eq!(s.aimd.window(), 1);
-        s.aimd.on_clean_ack();
-        assert_eq!(s.aimd.window(), 2);
-        s.aimd.on_clean_ack();
-        assert_eq!(s.aimd.window(), 4);
-        s.aimd.on_clean_ack();
-        assert_eq!(s.aimd.window(), 8);
-    }
-
-    #[test]
-    fn sender_aimd_loss_halves_ssthresh_and_resets_cwnd() {
-        let mut s = make_sender();
-        s.aimd.cwnd = 32;
-        s.aimd.on_loss();
-        assert_eq!(s.aimd.cwnd, 1);
-        assert_eq!(s.aimd.ssthresh, 16);
-    }
-
-    #[test]
-    fn sender_aimd_loss_from_cwnd_1_sets_ssthresh_to_1() {
-        let mut s = make_sender();
-        assert_eq!(s.aimd.cwnd, 1);
-        s.aimd.on_loss();
-        assert_eq!(s.aimd.ssthresh, 1); // max(1/2, 1) = 1
-        assert_eq!(s.aimd.cwnd, 1);
-    }
-
-    #[test]
-    fn sender_aimd_cwnd_clamps_to_max_window() {
-        let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
-        s.aimd.ssthresh = MAX_WINDOW as u8; // force congestion-avoidance path
-        for _ in 0..=MAX_WINDOW {
-            s.aimd.on_clean_ack();
-        }
-        assert!(s.aimd.window() <= MAX_WINDOW as u8);
-    }
-
-    #[test]
-    fn sender_aimd_congestion_avoidance_increments_slowly() {
-        let mut s = make_sender();
-        s.aimd.cwnd = 16;
-        s.aimd.ssthresh = 8; // already above ssthresh → congestion avoidance
-        let initial = s.aimd.window();
-        for _ in 0..initial {
-            s.aimd.on_clean_ack();
-        }
-        assert_eq!(s.aimd.window(), initial + 1);
     }
 
     // =========================================================================
@@ -1057,23 +971,8 @@ mod connection_tests {
     // =========================================================================
 
     #[test]
-    fn sender_timer_fire_resets_cwnd_and_sets_ssthresh() {
-        let mut s = make_sender();
-        s.aimd.cwnd = 4;
-        push_and_send_n(&mut s, 2);
-
-        let cwnd_before = s.aimd.window();
-        let try_send = s.on_timeout();
-
-        assert!(try_send);
-        assert_eq!(s.aimd.window(), 1);
-        assert!(s.aimd.ssthresh <= cwnd_before / 2 + 1);
-    }
-
-    #[test]
     fn sender_timer_fire_marks_in_flight_for_retransmit() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 3); // seqs 0,1,2 all in flight
 
         // After loss, all three should be flagged for retransmit
@@ -1083,13 +982,12 @@ mod connection_tests {
         let pending = s.to_retransmit & s.occupied;
         assert_eq!(pending.count_ones(), 3);
         // That frame must be seq 0 (send_base)
-        assert_eq!(pending, 0b111 << (s.send_base as usize % SLOT_LEN));
+        assert_eq!(pending, 0b111 << (s.send_base as usize % SLOTS_LEN));
     }
 
     #[test]
     fn sender_timer_fire_sets_retransmitted_bitmap() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 1); // seq 0
 
         assert_eq!(s.retransmitted, 0);
@@ -1101,7 +999,6 @@ mod connection_tests {
     #[test]
     fn sender_send_next_transmits_retransmit_frame() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 2); // seqs 0,1
 
         s.on_timeout(); // cwnd drops to 1, seq 0 queued for retransmit
@@ -1113,7 +1010,7 @@ mod connection_tests {
 
         // Verify the retransmitted frame is seq 0
         let raw = unsafe { std::slice::from_raw_parts(data, len as usize) };
-        let parsed = DataFrame::parse(raw, test_crc).unwrap();
+        let parsed = DataFrame::parse(raw, crc16).unwrap();
         assert_eq!(parsed.seq, 0);
     }
 
@@ -1124,14 +1021,13 @@ mod connection_tests {
     #[test]
     fn sender_karn_skips_rtt_sample_for_retransmitted_frame() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 1); // seq 0
         s.on_timeout(); // marks seq 0 as retransmitted
 
         assert!(!s.rtt.have_sample);
 
         // ACK seq 0 via ack_base advance
-        let ack = AckFrame::ack(1, 0).to_bytes(test_crc);
+        let ack = AckFrame::ack(1, 0).to_bytes(crc16);
         s.on_recv_ack(&ack);
 
         // RTT estimator must NOT have been updated
@@ -1141,12 +1037,11 @@ mod connection_tests {
     #[test]
     fn sender_karn_samples_rtt_for_non_retransmitted_frame() {
         let mut s = make_sender();
-        s.aimd.cwnd = 4;
         push_and_send_n(&mut s, 1); // seq 0, not retransmitted
 
         assert!(!s.rtt.have_sample);
 
-        let ack = AckFrame::ack(1, 0).to_bytes(test_crc);
+        let ack = AckFrame::ack(1, 0).to_bytes(crc16);
         s.on_recv_ack(&ack);
 
         assert!(s.rtt.have_sample);
@@ -1159,7 +1054,6 @@ mod connection_tests {
     #[test]
     fn sender_seq_wraps_at_255() {
         let mut s = make_sender();
-        s.aimd.cwnd = MAX_WINDOW as u8;
         // Manually position near wraparound
         s.send_base = 254;
         s.seq_send = 254;
@@ -1172,11 +1066,11 @@ mod connection_tests {
         assert_eq!(s.seq_next, 1); // next would be seq 1
 
         // Verify seq 255 is in slot 255 % SLOT_LEN = 31
-        let slot_255 = 255usize % SLOT_LEN;
+        let slot_255 = 255usize % SLOTS_LEN;
         assert_eq!(s.slots[slot_255][DataFrame::SEQ_OFFSET], 255);
 
         // Verify wrapped frame is in slot 0 % SLOT_LEN = 0
-        let slot_0 = 0usize % SLOT_LEN;
+        let slot_0 = 0usize % SLOTS_LEN;
         assert_eq!(s.slots[slot_0][DataFrame::SEQ_OFFSET], 0);
     }
 }
