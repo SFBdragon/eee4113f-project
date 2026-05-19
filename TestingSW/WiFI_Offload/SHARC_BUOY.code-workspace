@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../SHARC_BUOY"
+		},
+		{
+			"name": "LORA_MODULE",
+			"path": "../LORA_MODULE"
+		},
+		{
+			"name": "WiFI_Offload",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

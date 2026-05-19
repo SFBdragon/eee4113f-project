@@ -578,13 +578,12 @@ int main(void)
 
     //HAL_Delay(3000); TODO: REMOVE IF FAILING
     HAL_SuspendTick();    // Need to sleep clock because systick triggers interrupt too
-    __HAL_RCC_DMA1_CLK_DISABLE();
-    __HAL_RCC_DMA2_CLK_DISABLE();
+    //__HAL_RCC_DMA1_CLK_DISABLE();
+   // __HAL_RCC_DMA2_CLK_DISABLE();
 
 
-
-    //HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
-    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
+    //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
     SystemClock_Config();
     HAL_ResumeTick();
 
@@ -1227,6 +1226,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         // Set a flag for main loop to process — keep ISR short
         lora_rx_len   = Size;
         lora_rx_ready = 1;
+
+          char lenStr[32];
+        snprintf(lenStr, sizeof(lenStr), "LORA DATA  new(%d bytes):\r\n", lora_rx_len);
+        UART_SendString(&huart3, lenStr);
+
         // Trigger interrupt ot process data
         NVIC_SetPendingIRQ(EXTI0_IRQn);
 
