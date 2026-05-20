@@ -199,16 +199,16 @@ void recv_lora_packet(uint8_t *data, BufLen len)
         return;
     }
 
-    // --- CRC check ---
-    uint16_t rx_crc = read_u16_le(&data[len - 2]);
-    uint16_t calc_crc = crc16(data, (uint32_t)(len - 2));
-    if (rx_crc != calc_crc) {
-        // Silently drop corrupt packets; the controller will retry.
-        char printbuf[100];
-        snprintf(printbuf, 100, "shaun says bad crc: packet %d calculated %d\n", rx_crc, calc_crc);
-        shaun_debug(printbuf);
-        return;
-    }
+    // // --- CRC check ---
+    // uint16_t rx_crc = read_u16_le(&data[len - 2]);
+    // uint16_t calc_crc = crc16(data, (uint32_t)(len - 2));
+    // if (rx_crc != calc_crc) {
+    //     // Silently drop corrupt packets; the controller will retry.
+    //     char printbuf[100];
+    //     snprintf(printbuf, 100, "shaun says bad crc: packet %d calculated %d\n", rx_crc, calc_crc);
+    //     shaun_debug(printbuf);
+    //     return;
+    // }
 
     // --- Parse and execute commands ---
     // Commands start at offset 5 and end before the 2-byte CRC.
