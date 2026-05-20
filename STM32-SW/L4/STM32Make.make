@@ -88,6 +88,8 @@ Drivers/OLED/ssd1306.c \
 Drivers/OLED/ssd1306_fonts.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_crc.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_crc_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c \

@@ -34,6 +34,10 @@
 
 #include "control.h"
 
+#include "netio.h"
+
+
+
 
 /* USER CODE END Includes */
 
@@ -81,6 +85,8 @@ static uint8_t packedBlocks[NUM_BLOCKS][SD_BLOCK_SIZE];
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CRC_HandleTypeDef hcrc;
+
 I2C_HandleTypeDef hi2c2;
 
 UART_HandleTypeDef hlpuart1;
@@ -172,6 +178,7 @@ static void MX_RTC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_SDMMC1_SD_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 void UART_SendString(UART_HandleTypeDef *huart, char *str);
 static uint32_t get_dma_head(void);
@@ -185,7 +192,6 @@ void UART_DumpBuffer(uint8_t *data, uint32_t len);
 void lora_send(uint8_t *pData, uint16_t size);
 
 void PackBlocks(const uint8_t *src, uint16_t startBlockNum) ;
-uint16_t CRC16(const uint8_t *data, uint16_t length);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -261,6 +267,7 @@ int main(void)
   MX_I2C2_Init();
   MX_SDMMC1_SD_Init();
   MX_USART1_UART_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -404,6 +411,13 @@ int main(void)
         UART_SendString(&huart3, "\r\n"); 
 
       // TAM / SHAUN TO DECODE THIS INCOMING DATA PACKET
+      // Processing lora command
+    
+      // recv_lora_packet(lora_rx_buf, (BufLen)lora_rx_len);
+
+          // RESET BUFFER WHEN DONE
+      lora_rx_len = 0;
+      memset(lora_rx_buf, 0, sizeof(lora_rx_buf));  // optional but clean
       }
 
 
@@ -452,7 +466,7 @@ int main(void)
          //  snprintf(pbg, sizeof(pbg), "PackBlocks: accumHead=%u\r\n", accumHead);
            // UART_SendString(&huart3, pbg);
 
-
+          
 
              // PackBlocks(accumBuffer, accumHead);
 
@@ -515,9 +529,9 @@ int main(void)
                 // Purely for debugging
                 dataReady = 0;
                 // End of transmissoin
-                char hdr[48];
-                sprintf(hdr, "Received %d bytes:\r\n", rxLen);
-                UART_SendString(&huart3, hdr);
+               // char hdr[48];
+                //sprintf(hdr, "Received %d bytes:\r\n", rxLen);
+                //UART_SendString(&huart3, hdr);
 
                 // Figure out length of packet
                 // Append PL to start of packet (Not sure how to do the first one because I cant force open space)
@@ -673,6 +687,45 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
+  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
+  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
+  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
+  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+
+    hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE;
+    hcrc.Init.GeneratingPolynomial = 0xA7D3;
+    hcrc.Init.CRCLength = CRC_POLYLENGTH_16B;
+    hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE;
+    hcrc.Init.InitValue = 0xFFFF;
+
+    
+  /* USER CODE END CRC_Init 2 */
+
 }
 
 /**
@@ -1221,7 +1274,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     if (huart->Instance == LPUART1)
     {
         // lora_rx_buf already contains the data, Size bytes valid
-        lora_rx_buf[Size] = '\0';  // null-terminate for easy string use
+        //lora_rx_buf[Size] = '\0';  // null-terminate for easy string use
 
         // Set a flag for main loop to process — keep ISR short
         lora_rx_len   = Size;
@@ -1429,7 +1482,7 @@ void PackBlocks(const uint8_t *src, uint16_t dataLen) {
         uint16_t currentBlockLen = (remaining > BLOCK_DATA_SIZE) ? BLOCK_DATA_SIZE : remaining;
         
         // Calculate CRC only for the actual data present in this block
-        uint16_t crc = CRC16(data, currentBlockLen);
+        uint16_t crc = crc16(data, currentBlockLen);
 
         // --- NEW HEADER STRUCTURE ---
         // Byte 0-1: Block Length (High byte, then Low byte)
@@ -1462,8 +1515,10 @@ void PackBlocks(const uint8_t *src, uint16_t dataLen) {
     }
 }
 
-uint16_t CRC16(const uint8_t *data, uint16_t length) {
-    return 69;
+uint16_t crc16(const uint8_t *data, uintptr_t len){
+    uint32_t crc_result = HAL_CRC_Calculate(&hcrc, (uint32_t*)data, len);
+    // HAL HW returns a 32-bit value, return lower 16
+    return (uint16_t)crc_result;
 }
 
 void UART_DumpBuffer(uint8_t *data, uint32_t len) {
