@@ -20,7 +20,6 @@ impl LoRaInterface for LoRaSerial {
     }
 
     fn send_packet(&self, bytes: &[u8]) -> Result<(), crate::drivers::StatusError> {
-        dbg!("hiiiiiiiiiiii");
         control_serial_ports::send_lora_packet(bytes).map_err(|e| match e {
             SerialError::Timeout => StatusError::ReceiveTimeout,
             SerialError::Detached => StatusError::ModuleDetached,

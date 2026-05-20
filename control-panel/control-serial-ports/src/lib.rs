@@ -175,8 +175,6 @@ pub fn recv_lora_packet(timeout_ms: u32) -> Result<Vec<u8>, SerialError> {
 
 /// SLIP-encodes and sends `data` to the LoRa module.
 pub fn send_lora_packet(data: &[u8]) -> Result<(), SerialError> {
-    dbg!("halo no");
     let mut port = open_lora_port()?;
-    dbg!("halo");
     slip_send(port.as_mut(), data)
 }
