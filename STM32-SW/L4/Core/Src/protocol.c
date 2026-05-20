@@ -175,26 +175,6 @@ static void get_gps_info(uint32_t *lat, uint32_t *lon);
 
 
 // ---------------------------------------------------------------------------
-// Initialisation
-// ---------------------------------------------------------------------------
-
-void protocol_init(void)
-{
-    Status lora_status = initialize_lora();
-    if (lora_status != STATUS_SUCCESS) {
-        // TODO: surface error to application (e.g. set an error flag,
-        // call an error handler Glen provides).  For now, continue so
-        // the device isn't totally bricked.
-    }
-
-    Status wifi_status = initialize_wifi();
-    if (wifi_status != STATUS_SUCCESS) {
-        // Same story as above.
-    }
-}
-
-
-// ---------------------------------------------------------------------------
 // LoRa receive path
 //
 // Called by Tamryn's driver when a packet has been received.

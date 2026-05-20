@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crossbeam_channel::{Receiver, Sender};
 use protocol::LoRaAddr;
 
-use crate::{mock::MockModule, mock2::UdpMockRadios};
+use crate::{mock::MockModule, mock2::UdpMockRadios, serial::LoRaSerial};
 
 pub use control_protocol as protocol;
 
@@ -14,6 +14,7 @@ pub mod export;
 pub mod lora;
 pub mod mock;
 pub mod mock2;
+pub mod serial;
 pub mod utils;
 pub mod wifi;
 
@@ -41,6 +42,24 @@ impl Controller {
     //         lora_events,
     //     }
     // }
+
+    pub fn demo() -> Self {
+        let addr = LoRaAddr::from_raw(0x1CAD);
+        let lora_hal = Arc::new(LoRaSerial);
+        let mock_module = Arc::new(MockModule::new());
+
+        let wifi_receiver = wifi::start_wifi_listener_thread_with_hal(addr, mock_module.clone());
+
+        let (lora_commands, lora_events) = lora::start_lora_thread_with_hal(addr, lora_hal);
+
+        Self {
+            addr,
+            wifi_hal: mock_module.clone(),
+            wifi_receiver,
+            lora_commands,
+            lora_events,
+        }
+    }
 
     pub fn mocked() -> (Self, Arc<MockModule>) {
         let addr = LoRaAddr::from_raw(0x1CAD);

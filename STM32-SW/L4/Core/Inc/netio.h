@@ -38,13 +38,6 @@ typedef uint16_t BufLen;
 
 // --------------- LoRa --------------- //
 
-// This is called to perform all the LoRa module setup.
-// Once it returns, the LoRa module should be listening for packets,
-// if successful.
-//
-// Tamryn defines this function. Shaun calls it.
-Status initialize_lora();
-
 // Read the memory from [data, data + len) bytes and broadcast it via LoRa.
 //
 // Tamryn defines this function. Shaun calls it.
@@ -58,11 +51,6 @@ Status send_lora_packet(uint8_t *data, BufLen len);
 void recv_lora_packet(uint8_t *data, BufLen len);
 
 // --------------- WiFi --------------- //
-
-// This is called to perform all the WiFi module setup.
-// Once it returns, the WiFi module and driver should be ready
-// for power_up_wifi to be called.
-Status initialize_wifi();
 
 Status power_up_wifi();
 

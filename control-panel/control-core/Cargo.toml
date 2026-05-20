@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 # control-data-link = { path = "../control-data-link" }
+control-serial-ports = { path = "../control-serial-ports" }
 control-protocol = { path = "../control-protocol" }
 crc = "3.4.0"
 crossbeam-channel = "0.5.15"

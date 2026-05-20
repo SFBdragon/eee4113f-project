@@ -5,5 +5,5 @@ members = [
     "control-data-link",
     "control-core",
     "control-gui",
-    "control-protocol", "control-protocol-static", "mock-module",
+    "control-protocol", "control-protocol-static", "mock-module", "control-serial-ports",
 ]

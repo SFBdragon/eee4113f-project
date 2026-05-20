@@ -69,7 +69,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let (controller, mock) = control_core::Controller::mocked2();
+    let controller = control_core::Controller::demo();
 
     info!(%controller.addr, "Controller address selected.");
 
@@ -268,37 +268,37 @@ fn main() {
         });
     }
 
-    {
-        let mock_module = mock.clone();
-        app_window.on_debug_set_lora_module_attached(move |attached| {
-            mock_module.state().is_laptop_lora_module_attached = attached;
-        });
+    // {
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_lora_module_attached(move |attached| {
+    //         mock_module.state().is_laptop_lora_module_attached = attached;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_lora_send_fails(move |failing| {
-            mock_module.state().is_lora_send_failing = failing;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_lora_send_fails(move |failing| {
+    //         mock_module.state().is_lora_send_failing = failing;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_lora_recv_fails(move |failing| {
-            mock_module.state().is_lora_recv_failing = failing;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_lora_recv_fails(move |failing| {
+    //         mock_module.state().is_lora_recv_failing = failing;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_wifi_module_attached(move |attached| {
-            mock_module.state().is_laptop_wifi_module_attached = attached;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_wifi_module_attached(move |attached| {
+    //         mock_module.state().is_laptop_wifi_module_attached = attached;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_wifi_send_fails(move |failing| {
-            mock_module.state().is_wifi_send_failing = failing;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_wifi_send_fails(move |failing| {
+    //         mock_module.state().is_wifi_send_failing = failing;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_wifi_recv_fails(move |failing| {
-            mock_module.state().is_wifi_recv_failing = failing;
-        });
-    }
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_wifi_recv_fails(move |failing| {
+    //         mock_module.state().is_wifi_recv_failing = failing;
+    //     });
+    // }
 
     {
         let events = controller.lora_events.clone();
