@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "SD_Stream.h"
+#include <stdbool.h>
 #define TEST_BUFFER_SIZE 16384  // 32 sectors (16KB) - larger buffers = better speed
 #define STRESS_TEST_TOTAL_SIZE (100ULL * 1024 * 1024)
 #define TOTAL_TEST_SIZE ( 1024*1024*1024)//(100ULL * 1024 * 1024)// 1MB total test
@@ -17,6 +18,43 @@ static UART_HandleTypeDef *_uart = NULL;
 static uint8_t write_buf[512] __attribute__((aligned(4)));
 static uint8_t read_buf[512] __attribute__((aligned(4)));
 
+// Tracks the furthest sector successfully written
+static uint64_t last_written_sector = 0;
+static bool     has_written          = false;
+
+// How far the caller is allowed to overwrite (inclusive).
+// Defaults to DATA_START_SECTOR - 1 (nothing overwriteable).
+static uint64_t overwrite_limit = DATA_START_SECTOR - 1;
+
+
+
+void allow_overwrite(uint64_t upto_block) {
+    overwrite_limit = upto_block;
+}
+
+// First sector that holds real recorded data.
+uint64_t storage_first_readable_block(void) {
+    return (uint64_t)DATA_START_SECTOR;
+}
+
+// First sector the writer will NOT touch without explicit allow_overwrite().
+// Equal to storage_first_readable_block() when nothing has been freed.
+uint64_t storage_first_protected_block(void) {
+    // overwrite_limit is the last sector allowed to be overwritten,
+    // so the protected zone starts one past it — but never before DATA_START_SECTOR.
+    uint64_t one_past = overwrite_limit + 1;
+    if (one_past < (uint64_t)DATA_START_SECTOR)
+        one_past = (uint64_t)DATA_START_SECTOR;
+    return one_past;
+}
+
+// Last sector that contains recorded data (inclusive).
+// Returns DATA_START_SECTOR - 1 if nothing has been written yet.
+uint64_t storage_last_readable_block(void) {
+    if (!has_written)
+        return (uint64_t)DATA_START_SECTOR - 1; // empty — caller should check vs first_readable
+    return last_written_sector;
+}
 
 static void Stream_Log(const char *msg) {
     if (_uart) HAL_UART_Transmit(_uart, (uint8_t*)msg, strlen(msg), 200);
@@ -32,14 +70,13 @@ void SD_Stream_Init(UART_HandleTypeDef *uartHandle) {
 HAL_StatusTypeDef SD_Stream_WriteBlock(uint8_t *block) {
     char dbg[80];
 
-    HAL_StatusTypeDef result = HAL_SD_WriteBlocks(
-        &hsd1,
-        block,
-        current_sector,
-        1,       // 1 block at a time (512 bytes)
-        5000
-    );
+    // Guard: refuse to enter the protected zone
+    if (current_sector >= storage_first_protected_block()) {
+        Stream_Log("SD: write blocked — protected zone\r\n");
+        return HAL_ERROR;
+    }
 
+    HAL_StatusTypeDef result = HAL_SD_WriteBlocks(&hsd1, block, current_sector, 1, 5000);
     if (result != HAL_OK) {
         Stream_Log("SD: write failed\r\n");
         return result;
@@ -56,10 +93,11 @@ HAL_StatusTypeDef SD_Stream_WriteBlock(uint8_t *block) {
     snprintf(dbg, sizeof(dbg), "SD: wrote sector %lu\r\n", (unsigned long)current_sector);
     Stream_Log(dbg);
 
+    last_written_sector = current_sector;
+    has_written         = true;
     current_sector++;
     return HAL_OK;
 }
-
 uint32_t SD_Stream_GetCurrentSector(void) {
     return current_sector;
 }

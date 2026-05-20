@@ -89,6 +89,9 @@ CRC_HandleTypeDef hcrc;
 
 I2C_HandleTypeDef hi2c2;
 
+LPTIM_HandleTypeDef hlptim1;
+LPTIM_HandleTypeDef hlptim2;
+
 UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -114,16 +117,10 @@ uint32_t total_uptime; // Total time SD card has been active, in seconds
 const char total_uptime_filename[] = "UPTIME.txt";
 uint8_t rxBuf[512];
 
-
 // Bringing in from Interrupt file
 // FILES USED TO INDICATE WAKE SOURCE
 volatile uint8_t wake_source;
 volatile uint8_t RTC_WAKE_FLAG;
-
-// EVERY TIME 
-volatile uint32_t LORA_ON_TIME; // how long on (s)
-volatile uint32_t LORA_OFF_TIME; // how long off (s)
-
 volatile uint8_t LORA_WAKE_FLAG;
 volatile uint8_t DMA_WAKE_FLAG;
 volatile uint8_t SHARC_WAKE_FLAG;
@@ -136,6 +133,12 @@ volatile uint8_t cb_write_second_half = 0;
 volatile uint8_t uart_active          = 0;   /* set by EXTI, cleared on done */
 extern UART_HandleTypeDef huart1;
 
+// LORA TIMING WINDOWS
+static uint16_t lora_on_period_s    = 10*1;
+static uint16_t lora_off_period_s  = 10*1;
+static uint16_t lora_total_period_s = 30*10;
+static uint8_t lora_window_state = 1; // On state fla;
+//static uint16_t lora_off_period_s = lora_total_period_s - lora_on_period_s;
 
 // SHARC BUOY DATA WRITINGS
 uint8_t rxBuffer[RX_BUF_SIZE];
@@ -154,6 +157,11 @@ static uint8_t block_buf[512] __attribute__((aligned(4)));
 
 // BUffer for wheere in the offlaod we are:
 static uint16_t rx_write_pos = 0;  // tracks bytes written so far in current half
+
+
+// TIMERS:
+static void (*timeout_callback_1)(void) = NULL;
+static void (*timeout_callback_2)(void) = NULL;
 
 // WIFI
 // 1. The Buffer: Adjust the size (64, 128, 256) based on your largest expected packet
@@ -185,6 +193,8 @@ static void MX_I2C2_Init(void);
 static void MX_SDMMC1_SD_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_CRC_Init(void);
+static void MX_LPTIM1_Init(void);
+static void MX_LPTIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void UART_SendString(UART_HandleTypeDef *huart, char *str);
 static uint32_t get_dma_head(void);
@@ -195,7 +205,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
 void SD_SpeedTest(void);
 void UART_DumpBuffer(uint8_t *data, uint32_t len);
 
-void lora_send(uint8_t *pData, uint16_t size);
+HAL_StatusTypeDef lora_send(uint8_t *pData, uint16_t size);
 
 void PackBlocks(const uint8_t *src, uint16_t startBlockNum) ;
 /* USER CODE END PFP */
@@ -274,6 +284,8 @@ int main(void)
   MX_SDMMC1_SD_Init();
   MX_USART1_UART_Init();
   MX_CRC_Init();
+  MX_LPTIM1_Init();
+  MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
 
   // NB TODO: REMOVE FOR FULL DEPLOYMENT OR ELSE OSE DATA ON POWER CYCLE
@@ -315,6 +327,11 @@ int main(void)
   //SD_SpeedTest();
   //HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_RESET);
 
+
+  // Setting initial lora active window:
+
+   HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_on_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+   HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -364,8 +381,8 @@ int main(void)
 */
   
   // Example of lora send usage:
-  uint8_t lora_tx_buf[] = {'G', 'Ge', 'G'};
-  lora_send(lora_tx_buf, sizeof(lora_tx_buf));
+  //uint8_t lora_tx_buf[] = {'G','Ge', 'G'};
+  //lora_send(lora_tx_buf, sizeof(lora_tx_buf));
   
 // ================   WIFI MANAGEMENT =======================
       if (WIFI_MODE){ // WIFI MODE REQUEST MADE VIA LORA, WIFI CURRENTLY ACTIVE
@@ -627,10 +644,10 @@ int main(void)
 
 
           // DEBUG SHAINS FUNCS
-          uint32_t len = read_block(DATA_START_SECTOR, block_buf);
-        char msg[64];
-        snprintf(msg, sizeof(msg), "Block lengthh: %lu bytes\r\n", len);
-        UART_SendString(&huart3, msg);
+       //   uint32_t len = read_block(DATA_START_SECTOR, block_buf);
+        //char msg[64];
+        //snprintf(msg, sizeof(msg), "Block lengthh: %lu bytes\r\n", len);
+        //UART_SendString(&huart3, msg);
                     
 
 
@@ -649,32 +666,48 @@ int main(void)
     
     // RTC WAKEUP (Lora window start / stop)
     // TOOD: MAKE THIS WAKE_SOURCE A FLAG THAT GETS SET RATHER
-    if (RTC_WAKE_FLAG){  // RTC CAUSED WAKEUp
+    if (RTC_WAKE_FLAG == 1){  // RTC CAUSED WAKEUp
+      __HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
         RTC_WAKE_FLAG = 0;  // Reset RCT WAKEFLAG
+   
+          HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+    
+        // Clear both the RTC internal flag AND the EXTI line (line 20 on most STM32)
+        __HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(&hrtc, RTC_FLAG_WUTF);
+        __HAL_RTC_WAKEUPTIMER_EXTI_CLEAR_FLAG();  // <-- this is commonly missed
 
       
       UART_SendString(&huart3, "Woke from RTC!\r\n"); 
+      // Current state:
+      if(lora_window_state == 1){
+        // Currently in on state
+        UART_SendString(&huart3, "Turning off LoRa\r\n"); 
 
-      // Check time 
-      // Re-configure RTC wakeup
-      HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
-    }
+        // Turrning off
+        lora_window_state = 0;
+        HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_RESET);
 
-    // TEMP OUTSIDE TO FORCE INTERRUTP 
-    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+         HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_off_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+      }
+      else if(lora_window_state == 0){
+        // Currently in off state
+        UART_SendString(&huart3, "Turning on LoRa\r\n"); 
+
+        // Turrning on
+        lora_window_state = 1;
+        HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
+         HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_on_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+      }
+      }
     
-  
 
-    // SD POWER DRAW TEST (ON VS OFF)
-
-  
-
+   
 
 
 // ====================== GOING TO SLEEP =========================
     // ENTER STOP MODE
     wake_source = 0; // reset wake source for next loop
-    UART_SendString(&huart3, "Going to bed in 2s \r\n");
+    UART_SendString(&huart3, "Going to bed \r\n");
     
 
     // Write all peripherals low:
@@ -688,7 +721,7 @@ int main(void)
 
 
     HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);  //SLEEP NOT STOP 
-    //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI); // LPUART ISNT WORKING IN THIS MODE ATM
+    
     SystemClock_Config();
     HAL_ResumeTick();
 
@@ -697,10 +730,10 @@ int main(void)
 
     UART_SendString(&huart3, "Woke up \r\n");
 
-  /*
+  
+      /*
     
     UART_SendString(&huart3, "DEBUG: Checking wake source\r\n");
-
     switch (wake_source) {
       case 1: UART_SendString(&huart3, "Woke from RTC\r\n");      break;
       case 2: UART_SendString(&huart3, "Woke from GPIO\r\n");     break;
@@ -708,10 +741,16 @@ int main(void)
     }
 
     */
+
+
+
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+  
+
+
 
 
   // POST WHILE LOOP
@@ -864,6 +903,74 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
+  * @brief LPTIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_LPTIM1_Init(void)
+{
+
+  /* USER CODE BEGIN LPTIM1_Init 0 */
+
+  /* USER CODE END LPTIM1_Init 0 */
+
+  /* USER CODE BEGIN LPTIM1_Init 1 */
+
+  /* USER CODE END LPTIM1_Init 1 */
+  hlptim1.Instance = LPTIM1;
+  hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
+  hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
+  hlptim1.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
+  hlptim1.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
+  hlptim1.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
+  hlptim1.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
+  hlptim1.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
+  hlptim1.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
+  if (HAL_LPTIM_Init(&hlptim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPTIM1_Init 2 */
+
+  /* USER CODE END LPTIM1_Init 2 */
+
+}
+
+/**
+  * @brief LPTIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_LPTIM2_Init(void)
+{
+
+  /* USER CODE BEGIN LPTIM2_Init 0 */
+
+  /* USER CODE END LPTIM2_Init 0 */
+
+  /* USER CODE BEGIN LPTIM2_Init 1 */
+
+  /* USER CODE END LPTIM2_Init 1 */
+  hlptim2.Instance = LPTIM2;
+  hlptim2.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
+  hlptim2.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
+  hlptim2.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
+  hlptim2.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
+  hlptim2.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
+  hlptim2.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
+  hlptim2.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
+  hlptim2.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
+  if (HAL_LPTIM_Init(&hlptim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPTIM2_Init 2 */
+
+  /* USER CODE END LPTIM2_Init 2 */
 
 }
 
@@ -1447,11 +1554,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
 }
 
-void lora_send(uint8_t *pData, uint16_t size) {
+HAL_StatusTypeDef lora_send(uint8_t *pData, uint16_t size) {
   // Wrapper function for sending data over LORA
     // RE-ASSERT Power to LORA
     HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, SET);
-    HAL_UART_Transmit(&hlpuart1, pData, size, 100);
+    HAL_StatusTypeDef result =  HAL_UART_Transmit(&hlpuart1, pData, size, 100);
 }
 
 void SD_SpeedTest(void) {
@@ -1587,7 +1694,7 @@ void UART_DumpBuffer(uint8_t *data, uint32_t len) {
     }
 }
 
-// FOR SHAUN
+// FOR SHAUN ============================================
 
 // Returns the block data length from header, or 0 on error
 uint32_t read_block(uint64_t block_id, uint8_t* buffer) {
@@ -1647,82 +1754,168 @@ void flush_block_buffer_to_disk(void) {
 
 // Call `callback(ctx)` after `n` milliseconds.
 // Defined by Glen. Called by Shaun for delays.
+// RUNNING ON LPTIM1
 void call_after_n_ms(uint32_t n, void (*callback)()) {
-
+    timeout_callback_1 = callback;
+    uint32_t period = n * 32; // LSI @ 32kHz: 32 ticks per ms
+    HAL_LPTIM_OnePulse_Stop_IT(&hlptim1);          // stop any existing
+    HAL_LPTIM_OnePulse_Start_IT(&hlptim1, period, period); // start neww
 }
 
 // Cancel the active `call_after_n_ms` countdown, if there is one.
+// RUNNING ON LPTIM1
 void cancel_timeout() {
-
+    HAL_LPTIM_OnePulse_Stop_IT(&hlptim1);
+    timeout_callback_1 = NULL;
 }
 
+// RUNNING ON LPTIM2
 // Defined by Glen. Call `callback` every `n` milliseconds.
 void call_repeatedly_after_n_ms_wifi_ping(uint32_t n, void (*callback)()) {
+  timeout_callback_2 = callback;
+  uint32_t period = n * 32; // LSI @ 32kHz: 32 ticks per ms
+  HAL_LPTIM_OnePulse_Stop_IT(&hlptim2);          // stop any existing
+  HAL_LPTIM_TimeOut_Start_IT(&hlptim2, period, period);  // repeats automatically
 
 }
+
 // Defined by Glen. Cancel the repeated callback.
 // Stop doing the callback if you turn WiFi off or otherwise want to stop pinging.
 void cancel_timeout_wifi_ping() {
-
+    HAL_LPTIM_OnePulse_Stop_IT(&hlptim2);          // stop any existing
+    timeout_callback_2 = NULL;
 }
 
 uint32_t get_time_since_epoch_ms() {
-    // give me a time stamp
-    return 0;
+  // give me a time stamp
+  return 0;
 }
 
 // Configure how many seconds to be on for every N seconds.
 // Units are in seconds.
 // Defined by Glen. Called by Shaun to configure the LoRa receive window.
 void set_lora_recv_window(uint16_t on_period, uint16_t total_period) {
-    // this configures the LoRa recv window to use once the buoy
-    // stops hearing from the gui for 10mins (or whatever, but tell
-    // me if this behavior changes)
+  // this configures the LoRa recv window to use once the buoy
+  // stops hearing from the gui for 10mins (or whatever, but tell
+  // me if this behavior changes)
+    lora_on_period_s    = on_period;
+    lora_total_period_s = total_period;
+    lora_off_period_s = lora_total_period_s - lora_on_period_s;
 }
 
-void allow_overwrite(uint64_t upto_block) {
-    // set the pointer you can always overwrite up to 
-}
+
 
 uint64_t storage_total_blocks() {
-    return 100; // todo tell me how many blocks in storage
+  //Tell me how many blocks in storage
+HAL_SD_CardInfoTypeDef cardInfo;
+    
+    if (HAL_SD_GetCardInfo(&hsd1, &cardInfo) == HAL_OK) {
+        // LogBlockNbr holds the total number of logical blocks on your SD card
+        return (uint64_t)cardInfo.LogBlockNbr;
+    }
+    // Fallback default in case the SD card is not initialized/present
+    return 0; 
 }
 
+
+
+// FOLLOWING IS IMPLEMENTED IN SD_STREAM.C
+/*
+
+
+void allow_overwrite(uint64_t upto_block) {
+  // set the pointer you can always overwrite up to 
+}
+
+
 uint64_t storage_first_readable_block() {
-    return 0; // todo tell me first readable/available block ID
+   // todo tell me first readable/available block ID
+   // This is defined in the SD_Stream header
+   return (uint64_t)DATA_START_SECTOR;
 }
 
 uint64_t storage_first_protected_block() {
-    return 0; // todo tell me which block ID you won't overwrite 
-    // (unless storage policy is OVERWRITE)
-    // this is either `storage_first_readable_block`
-    // or what got set by `allow_overwrite`
+  return 0; // todo tell me which block ID you won't overwrite 
+  // (unless storage policy is OVERWRITE)
+  // this is either `storage_first_readable_block`
+  // or what got set by `allow_overwrite`
 }
 
 uint64_t storage_last_readable_block() {
-    return 0; // gimme that last block ID that is readable 
+  return 0; // gimme that last block ID that is readable 
 }
+
+*/
+
+
 
 Status send_lora_packet(uint8_t *data, BufLen len) {
-      // shaun calls this to send a LoRa packet.
-      return STATUS_SUCCESS;
+  // Shaun calls this
+    HAL_StatusTypeDef result = lora_send(data, len);
+    
+    switch (result) {
+        case HAL_OK:      return 1;
+        default:          return -1;
+    }
 }
 
+
+
+
 Status power_up_wifi() {
-    // Shaun calls this to tell WiFi to turn on;
-    // Shaun calls WiFi ping timer nonsense separately.
-    // Shaun calls block_flush and such separately, later.
-    return STATUS_SUCCESS;
+  // Shaun calls this to tell WiFi to turn on;
+  // Shaun calls WiFi ping timer nonsense separately.
+  // Shaun calls block_flush and such separately, later.
+  HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_SET);
+
+  return 1;
 }
 
 Status power_down_wifi() {
-    // Shaun calls this to tell WiFi to turn off.
-    return STATUS_SUCCESS;
+  // Shaun calls this to tell WiFi to turn off.
+   HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_RESET);
+  return 1;
 }
 
 short send_wifi_packet(uint64_t macdst, uint8_t *data, uint16_t len) {
-    // shaun calls this to send a WiFi packet.
-    return STATUS_SUCCESS;
+  // shaun calls this to send a WiFi packet.
+  return STATUS_SUCCESS;
+}
+
+void set_overwrite_policy(Policy policy) {
+  // the overwrite policy was set by the user
+  switch (policy)
+  {
+    case STORAGE_POLICY_OVERWRITE:
+      /* if you run out of storage, start replacing oldest blocks */
+      break;
+    case STORAGE_POLICY_PRESERVE:
+      /* if you run out of storage, don't overwrite blocks between
+      storage_first_protected_block and storage_last_readable_block
+      - discard the new measurement data */
+      break;
+  }
+}
+
+
+// Fires after `n` ms -> reset
+void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
+
+    if (hlptim->Instance == LPTIM1){
+      if (timeout_callback_1) {
+          void (*cb)(void) = timeout_callback_1;
+          timeout_callback_1 = NULL; // clear first in case cb() calls call_after_n_ms again
+          cb();
+      }
+    }
+
+  // Fires after `n` ms -> continues 
+  if (hlptim->Instance == LPTIM2){
+      if (timeout_callback_2) {
+          void (*cb)(void) = timeout_callback_2;
+          cb();
+      }
+    }
 }
 
 

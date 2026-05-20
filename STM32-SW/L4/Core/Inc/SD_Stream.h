@@ -12,8 +12,18 @@
 #define NUM_BLOCKS        ((RX_BUF_SIZE / 2) / BLOCK_DATA_SIZE)
 #define REMAINDER_BYTES   ((RX_BUF_SIZE / 2) % BLOCK_DATA_SIZE)
 
+
+
 /* ── SD addressing ──────────────────────────────────────────── */
 #define DATA_START_SECTOR 5000
+
+
+// Block range tracking
+void     allow_overwrite(uint64_t upto_block);
+uint64_t storage_first_readable_block(void);
+uint64_t storage_first_protected_block(void);
+uint64_t storage_last_readable_block(void);
+
 
 /* ── Public API ─────────────────────────────────────────────── */
 void              SD_Stream_Init             (UART_HandleTypeDef *uartHandle);

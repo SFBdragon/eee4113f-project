@@ -100,6 +100,7 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_lptim.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_mmc.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_mmc_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr.c \
