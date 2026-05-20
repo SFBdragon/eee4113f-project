@@ -73,6 +73,13 @@ uint16_t lora_tx_len   = 0;
 static uint8_t packedBlocks[NUM_BLOCKS][SD_BLOCK_SIZE];
 
 
+typedef struct {
+    uint8_t Hours;
+    uint8_t Minutes;
+    uint8_t Seconds;
+    uint16_t Milliseconds;
+} PreciseTime_t;
+
 
 /* USER CODE END PD */
 
@@ -135,9 +142,12 @@ extern UART_HandleTypeDef huart1;
 
 // LORA TIMING WINDOWS
 static uint16_t lora_on_period_s    = 10*1;
-static uint16_t lora_off_period_s  = 10*1;
-static uint16_t lora_total_period_s = 30*10;
+static uint16_t lora_off_period_s  = 60*1;
+static uint16_t lora_total_period_s = 70*10;
 static uint8_t lora_window_state = 1; // On state fla;
+
+static uint16_t keep_active_s = 60*1; // Reset time since last activities
+static uint8_t active_flag = 1;
 //static uint16_t lora_off_period_s = lora_total_period_s - lora_on_period_s;
 
 // SHARC BUOY DATA WRITINGS
@@ -208,6 +218,8 @@ void UART_DumpBuffer(uint8_t *data, uint32_t len);
 HAL_StatusTypeDef lora_send(uint8_t *pData, uint16_t size);
 
 void PackBlocks(const uint8_t *src, uint16_t startBlockNum) ;
+
+void reset_active(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -329,9 +341,7 @@ int main(void)
 
 
   // Setting initial lora active window:
-
-   HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_on_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
-   HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
+    reset_active();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -405,6 +415,7 @@ int main(void)
           wifi_rx_ready = 0; // Reset the flag so we don't process the same data twice
           UART_SendString(&huart3, "WIFI DATA RECEIVED:\r\n"); 
           // TAM / SHAUN TO PROCESS INCOMING WIFI DATA HERE 
+          reset_active();
 
           // BELOW IS DEBUG CODE TO OUTPUT THE INCOMIGN DATA
          
@@ -432,6 +443,7 @@ int main(void)
       if (LORA_WAKE_FLAG){  // JUST FOR DEBUG, LORA COMMANDS READ FROM DMA TRIGGER.
         LORA_WAKE_FLAG = 0;
         UART_SendString(&huart3, "Woke from LPUART!\r\n"); 
+        reset_active();
       }
 
       // DATA ARRIVED AND READY
@@ -648,8 +660,7 @@ int main(void)
         //char msg[64];
         //snprintf(msg, sizeof(msg), "Block lengthh: %lu bytes\r\n", len);
         //UART_SendString(&huart3, msg);
-                    
-
+                  
 
     __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag
   
@@ -679,9 +690,12 @@ int main(void)
       
       UART_SendString(&huart3, "Woke from RTC!\r\n"); 
       // Current state:
+
+      
       if(lora_window_state == 1){
         // Currently in on state
         UART_SendString(&huart3, "Turning off LoRa\r\n"); 
+
 
         // Turrning off
         lora_window_state = 0;
@@ -698,6 +712,14 @@ int main(void)
         HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
          HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_on_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       }
+
+      else if(lora_window_state ==3)  // In active count donw
+        // Active mode timout
+        // Turrning off
+        lora_window_state = 0;
+        HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_RESET);
+        HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_off_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+
       }
     
 
@@ -1776,7 +1798,6 @@ void call_repeatedly_after_n_ms_wifi_ping(uint32_t n, void (*callback)()) {
   uint32_t period = n * 32; // LSI @ 32kHz: 32 ticks per ms
   HAL_LPTIM_OnePulse_Stop_IT(&hlptim2);          // stop any existing
   HAL_LPTIM_TimeOut_Start_IT(&hlptim2, period, period);  // repeats automatically
-
 }
 
 // Defined by Glen. Cancel the repeated callback.
@@ -1787,8 +1808,24 @@ void cancel_timeout_wifi_ping() {
 }
 
 uint32_t get_time_since_epoch_ms() {
-  // give me a time stamp
-  return 0;
+   RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+
+    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+    // 2. Calculate milliseconds within the current second
+    uint32_t ms_part = 0;
+    if (sTime.SecondFraction > 0) {
+        // LSI counts DOWN from SecondFraction (249) to 0
+        uint32_t fraction_passed = sTime.SecondFraction - sTime.SubSeconds;
+        ms_part = (fraction_passed * 1000) / (sTime.SecondFraction + 1);
+    }
+
+    uint32_t total_seconds = ((uint64_t)sTime.Hours * 3600) + 
+                             ((uint64_t)sTime.Minutes * 60) + 
+                             sTime.Seconds;
+    return (total_seconds * 1000) + ms_part;
 }
 
 // Configure how many seconds to be on for every N seconds.
@@ -1803,6 +1840,14 @@ void set_lora_recv_window(uint16_t on_period, uint16_t total_period) {
     lora_off_period_s = lora_total_period_s - lora_on_period_s;
 }
 
+
+// HELPER TO KEEP LORA ACTIVE WAKES
+void reset_active(void){
+  // Reset active time
+   HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, keep_active_s , RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+   HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET); // Re assert 
+  
+}
 
 
 uint64_t storage_total_blocks() {
@@ -1847,8 +1892,6 @@ uint64_t storage_last_readable_block() {
 
 */
 
-
-
 Status send_lora_packet(uint8_t *data, BufLen len) {
   // Shaun calls this
     HAL_StatusTypeDef result = lora_send(data, len);
@@ -1858,9 +1901,6 @@ Status send_lora_packet(uint8_t *data, BufLen len) {
         default:          return -1;
     }
 }
-
-
-
 
 Status power_up_wifi() {
   // Shaun calls this to tell WiFi to turn on;
@@ -1897,7 +1937,6 @@ void set_overwrite_policy(Policy policy) {
   }
 }
 
-
 // Fires after `n` ms -> reset
 void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
 
@@ -1918,9 +1957,7 @@ void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
     }
 }
 
-
 /* USER CODE END 4 */
-
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None

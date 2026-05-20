@@ -10,7 +10,6 @@
 
 #include <string.h> // for memcmp
 
-
 extern SD_HandleTypeDef hsd1;
 static uint32_t current_sector = DATA_START_SECTOR;
 static UART_HandleTypeDef *_uart = NULL;
@@ -25,8 +24,6 @@ static bool     has_written          = false;
 // How far the caller is allowed to overwrite (inclusive).
 // Defaults to DATA_START_SECTOR - 1 (nothing overwriteable).
 static uint64_t overwrite_limit = DATA_START_SECTOR - 1;
-
-
 
 void allow_overwrite(uint64_t upto_block) {
     overwrite_limit = upto_block;
