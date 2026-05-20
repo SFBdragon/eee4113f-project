@@ -10,7 +10,6 @@
 #include "../Inc/rust_wifi.h"
 #include "../Inc/control.h"
 
-
 // ---------------------------------------------------------------------------
 // Compile-time configuration
 // ---------------------------------------------------------------------------
@@ -204,6 +203,7 @@ void recv_lora_packet(uint8_t *data, BufLen len)
     uint16_t calc_crc = crc16(data, (uint32_t)(len - 2));
     if (rx_crc != calc_crc) {
         // Silently drop corrupt packets; the controller will retry.
+        shaun_debug("shaun says bad crc");
         return;
     }
 
