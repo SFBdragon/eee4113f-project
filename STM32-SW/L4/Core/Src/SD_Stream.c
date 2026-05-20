@@ -9,9 +9,8 @@
 
 #include <string.h> // for memcmp
 
-
 extern SD_HandleTypeDef hsd1;
-static uint32_t current_sector = DATA_START_SECTOR;
+uint32_t current_sector = DATA_START_SECTOR;
 static UART_HandleTypeDef *_uart = NULL;
 
 static uint8_t write_buf[512] __attribute__((aligned(4)));
@@ -96,6 +95,95 @@ void SD_Stream_ReadDebug(uint32_t start_sector, uint32_t num_blocks) {
     Stream_Log("--- SD READ END ---\r\n");
 }
 
+
+void SD_Stream_ReadDebug_Last_Line(uint32_t start_sector, uint32_t num_blocks) {
+    static uint8_t read_buf[512] __attribute__((aligned(4)));
+    char msg[64];
+
+    Stream_Log("--- SD READ START ---\r\n");
+
+    for (uint32_t i = 0; i < num_blocks; i++) {
+        HAL_StatusTypeDef res = HAL_SD_ReadBlocks(
+            &hsd1, read_buf, start_sector + i, 1, 2000);
+
+        if (res != HAL_OK) { Stream_Log("Read error\r\n"); break; }
+
+        uint32_t t = HAL_GetTick();
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+            if (HAL_GetTick() - t > 2000) { Stream_Log("Timeout\r\n"); return; }
+        }
+
+        // Only print last 16 bytes of the block (offset 0x1F0)
+        int row = 512 - 16;
+        int len = snprintf(msg, sizeof(msg),
+            "Sector %lu [last 16]: %02X %02X %02X %02X %02X %02X %02X %02X "
+                          "%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+            (unsigned long)(start_sector + i),
+            read_buf[row+0],  read_buf[row+1],  read_buf[row+2],  read_buf[row+3],
+            read_buf[row+4],  read_buf[row+5],  read_buf[row+6],  read_buf[row+7],
+            read_buf[row+8],  read_buf[row+9],  read_buf[row+10], read_buf[row+11],
+            read_buf[row+12], read_buf[row+13], read_buf[row+14], read_buf[row+15]);
+        HAL_UART_Transmit(_uart, (uint8_t*)msg, len, 500);
+        Stream_Log("\r\n");
+    }
+    Stream_Log("--- SD READ END ---\r\n");
+}
+
+HAL_StatusTypeDef SD_Stream_ReadBlock(uint32_t sector, uint8_t* buffer) {
+    HAL_StatusTypeDef res = HAL_SD_ReadBlocks(&hsd1, buffer, sector, 1, 2000);
+    if (res != HAL_OK) {
+        Stream_Log("ReadBlock: failed\r\n");
+        return res;
+    }
+
+    uint32_t t = HAL_GetTick();
+    while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+        if (HAL_GetTick() - t > 2000) {
+            Stream_Log("ReadBlock: timeout\r\n");
+            return HAL_TIMEOUT;
+        }
+    }
+
+    return HAL_OK;
+}
+
+
+void SD_Stream_ReadAndForward(uint32_t start_sector, uint32_t num_blocks) {
+    static uint8_t read_buf[512] __attribute__((aligned(4)));
+    char msg[80];
+
+    Stream_Log("--- SD READ AND FORWARD START ---\r\n");
+
+    for (uint32_t i = 0; i < num_blocks; i++) {
+        HAL_StatusTypeDef res = HAL_SD_ReadBlocks(
+            &hsd1, read_buf, start_sector + i, 1, 2000);
+
+        if (res != HAL_OK) { Stream_Log("Read error\r\n"); break; }
+
+        uint32_t t = HAL_GetTick();
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+            if (HAL_GetTick() - t > 2000) { Stream_Log("Timeout\r\n"); return; }
+        }
+
+        // Print last 16 bytes as hex (debug)
+        int row = 512 - 16;
+        int len = snprintf(msg, sizeof(msg),
+            "Sector %lu [last 16]: %02X %02X %02X %02X %02X %02X %02X %02X "
+                          "%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+            (unsigned long)(start_sector + i),
+            read_buf[row+0],  read_buf[row+1],  read_buf[row+2],  read_buf[row+3],
+            read_buf[row+4],  read_buf[row+5],  read_buf[row+6],  read_buf[row+7],
+            read_buf[row+8],  read_buf[row+9],  read_buf[row+10], read_buf[row+11],
+            read_buf[row+12], read_buf[row+13], read_buf[row+14], read_buf[row+15]);
+        HAL_UART_Transmit(_uart, (uint8_t*)msg, len, 500);
+        Stream_Log("\r\n");
+
+        // Forward raw 512 bytes over USART3
+        HAL_UART_Transmit(&huart3, read_buf, 512, 5000);
+    }
+
+    Stream_Log("--- SD READ AND FORWARD END ---\r\n");
+}
 
 void SD_BruteSpeedTest(void) {
     static uint8_t test_buf[TEST_BUFFER_SIZE] __attribute__((aligned(4)));

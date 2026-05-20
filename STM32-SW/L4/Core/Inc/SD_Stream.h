@@ -15,12 +15,19 @@
 /* ── SD addressing ──────────────────────────────────────────── */
 #define DATA_START_SECTOR 5000
 
+
+extern uint32_t current_sector;
+
+
 /* ── Public API ─────────────────────────────────────────────── */
 void              SD_Stream_Init             (UART_HandleTypeDef *uartHandle);
 HAL_StatusTypeDef SD_Stream_WriteBlock       (uint8_t *block);
 void              SD_Stream_ReadDebug        (uint32_t start_sector, uint32_t num_blocks);
 uint32_t          SD_Stream_GetCurrentSector (void);
 void                SD_BruteSpeedTest       (void);
+void SD_Stream_ReadDebug_Last_Line(uint32_t start_sector, uint32_t num_blocks);
 void SD_MassAccuracyTest                    (uint32_t iterations);
+void  SD_Stream_ReadAndForward(uint32_t start_sector, uint32_t num_blocks);
+HAL_StatusTypeDef SD_Stream_ReadBlock(uint32_t sector, uint8_t* buffer);
 
 #endif

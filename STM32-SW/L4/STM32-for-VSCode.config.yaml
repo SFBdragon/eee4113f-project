@@ -58,7 +58,7 @@ libraries:
 
 # Library directories. Folders can be added here that contain custom libraries.
 libraryDirectories:
-  - RustLibs/**
+  - RustLibs
 
 # Files or folders that will be excluded from compilation.
 # Glob patterns (https://www.wikiwand.com/en/Glob_(programming)) can be used.

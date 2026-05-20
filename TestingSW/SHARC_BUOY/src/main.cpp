@@ -1,18 +1,32 @@
 #include <Arduino.h>
 
-#define TRIGGER_PIN 5
-#define ONBOARD_LED 8
-#define BAUD_RATE 115200
-#define SERIAL_TX_PIN 21
-#define SERIAL_RX_PIN 20
+#define TRIGGER_PIN     22
+#define ONBOARD_LED     2
+#define BAUD_RATE       115200
+#define SERIAL_TX_PIN   17
+#define SERIAL_RX_PIN   16
 
-// 24KB test dataset
-#define DATA_SIZE 24576
-uint8_t testData[DATA_SIZE];
+#define PACKET_SIZE     (1024 * 6 / 5)
 
-// Packet configuration
-#define MIN_PACKET_SIZE 50
-#define MAX_PACKET_SIZE 10240
+uint8_t packetData[PACKET_SIZE];
+
+void build_packet(uint8_t* buf, uint8_t index) {
+  memset(buf, index, PACKET_SIZE);
+  buf[0] = 0xFF;
+  buf[PACKET_SIZE - 1] = 0xFF;
+}
+
+void write_data(uint8_t* data, size_t len) {
+  digitalWrite(TRIGGER_PIN, HIGH);
+  digitalWrite(ONBOARD_LED, HIGH);
+  delay(10);
+
+  Serial1.write(data, len);
+  Serial1.flush();
+
+  digitalWrite(TRIGGER_PIN, LOW);
+  digitalWrite(ONBOARD_LED, LOW);
+}
 
 void setup() {
   pinMode(TRIGGER_PIN, OUTPUT);
@@ -23,51 +37,21 @@ void setup() {
   Serial.begin(BAUD_RATE);
   Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-  // Fill test dataset with recognizable pattern
-  for (int i = 0; i < DATA_SIZE; i++) {
-    testData[i] = (i % 26) + 65; // A-Z repeating
-  }
-
-  Serial.println("SHARC Buoy Emulator Ready");
-}
-
-void sendPacket(uint8_t* data, size_t len) {
-  // Pull GPIO high to wake STM32L4
-  digitalWrite(TRIGGER_PIN, HIGH);
-  digitalWrite(ONBOARD_LED, HIGH);
-  delay(15); // Allow STM32L4 to wake and setup DMA (~10us + margin)
-
-  Serial1.write(data, len);
-  Serial1.flush();
-
-  delay(5);
-  digitalWrite(TRIGGER_PIN, LOW);
-  digitalWrite(ONBOARD_LED, LOW);
+  Serial.println("ESP32 Ready");
 }
 
 void loop() {
-  uint32_t bytesSent = 0;
+  static uint8_t index = 0;
 
-  Serial.println("Starting 24KB transmission...");
+  build_packet(packetData, index);
 
-  while (bytesSent < DATA_SIZE) {
-    // Vary packet size between MIN and MAX
-    uint32_t packetSize = random(MIN_PACKET_SIZE, MAX_PACKET_SIZE);
-    if (bytesSent + packetSize > DATA_SIZE) {
-      packetSize = DATA_SIZE - bytesSent;
-    }
+  Serial.printf("Sending packet %02X  [FF %02X ... %02X FF]\n",
+                index, index, index);
 
-    sendPacket(&testData[bytesSent], packetSize);
-    bytesSent += packetSize;
+  write_data(packetData, PACKET_SIZE);
 
-    Serial.printf("Sent %lu / %d bytes\n", bytesSent, DATA_SIZE);
+  index++;
+  if (index >= 0xFF) index = 0;  // skip FF, reserved as marker
 
-    // Vary interval between 10ms and 60s
-    uint32_t interval = random(10, 60000);
-    Serial.printf("Next packet in %lu ms\n", interval);
-    delay(interval);
-  }
-
-  Serial.println("Transmission complete. Waiting 10s before repeat.");
-  delay(10000);
+  delay(3000);
 }
