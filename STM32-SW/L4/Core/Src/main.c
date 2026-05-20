@@ -142,11 +142,11 @@ extern UART_HandleTypeDef huart1;
 
 // LORA TIMING WINDOWS
 static uint16_t lora_on_period_s    = 10*1;
-static uint16_t lora_off_period_s  = 60*1;
+static uint16_t lora_off_period_s  = 10*1;
 static uint16_t lora_total_period_s = 70*10;
 static uint8_t lora_window_state = 1; // On state fla;
 
-static uint16_t keep_active_s = 60*1; // Reset time since last activities
+static uint16_t keep_active_s = 120*1; // Reset time since last activities
 static uint8_t active_flag = 1;
 //static uint16_t lora_off_period_s = lora_total_period_s - lora_on_period_s;
 
@@ -330,7 +330,6 @@ int main(void)
 
   //total_uptime = SD_ReadUptime();
   SD_Stream_Init(&huart3);
-
   //UART_SendString(&huart3, "Begin write in 2 sec\r\n");
   //HAL_Delay(2000);
   //SD_BruteSpeedTest();
@@ -338,7 +337,6 @@ int main(void)
     // SPEED TEST
   //SD_SpeedTest();
   //HAL_GPIO_WritePin(Wi_GPIO_0_GPIO_Port, Wi_GPIO_0_Pin, GPIO_PIN_RESET);
-
 
   // Setting initial lora active window:
     reset_active();
@@ -351,8 +349,10 @@ int main(void)
   // Testing with While loop
   while(0){
     HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_RESET);
     HAL_Delay(1000);
     HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_SET);
     HAL_Delay(1000);
   } 
 
@@ -434,9 +434,7 @@ int main(void)
         //SD_Stream_ReadDebug(DATA_START_SECTOR,100 );  // GET THIS TO OUTPUT FILES AND SEND OVER WIFI (SEND_WIFI_FILES WRAPPER)
           // DEBUG END
         }   
-
       }
-
       // ================== LORA ======================
       // TODO 1: DETERMINE COMMAND STRUCTURE AND DECODE COMMAND HERE
 
@@ -447,35 +445,83 @@ int main(void)
       }
 
       // DATA ARRIVED AND READY
-      if (lora_rx_ready){
-        // LORA INCOMING COMMAND READY TO BE PROCESSED 
-        lora_rx_ready = 0; // RESET LORA FLAG
+      if (lora_rx_ready) {
+          // LORA INCOMING COMMAND READY TO BE PROCESSED
+          lora_rx_ready = 0; // RESET LORA FLAG
 
-        // DEBUG START - PRINTING RECIEVED DATA
-        UART_SendString(&huart3, "LORA DATA: \r\n"); 
-       char hex[8];
-        for (uint16_t i = 0; i < lora_rx_len; i++)
-        {
-            snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
-            UART_SendString(&huart3, hex);
-        }
-        UART_SendString(&huart3, "\r\n"); 
+          // DEBUG START - PRINTING RECEIVED RAW DATA
+          UART_SendString(&huart3, "LORA RAW: \r\n");
+          char hex[8];
+          for (uint16_t i = 0; i < lora_rx_len; i++) {
+              snprintf(hex, sizeof(hex), "%02X ", lora_rx_buf[i]);
+              UART_SendString(&huart3, hex);
+          }
+          UART_SendString(&huart3, "\r\n");
 
-      // TAM / SHAUN TO DECODE THIS INCOMING DATA PACKET
-      // Processing lora command
+          // SLIP DECODE
+          // SLIP special bytes:
+          //   END     = 0xC0  -- marks start/end of packet
+          //   ESC     = 0xDB  -- escape next byte
+          //   ESC_END = 0xDC  -- escaped END (ESC + ESC_END => 0xC0)
+          //   ESC_ESC = 0xDD  -- escaped ESC (ESC + ESC_ESC => 0xDB)
 
-      // NB: WIFI DATA OFFLOAD:
-       uint32_t end_sector = SD_Stream_GetCurrentSector();
-       uint32_t num_written = end_sector - DATA_START_SECTOR;
-       SD_Stream_ReadAndForward(DATA_START_SECTOR, num_written);
-    
-      // TODO: FIX LINKING
-       recv_lora_packet(lora_rx_buf, (BufLen)lora_rx_len);
+          #define SLIP_END     0xC0
+          #define SLIP_ESC     0xDB
+          #define SLIP_ESC_END 0xDC
+          #define SLIP_ESC_ESC 0xDD
+          #define SLIP_MAX_PACKET 250
+
+          static uint8_t slip_buf[SLIP_MAX_PACKET];
+          uint16_t slip_len = 0;
+          uint8_t in_esc = 0;
+          uint8_t slip_err = 0;
+
+          for (uint16_t i = 0; i < lora_rx_len; i++) {
+              uint8_t b = lora_rx_buf[i];
+
+              if (b == SLIP_END) {
+                  // END byte: if we have accumulated bytes, dispatch the packet
+                  if (slip_len > 0) {
+                      recv_lora_packet(slip_buf, (BufLen)slip_len);
+                      //UART_SendString(&huart3, "JUST EXECUTED: \r\n");
+                      slip_len = 0;
+                      in_esc  = 0;
+                      slip_err = 0;
+                  }
+                  // else: leading/trailing END byte, ignore (valid per RFC 1055)
+              } else if (b == SLIP_ESC) {
+                  in_esc = 1;
+              } else if (in_esc) {
+                  in_esc = 0;
+                  if      (b == SLIP_ESC_END) b = SLIP_END;
+                  else if (b == SLIP_ESC_ESC) b = SLIP_ESC;
+                  else {
+                      // Protocol violation — discard this packet
+                      UART_SendString(&huart3, "SLIP ERR: bad escape\r\n");
+                      slip_err = 1;
+                      slip_len = 0;
+                  }
+                  if (!slip_err) {
+                      if (slip_len < SLIP_MAX_PACKET) slip_buf[slip_len++] = b;
+                      else {
+                          UART_SendString(&huart3, "SLIP ERR: overflow\r\n");
+                          slip_len = 0;
+                          slip_err = 1;
+                      }
+                  }
+              } else {
+                  if (slip_len < SLIP_MAX_PACKET) slip_buf[slip_len++] = b;
+                  else {
+                      UART_SendString(&huart3, "SLIP ERR: overflow\r\n");
+                      slip_len = 0;
+                      slip_err = 1;
+                  }
+              }
+          }
 
           // RESET BUFFER WHEN DONE
-
-      lora_rx_len = 0;
-      memset(lora_rx_buf, 0, sizeof(lora_rx_buf));  // optional but clean
+          lora_rx_len = 0;
+          memset(lora_rx_buf, 0, sizeof(lora_rx_buf));
       }
 
 
@@ -640,7 +686,6 @@ int main(void)
 
               uint32_t end_sector = SD_Stream_GetCurrentSector();
               uint32_t num_written = end_sector - DATA_START_SECTOR;
-
               char dbg[64];
               snprintf(dbg, sizeof(dbg), "NUM_BLOCKS = %d, rxLen = %d\r\n", NUM_BLOCKS, rxLen);
               UART_SendString(&huart3, dbg);
@@ -662,13 +707,10 @@ int main(void)
         //UART_SendString(&huart3, msg);
                   
 
-    __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag
-  
-         
+    __HAL_GPIO_EXTI_CLEAR_IT(D_WAKE_Pin); // Clear wakeup pin interrupt flag       
    // HAL_Delay(3000); // DElay to allow completion before resleep concerend why this is needded.. maybe dma isnt working
 
               // TOO: REMOVE ^^ IF NEEDED 
-
 
 
     // ===================== RTC FOR LORA WINDOW SETUP  =================
@@ -700,7 +742,6 @@ int main(void)
         // Turrning off
         lora_window_state = 0;
         HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_RESET);
-
          HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_off_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       }
       else if(lora_window_state == 0){
@@ -710,7 +751,7 @@ int main(void)
         // Turrning on
         lora_window_state = 1;
         HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET);
-         HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_on_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+        HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, lora_on_period_s, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
       }
 
       else if(lora_window_state ==3)  // In active count donw
@@ -722,10 +763,6 @@ int main(void)
 
       }
     
-
-   
-
-
 // ====================== GOING TO SLEEP =========================
     // ENTER STOP MODE
     wake_source = 0; // reset wake source for next loop
@@ -1844,6 +1881,7 @@ void set_lora_recv_window(uint16_t on_period, uint16_t total_period) {
 // HELPER TO KEEP LORA ACTIVE WAKES
 void reset_active(void){
   // Reset active time
+   UART_SendString(&huart3, "Reseting active\r\n");
    HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, keep_active_s , RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
    HAL_GPIO_WritePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin, GPIO_PIN_SET); // Re assert 
   
@@ -1863,19 +1901,32 @@ HAL_SD_CardInfoTypeDef cardInfo;
 }
 
 
+// TRACK THREE POINTERS - SHAUNS EXPLANATION
+// READABLE BLOCKS (ZERO) 0-16gb zZER
+// First wrap around, start incrementing (write head pushes read ahead of it)
+// if write_head = read_head, read+head++
+
+// PROTECTED HEAD
+// WORKS LIKE READABLE, INCREMENT THE SAME WAY. 
+// HEAD ALWAYS BETWEEN
+// IF WRITE HEAD ABOUT TO HIT PROTECTED, CHECK OVERWRITE POLICY
+// IF OVERWRITE POLICY IS DISCARD - DISCARD NEW DATA
 
 // FOLLOWING IS IMPLEMENTED IN SD_STREAM.C
-/*
 
 
 void allow_overwrite(uint64_t upto_block) {
   // set the pointer you can always overwrite up to 
+
 }
 
 
 uint64_t storage_first_readable_block() {
    // todo tell me first readable/available block ID
    // This is defined in the SD_Stream header
+   if (current_sector > DATA_START_SECTOR){
+
+   }
    return (uint64_t)DATA_START_SECTOR;
 }
 
@@ -1890,12 +1941,11 @@ uint64_t storage_last_readable_block() {
   return 0; // gimme that last block ID that is readable 
 }
 
-*/
 
 Status send_lora_packet(uint8_t *data, BufLen len) {
   // Shaun calls this
+  UART_SendString(&huart3, "SENDING LORE: \r\n");
     HAL_StatusTypeDef result = lora_send(data, len);
-    
     switch (result) {
         case HAL_OK:      return 1;
         default:          return -1;
