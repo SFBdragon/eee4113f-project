@@ -89,32 +89,29 @@
 //   }
 // }
 
+#include <Arduino.h>
+#include "esp_wifi.h"
 
-#include <WiFi.h>
-#include <esp_wifi.h>
+void setup() {
+    Serial.begin(115200);
+    while (!Serial) delay(10);
 
-void readMacAddress(){
-  uint8_t baseMac[6];
-  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
-  if (ret == ESP_OK) {
-    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
-                  baseMac[0], baseMac[1], baseMac[2],
-                  baseMac[3], baseMac[4], baseMac[5]);
-  } else {
-    Serial.println("Failed to read MAC address");
-  }
+    // Initialize Wi-Fi in station mode (required to read MAC)
+    esp_wifi_init(nullptr);  // uses default config
+    esp_wifi_set_mode(WIFI_MODE_STA);
+
+    uint8_t mac[6];
+    esp_wifi_get_mac(WIFI_IF_STA, mac);
+
+    Serial.printf("STA MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    // Base MAC (factory-burned into eFuse; STA derives from this)
+    uint8_t base_mac[6];
+    esp_efuse_mac_get_default(base_mac);
+    Serial.printf("Base MAC (eFuse): %02X:%02X:%02X:%02X:%02X:%02X\n",
+                  base_mac[0], base_mac[1], base_mac[2],
+                  base_mac[3], base_mac[4], base_mac[5]);
 }
 
-void setup(){
-  Serial.begin(115200);
-
-  WiFi.mode(WIFI_STA);
-  WiFi.STA.begin();
-
-  Serial.print("[DEFAULT] ESP32 Board MAC Address: ");
-  readMacAddress();
-}
- 
-void loop(){
-
-}
+void loop() {}
