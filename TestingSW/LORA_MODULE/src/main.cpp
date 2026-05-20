@@ -1,194 +1,120 @@
-#include <Arduino.h>
+// #include <Arduino.h>
+// #include <WiFi.h>
+// #include <esp_now.h>
 
-#define ONBOARD_LED 8
-#define BAUD_RATE 115200
-#define SERIAL_TX_PIN 21
-#define SERIAL_RX_PIN 20
+// // ─── CONFIGURATION ───────────────────────────────────────────────────────────
+// #define BAUD_RATE 115200
+// #define SERIAL_TX_PIN 21
+// #define SERIAL_RX_PIN 20
 
-#define OFFLOAD_INTERVAL_MS 1000  // 5s between packets
+// // Put the MAC address of the OTHER ESP32 here
+// uint8_t REMOTE_MAC[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF}; 
 
-struct Packet {
-  const char* name;
-  uint8_t     data[64];
-  uint8_t     len;
-};
+// // Tuning parameters for serial packing
+// #define MAX_ESP_NOW_PAYLOAD 250   // ESP-NOW hard hardware limit is 250 bytes
+// #define SERIAL_TIMEOUT_MS 4       // Wait up to 4ms for a gap in serial streaming
 
-const Packet PACKETS[] = {
+// uint8_t serialBuffer[MAX_ESP_NOW_PAYLOAD];
+// uint8_t bufferIdx = 0;
+// uint32_t lastByteTime = 0;
 
-  { "MIN_6",
-    { 0xAA, 6, 0x01, 0x00, 0x00, 0x55 },
-    6 },
+// // ─── ESP-NOW CALLBACKS ───────────────────────────────────────────────────────
 
-  { "COUNT_8",
-    { 0xAA, 8, 0x02, 0x01, 0x02, 0x03, 0x04, 0x55 },
-    8 },
+// // Triggered automatically when a wireless packet arrives
+// void onDataRecv(const esp_now_recv_info_t *recvInfo, const uint8_t *incomingData, int len) {
+//   // If you want to strictly filter by sender MAC, you can inspect recvInfo->src_addr here
+  
+//   // Directly stream wireless payload out of the physical serial port
+//   Serial1.write(incomingData, len);
+// }
 
-  { "ALL_FF_16",
-    { 0xAA, 16, 0x03,
-      0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-      0xFF, 0xFF, 0xFF,
-      0x55 },
-    16 },
+// // Optional: Status callback to verify wireless delivery success
+// void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+//   // status == ESP_NOW_SEND_SUCCESS means the remote ESP32 acknowledged the frame
+// }
 
-  { "ALT_AA55_16",
-    { 0xAA, 16, 0x04,
-      0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55,
-      0xAA, 0x55, 0xAA,
-      0x55 },
-    16 },
+// // ─── SETUP ────────────────────────────────────────────────────────────────────
 
-  { "ASCII_32",
-    { 0xAA, 32, 0x05,
-      'H','E','L','L','O',' ','W','O','R','L','D','!',
-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-      0x55 },
-    32 },
+// void setup() {
+//   // Initialize Serial1 for your device communications
+//   Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-  { "RAMP_32",
-    { 0xAA, 32, 0x06,
-      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-      0x18, 0x19, 0x1A, 0x1B,
-      0x55 },
-    32 },
+//   // Initialize Wi-Fi in Station Mode (required for ESP-NOW)
+//   WiFi.mode(WIFI_STA);
+//   WiFi.disconnect(); // Do not connect to a standard home router
 
-  { "CHECKER_48",
-    { 0xAA, 48, 0x07,
-      0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0,
-      0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0,
-      0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0,
-      0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0,
-      0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0, 0x0F, 0xF0,
-      0x0F, 0xF0, 0x0F, 0xF0, 0x55 },
-    48 },
+//   // Initialize ESP-NOW Protocol
+//   if (esp_now_init() != ESP_OK) {
+//     Serial1.println("Error initializing ESP-NOW");
+//     return;
+//   }
 
-  { "MAX_64",
-    { 0xAA, 64, 0x08,
-      'M','A','X','_','P','K','T','!',
-      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-      0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
-      0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-      0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-      0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
-      0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30,
-      0x31, 0x32, 0x33, 0x34, 0x55 },
-    64 },
-};
+//   // Register the structural callbacks
+//   esp_now_register_recv_cb(onDataRecv);
+//   esp_now_register_send_cb(onDataSent);
 
-const uint8_t NUM_PACKETS = sizeof(PACKETS) / sizeof(PACKETS[0]);
+//   // Register the peer (the twin ESP32)
+//   esp_now_peer_info_t peerInfo = {};
+//   memcpy(peerInfo.peer_addr, REMOTE_MAC, 6);
+//   peerInfo.channel = 1;     // Must match on both devices
+//   peerInfo.encrypt = false; // Set true if you want hardware-level encryption
 
-// ─── RX BUFFER ────────────────────────────────────────────────────────────────
+//   if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+//     Serial1.println("Failed to add peer");
+//     return;
+//   }
+// }
 
-#define RX_BUF_SIZE 128
-uint8_t  rxBuf[RX_BUF_SIZE];
-uint8_t  rxLen = 0;
-uint32_t lastByteTime = 0;
-#define  PACKET_TIMEOUT_MS 20   // flush & print if no new byte for 20 ms
+// // ─── LOOP ─────────────────────────────────────────────────────────────────────
 
-// ─── PRINT HELPERS ────────────────────────────────────────────────────────────
+// void loop() {
+//   // Read physical serial data into our wireless buffer
+//   while (Serial1.available() && bufferIdx < MAX_ESP_NOW_PAYLOAD) {
+//     serialBuffer[bufferIdx++] = Serial1.read();
+//     lastByteTime = millis();
+//   }
 
-void printRxBuffer() {
-  if (rxLen == 0) return;
+//   // Determine if it's time to transmit the wireless frame
+//   if (bufferIdx > 0) {
+//     bool bufferFull = (bufferIdx >= MAX_ESP_NOW_PAYLOAD);
+//     bool serialStreamGap = ((millis() - lastByteTime) > SERIAL_TIMEOUT_MS);
 
-  Serial.println("\n<<< RECEIVED:");
-  Serial.print("    HEX: ");
-  for (uint8_t i = 0; i < rxLen; i++) {
-    if (rxBuf[i] < 0x10) Serial.print("0");
-    Serial.print(rxBuf[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.println();
+//     if (bufferFull || serialStreamGap) {
+//       // Fire packet connectionless-ly to the pre-registered peer address
+//       esp_err_t result = esp_now_send(REMOTE_MAC, serialBuffer, bufferIdx);
+      
+//       // Reset the buffer tracker immediately
+//       bufferIdx = 0;
+//     }
+//   }
+// }
 
-  Serial.print("  ASCII: ");
-  for (uint8_t i = 0; i < rxLen; i++) {
-    Serial.print((rxBuf[i] >= 0x20 && rxBuf[i] < 0x7F) ? (char)rxBuf[i] : '.');
-  }
-  Serial.print("  (");
-  Serial.print(rxLen);
-  Serial.println(" bytes)");
 
-  // Quick sanity check against known packet signatures
-  if (rxLen >= 3 && rxBuf[0] == 0xAA && rxBuf[rxLen - 1] == 0x55) {
-    Serial.print("  FRAME: START=0xAA  LEN_FIELD=");
-    Serial.print(rxBuf[1]);
-    Serial.print("  SEQ=0x0");
-    Serial.print(rxBuf[2], HEX);
-    Serial.println("  END=0x55  [OK]");
+#include <WiFi.h>
+#include <esp_wifi.h>
+
+void readMacAddress(){
+  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+  if (ret == ESP_OK) {
+    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+                  baseMac[0], baseMac[1], baseMac[2],
+                  baseMac[3], baseMac[4], baseMac[5]);
   } else {
-    Serial.println("  FRAME: [no recognised framing — raw dump above]");
+    Serial.println("Failed to read MAC address");
   }
-
-  rxLen = 0;   // reset for next packet
 }
 
-void sendPacket(const Packet& p) {
-  Serial1.write(p.data, p.len);
-  Serial1.flush();
-
-  Serial.print("\n>>> SENDING: ");
-  Serial.print(p.name);
-  Serial.print("  (");
-  Serial.print(p.len);
-  Serial.println(" bytes)");
-
-  Serial.print("    HEX: ");
-  for (uint8_t i = 0; i < p.len; i++) {
-    if (p.data[i] < 0x10) Serial.print("0");
-    Serial.print(p.data[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.println();
-
-  Serial.print("  ASCII: ");
-  for (uint8_t i = 0; i < p.len; i++) {
-    Serial.print((p.data[i] >= 0x20 && p.data[i] < 0x7F) ? (char)p.data[i] : '.');
-  }
-  Serial.println();
-}
-
-// ─── SETUP ────────────────────────────────────────────────────────────────────
-
-void setup() {
-  pinMode(ONBOARD_LED, OUTPUT);
-  digitalWrite(ONBOARD_LED, LOW);
-
+void setup(){
   Serial.begin(115200);
-  Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-  Serial.println("=== Packet Tester Ready ===");
-  Serial.println("TX and RX on Serial1 — both printed here.");
+  WiFi.mode(WIFI_STA);
+  WiFi.STA.begin();
+
+  Serial.print("[DEFAULT] ESP32 Board MAC Address: ");
+  readMacAddress();
 }
+ 
+void loop(){
 
-// ─── LOOP ─────────────────────────────────────────────────────────────────────
-
-uint8_t  packetIndex    = 0;
-uint32_t lastSendTime   = 0;
-
-void loop() {
-
-  // ── 1. Drain Serial1 RX into buffer ────────────────────────────────────────
-  while (Serial1.available()) {
-    if (rxLen < RX_BUF_SIZE) {
-      rxBuf[rxLen++] = Serial1.read();
-    } else {
-      Serial1.read();   // discard overflow
-    }
-    lastByteTime = millis();
-  }
-
-  // ── 2. If gap detected, flush & pretty-print what arrived ──────────────────
-  if (rxLen > 0 && (millis() - lastByteTime) > PACKET_TIMEOUT_MS) {
-    printRxBuffer();
-  }
-
-  // ── 3. Send next packet on interval ────────────────────────────────────────
-  if (millis() - lastSendTime >= OFFLOAD_INTERVAL_MS) {
-    digitalWrite(ONBOARD_LED, HIGH);
-    sendPacket(PACKETS[packetIndex]);
-    packetIndex = (packetIndex + 1) % NUM_PACKETS;
-    lastSendTime = millis();
-    digitalWrite(ONBOARD_LED, LOW);
-  }
 }
