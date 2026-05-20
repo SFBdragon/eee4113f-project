@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "../Inc/netio.h"
 #include "../Inc/rust_wifi.h"
@@ -203,7 +204,9 @@ void recv_lora_packet(uint8_t *data, BufLen len)
     uint16_t calc_crc = crc16(data, (uint32_t)(len - 2));
     if (rx_crc != calc_crc) {
         // Silently drop corrupt packets; the controller will retry.
-        shaun_debug("shaun says bad crc");
+        char printbuf[100];
+        snprintf(printbuf, 100, "shaun says bad crc: packet %d calculated %d\n", rx_crc, calc_crc);
+        shaun_debug(printbuf);
         return;
     }
 
