@@ -9,13 +9,6 @@
 // ------------ Networking ------------ //
 
 
-// - Initializes networking subsystem.
-// - Starts LoRa listening.
-//
-// Defined by Shaun. Called by Glen at startup.
-void protocol_init();
-
-
 // Call `callback(ctx)` after `n` milliseconds.
 // Defined by Glen. Called by Shaun for delays.
 void call_after_n_ms(uint32_t n, void (*callback)());
@@ -94,13 +87,5 @@ void allow_overwrite(uint64_t upto_block);
 // Defined by Glen, called by Shaun before a WiFi transmission.
 void flush_block_buffer_to_disk();
 
-// ------------ Transmission of Records/Data ------------ //
-
-// The format of record metadata.
-// Defined by Glen.
-typedef struct {
-    uint16_t len;
-    // [len bytes follow, split across blocks]
-} RecordHeader;
 
 // TODO GPS STUFF ?

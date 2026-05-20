@@ -1,4 +1,4 @@
-ARM GAS  /tmp/cc6BkMHF.s 			page 1
+ARM GAS  /tmp/ccdlUfG1.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
   28:Core/Src/stm32l4xx_it.c **** /* USER CODE END Includes */
   29:Core/Src/stm32l4xx_it.c **** 
   30:Core/Src/stm32l4xx_it.c **** /* Private typedef -----------------------------------------------------------*/
-ARM GAS  /tmp/cc6BkMHF.s 			page 2
+ARM GAS  /tmp/ccdlUfG1.s 			page 2
 
 
   31:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN TD */
@@ -118,7 +118,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
   29              		.loc 1 84 1 view -0
   30              		.cfi_startproc
   31              		@ Volatile: function does not return.
-ARM GAS  /tmp/cc6BkMHF.s 			page 3
+ARM GAS  /tmp/ccdlUfG1.s 			page 3
 
 
   32              		@ args = 0, pretend = 0, frame = 0
@@ -178,7 +178,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
   61              		@ frame_needed = 0, uses_anonymous_args = 0
   62 0000 10B5     		push	{r4, lr}
   63              		.cfi_def_cfa_offset 8
-ARM GAS  /tmp/cc6BkMHF.s 			page 4
+ARM GAS  /tmp/ccdlUfG1.s 			page 4
 
 
   64              		.cfi_offset 4, -8
@@ -238,7 +238,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  116:Core/Src/stm32l4xx_it.c ****         (unsigned long)mmfar,
  117:Core/Src/stm32l4xx_it.c ****         (unsigned long)bfar);
  118:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/cc6BkMHF.s 			page 5
+ARM GAS  /tmp/ccdlUfG1.s 			page 5
 
 
  119:Core/Src/stm32l4xx_it.c ****     // Assumes UART is still functional
@@ -298,7 +298,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  142              		@ link register save eliminated.
  143              	.L9:
  134:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-ARM GAS  /tmp/cc6BkMHF.s 			page 6
+ARM GAS  /tmp/ccdlUfG1.s 			page 6
 
 
  135:Core/Src/stm32l4xx_it.c **** 
@@ -358,7 +358,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  177              		.syntax unified
  178              		.thumb
  179              		.thumb_func
-ARM GAS  /tmp/cc6BkMHF.s 			page 7
+ARM GAS  /tmp/ccdlUfG1.s 			page 7
 
 
  181              	UsageFault_Handler:
@@ -418,7 +418,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  182:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SVCall_IRQn 1 */
  183:Core/Src/stm32l4xx_it.c **** 
  184:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SVCall_IRQn 1 */
-ARM GAS  /tmp/cc6BkMHF.s 			page 8
+ARM GAS  /tmp/ccdlUfG1.s 			page 8
 
 
  185:Core/Src/stm32l4xx_it.c **** }
@@ -478,7 +478,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  205:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN PendSV_IRQn 0 */
  206:Core/Src/stm32l4xx_it.c **** 
  207:Core/Src/stm32l4xx_it.c ****   /* USER CODE END PendSV_IRQn 0 */
-ARM GAS  /tmp/cc6BkMHF.s 			page 9
+ARM GAS  /tmp/ccdlUfG1.s 			page 9
 
 
  208:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN PendSV_IRQn 1 */
@@ -538,7 +538,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  227:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
  228:Core/Src/stm32l4xx_it.c **** /* STM32L4xx Peripheral Interrupt Handlers                                    */
  229:Core/Src/stm32l4xx_it.c **** /* Add here the Interrupt Handlers for the used peripherals.                  */
-ARM GAS  /tmp/cc6BkMHF.s 			page 10
+ARM GAS  /tmp/ccdlUfG1.s 			page 10
 
 
  230:Core/Src/stm32l4xx_it.c **** /* For the available peripheral interrupt handler names,                      */
@@ -598,7 +598,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  324              		.thumb
  325              		.thumb_func
  327              	RCC_IRQHandler:
-ARM GAS  /tmp/cc6BkMHF.s 			page 11
+ARM GAS  /tmp/ccdlUfG1.s 			page 11
 
 
  328              	.LFB241:
@@ -658,7 +658,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  273:Core/Src/stm32l4xx_it.c **** 
  274:Core/Src/stm32l4xx_it.c ****   /* USER CODE END DMA1_Channel5_IRQn 1 */
  275:Core/Src/stm32l4xx_it.c **** }
-ARM GAS  /tmp/cc6BkMHF.s 			page 12
+ARM GAS  /tmp/ccdlUfG1.s 			page 12
 
 
  360              		.loc 1 275 1 is_stmt 0 view .LVU56
@@ -718,7 +718,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  403              		.thumb
  404              		.thumb_func
  406              	USART2_IRQHandler:
-ARM GAS  /tmp/cc6BkMHF.s 			page 13
+ARM GAS  /tmp/ccdlUfG1.s 			page 13
 
 
  407              	.LFB244:
@@ -778,7 +778,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  443              		.cfi_def_cfa_offset 8
  444              		.cfi_offset 3, -8
  445              		.cfi_offset 14, -4
-ARM GAS  /tmp/cc6BkMHF.s 			page 14
+ARM GAS  /tmp/ccdlUfG1.s 			page 14
 
 
  310:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
@@ -838,7 +838,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  485              		.cfi_offset 3, -8
  486              		.cfi_offset 14, -4
  327:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SDMMC1_IRQn 0 */
-ARM GAS  /tmp/cc6BkMHF.s 			page 15
+ARM GAS  /tmp/ccdlUfG1.s 			page 15
 
 
  328:Core/Src/stm32l4xx_it.c **** 
@@ -898,7 +898,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  522 0008 08BD     		pop	{r3, pc}
  523              	.L47:
  524 000a 00BF     		.align	2
-ARM GAS  /tmp/cc6BkMHF.s 			page 16
+ARM GAS  /tmp/ccdlUfG1.s 			page 16
 
 
  525              	.L46:
@@ -958,7 +958,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  363:Core/Src/stm32l4xx_it.c **** 
  364:Core/Src/stm32l4xx_it.c **** /**
  365:Core/Src/stm32l4xx_it.c ****   * @brief This function handles LPUART1 global interrupt.
-ARM GAS  /tmp/cc6BkMHF.s 			page 17
+ARM GAS  /tmp/ccdlUfG1.s 			page 17
 
 
  366:Core/Src/stm32l4xx_it.c ****   */
@@ -1018,7 +1018,7 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  612              		.file 10 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_sdmmc.h"
  613              		.file 11 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_sd.h"
  614              		.file 12 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h"
-ARM GAS  /tmp/cc6BkMHF.s 			page 18
+ARM GAS  /tmp/ccdlUfG1.s 			page 18
 
 
  615              		.file 13 "Core/Inc/main.h"
@@ -1028,67 +1028,67 @@ ARM GAS  /tmp/cc6BkMHF.s 			page 1
  619              		.file 17 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-non
  620              		.file 18 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
  621              		.file 19 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
-ARM GAS  /tmp/cc6BkMHF.s 			page 19
+ARM GAS  /tmp/ccdlUfG1.s 			page 19
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_it.c
-     /tmp/cc6BkMHF.s:21     .text.NMI_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:27     .text.NMI_Handler:00000000 NMI_Handler
-     /tmp/cc6BkMHF.s:44     .rodata.HardFault_Handler.str1.4:00000000 $d
-     /tmp/cc6BkMHF.s:50     .text.HardFault_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:56     .text.HardFault_Handler:00000000 HardFault_Handler
-     /tmp/cc6BkMHF.s:122    .text.HardFault_Handler:00000038 $d
-     /tmp/cc6BkMHF.s:129    .text.MemManage_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:135    .text.MemManage_Handler:00000000 MemManage_Handler
-     /tmp/cc6BkMHF.s:152    .text.BusFault_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:158    .text.BusFault_Handler:00000000 BusFault_Handler
-     /tmp/cc6BkMHF.s:175    .text.UsageFault_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:181    .text.UsageFault_Handler:00000000 UsageFault_Handler
-     /tmp/cc6BkMHF.s:198    .text.SVC_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:204    .text.SVC_Handler:00000000 SVC_Handler
-     /tmp/cc6BkMHF.s:217    .text.DebugMon_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:223    .text.DebugMon_Handler:00000000 DebugMon_Handler
-     /tmp/cc6BkMHF.s:236    .text.PendSV_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:242    .text.PendSV_Handler:00000000 PendSV_Handler
-     /tmp/cc6BkMHF.s:255    .text.SysTick_Handler:00000000 $t
-     /tmp/cc6BkMHF.s:261    .text.SysTick_Handler:00000000 SysTick_Handler
-     /tmp/cc6BkMHF.s:280    .text.RTC_WKUP_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:286    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
-     /tmp/cc6BkMHF.s:314    .text.RTC_WKUP_IRQHandler:00000014 $d
-     /tmp/cc6BkMHF.s:321    .text.RCC_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:327    .text.RCC_IRQHandler:00000000 RCC_IRQHandler
-     /tmp/cc6BkMHF.s:340    .text.DMA1_Channel5_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:346    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
-     /tmp/cc6BkMHF.s:365    .text.DMA1_Channel5_IRQHandler:0000000c $d
-     /tmp/cc6BkMHF.s:370    .text.USART1_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:376    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
-     /tmp/cc6BkMHF.s:395    .text.USART1_IRQHandler:0000000c $d
-     /tmp/cc6BkMHF.s:400    .text.USART2_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:406    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
-     /tmp/cc6BkMHF.s:425    .text.USART2_IRQHandler:0000000c $d
-     /tmp/cc6BkMHF.s:430    .text.EXTI15_10_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:436    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
-     /tmp/cc6BkMHF.s:465    .text.EXTI15_10_IRQHandler:00000018 $d
-     /tmp/cc6BkMHF.s:471    .text.SDMMC1_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:477    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
-     /tmp/cc6BkMHF.s:496    .text.SDMMC1_IRQHandler:0000000c $d
-     /tmp/cc6BkMHF.s:501    .text.DMA2_Channel4_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:507    .text.DMA2_Channel4_IRQHandler:00000000 DMA2_Channel4_IRQHandler
-     /tmp/cc6BkMHF.s:526    .text.DMA2_Channel4_IRQHandler:0000000c $d
-     /tmp/cc6BkMHF.s:531    .text.DMA2_Channel5_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:537    .text.DMA2_Channel5_IRQHandler:00000000 DMA2_Channel5_IRQHandler
-     /tmp/cc6BkMHF.s:556    .text.DMA2_Channel5_IRQHandler:0000000c $d
-     /tmp/cc6BkMHF.s:561    .text.LPUART1_IRQHandler:00000000 $t
-     /tmp/cc6BkMHF.s:567    .text.LPUART1_IRQHandler:00000000 LPUART1_IRQHandler
-     /tmp/cc6BkMHF.s:596    .text.LPUART1_IRQHandler:00000018 $d
+     /tmp/ccdlUfG1.s:21     .text.NMI_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:27     .text.NMI_Handler:00000000 NMI_Handler
+     /tmp/ccdlUfG1.s:44     .rodata.HardFault_Handler.str1.4:00000000 $d
+     /tmp/ccdlUfG1.s:50     .text.HardFault_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:56     .text.HardFault_Handler:00000000 HardFault_Handler
+     /tmp/ccdlUfG1.s:122    .text.HardFault_Handler:00000038 $d
+     /tmp/ccdlUfG1.s:129    .text.MemManage_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:135    .text.MemManage_Handler:00000000 MemManage_Handler
+     /tmp/ccdlUfG1.s:152    .text.BusFault_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:158    .text.BusFault_Handler:00000000 BusFault_Handler
+     /tmp/ccdlUfG1.s:175    .text.UsageFault_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:181    .text.UsageFault_Handler:00000000 UsageFault_Handler
+     /tmp/ccdlUfG1.s:198    .text.SVC_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:204    .text.SVC_Handler:00000000 SVC_Handler
+     /tmp/ccdlUfG1.s:217    .text.DebugMon_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:223    .text.DebugMon_Handler:00000000 DebugMon_Handler
+     /tmp/ccdlUfG1.s:236    .text.PendSV_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:242    .text.PendSV_Handler:00000000 PendSV_Handler
+     /tmp/ccdlUfG1.s:255    .text.SysTick_Handler:00000000 $t
+     /tmp/ccdlUfG1.s:261    .text.SysTick_Handler:00000000 SysTick_Handler
+     /tmp/ccdlUfG1.s:280    .text.RTC_WKUP_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:286    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
+     /tmp/ccdlUfG1.s:314    .text.RTC_WKUP_IRQHandler:00000014 $d
+     /tmp/ccdlUfG1.s:321    .text.RCC_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:327    .text.RCC_IRQHandler:00000000 RCC_IRQHandler
+     /tmp/ccdlUfG1.s:340    .text.DMA1_Channel5_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:346    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
+     /tmp/ccdlUfG1.s:365    .text.DMA1_Channel5_IRQHandler:0000000c $d
+     /tmp/ccdlUfG1.s:370    .text.USART1_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:376    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
+     /tmp/ccdlUfG1.s:395    .text.USART1_IRQHandler:0000000c $d
+     /tmp/ccdlUfG1.s:400    .text.USART2_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:406    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
+     /tmp/ccdlUfG1.s:425    .text.USART2_IRQHandler:0000000c $d
+     /tmp/ccdlUfG1.s:430    .text.EXTI15_10_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:436    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
+     /tmp/ccdlUfG1.s:465    .text.EXTI15_10_IRQHandler:00000018 $d
+     /tmp/ccdlUfG1.s:471    .text.SDMMC1_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:477    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
+     /tmp/ccdlUfG1.s:496    .text.SDMMC1_IRQHandler:0000000c $d
+     /tmp/ccdlUfG1.s:501    .text.DMA2_Channel4_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:507    .text.DMA2_Channel4_IRQHandler:00000000 DMA2_Channel4_IRQHandler
+     /tmp/ccdlUfG1.s:526    .text.DMA2_Channel4_IRQHandler:0000000c $d
+     /tmp/ccdlUfG1.s:531    .text.DMA2_Channel5_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:537    .text.DMA2_Channel5_IRQHandler:00000000 DMA2_Channel5_IRQHandler
+     /tmp/ccdlUfG1.s:556    .text.DMA2_Channel5_IRQHandler:0000000c $d
+     /tmp/ccdlUfG1.s:561    .text.LPUART1_IRQHandler:00000000 $t
+     /tmp/ccdlUfG1.s:567    .text.LPUART1_IRQHandler:00000000 LPUART1_IRQHandler
+     /tmp/ccdlUfG1.s:596    .text.LPUART1_IRQHandler:00000018 $d
 
 UNDEFINED SYMBOLS
 snprintf
 strlen
 HAL_UART_Transmit
 huart3
-ARM GAS  /tmp/cc6BkMHF.s 			page 20
+ARM GAS  /tmp/ccdlUfG1.s 			page 20
 
 
 HAL_IncTick

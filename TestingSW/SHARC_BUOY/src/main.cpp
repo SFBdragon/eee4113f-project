@@ -1,26 +1,31 @@
 #include <Arduino.h>
 
-#define TRIGGER_PIN     22    // GPIO22 to toggle high/low
-#define ONBOARD_LED     2     // ESP32 DevKit onboard LED
+#define TRIGGER_PIN     22
+#define ONBOARD_LED     2
 #define BAUD_RATE       115200
-#define SERIAL_TX_PIN   17    // UART2 TX
-#define SERIAL_RX_PIN   16    // UART2 RX
+#define SERIAL_TX_PIN   17
+#define SERIAL_RX_PIN   16
 
-// 24KB test dataset
-#define DATA_SIZE 24576
-uint8_t testData[DATA_SIZE];
+#define PACKET_SIZE     (1024 * 6 / 5)
+
+uint8_t packetData[PACKET_SIZE];
+
+void build_packet(uint8_t* buf, uint8_t index) {
+  memset(buf, index, PACKET_SIZE);
+  buf[0] = 0xFF;
+  buf[PACKET_SIZE - 1] = 0xFF;
+}
 
 void write_data(uint8_t* data, size_t len) {
-
   digitalWrite(TRIGGER_PIN, HIGH);
   digitalWrite(ONBOARD_LED, HIGH);
-  Serial.println("GPIO23 HIGH - Sending data...");
-  delay(100);
+  delay(10);
+
   Serial1.write(data, len);
   Serial1.flush();
+
   digitalWrite(TRIGGER_PIN, LOW);
   digitalWrite(ONBOARD_LED, LOW);
-  Serial.println("GPIO23 LOW");
 }
 
 void setup() {
@@ -32,20 +37,21 @@ void setup() {
   Serial.begin(BAUD_RATE);
   Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-  // Fill test dataset with recognizable pattern (A-Z repeating)
-  for (int i = 0; i < DATA_SIZE; i++) {
-    testData[i] = (i % 26) + 65;
-  }
-
-  Serial.println("ESP32 DevKit Ready");
+  Serial.println("ESP32 Ready");
 }
 
 void loop() {
-  // Toggle GPIO23 high
+  static uint8_t index = 0;
 
-  write_data(testData, DATA_SIZE);
-  Serial.printf("Sent %d bytes over Serial1 TX (GPIO%d)\n", DATA_SIZE, SERIAL_TX_PIN);
+  build_packet(packetData, index);
 
-  // Toggle GPIO23 low
-  delay(1000);
+  Serial.printf("Sending packet %02X  [FF %02X ... %02X FF]\n",
+                index, index, index);
+
+  write_data(packetData, PACKET_SIZE);
+
+  index++;
+  if (index >= 0xFF) index = 0;  // skip FF, reserved as marker
+
+  delay(3000);
 }
