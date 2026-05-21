@@ -55,9 +55,9 @@ fn scan_for_lora() -> Option<String> {
 
 // Returns the cached port name, or scans if not yet cached.
 fn get_lora_port_name() -> Option<String> {
-    if let Some(name) = LORA_PORT_NAME.lock().unwrap().clone() {
-        return Some(name);
-    }
+    // if let Some(name) = LORA_PORT_NAME.lock().unwrap().clone() {
+    //     return Some(name);
+    // }
     scan_for_lora()
 }
 
