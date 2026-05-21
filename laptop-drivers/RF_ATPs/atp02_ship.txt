@@ -1,0 +1,24 @@
+# WiFi ATP test results (recv side)
+# Generated 2026-05-14 18:10:47
+
+[results]
+mode = recv
+timestamp = 2026-05-14 18:10:47
+duration_sec = 18.769
+bytes_received = 325358
+bytes_received_mb = 0.310
+expected_bytes = 1048576
+delivery_pct = 31.03
+packets = 643
+reader_thread_frames = 643
+reader_thread_bytes = 325358
+throughput_mbps = 0.1387
+
+[plaintext]
+=== RECV RESULTS ===
+Duration:        18.77 s
+Bytes received:  325358 (0.31 MB)
+Packets:         643
+Reader-thread:   643 frames, 0.31 MB
+Throughput:      0.139 Mbps
+Delivery:        31.03% of expected 1.00 MB

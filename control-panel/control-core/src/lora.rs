@@ -224,7 +224,7 @@ fn lora_thread(
 
                         if f.sequence_flag != sequence {
                             tracing::warn!(?f, "Sequence mismatch, dropping frame.");
-                            // continue;
+                            continue;
                         }
 
                         tracing::debug!(?f, "Got seemingly fine frame back.");

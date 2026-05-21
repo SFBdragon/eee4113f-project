@@ -1,6 +1,11 @@
-use control_serial_ports::SerialError;
+use control_protocol::wifi::Mac;
+use control_serial_ports::{SerialError, wifi::WifiModule};
 
-use crate::{drivers::StatusError, lora::hal::LoRaInterface};
+use crate::{
+    drivers::StatusError,
+    lora::hal::LoRaInterface,
+    wifi::hal::{WiFiInterface, WiFiPacket},
+};
 
 pub struct LoRaSerial;
 
@@ -44,5 +49,41 @@ impl LoRaInterface for LoRaSerial {
         buffer[..data.len()].copy_from_slice(&data);
         *len = data.len();
         Ok(())
+    }
+}
+
+pub struct WiFiSerial(WifiModule);
+
+impl WiFiSerial {
+    pub fn new() -> Self {
+        Self(WifiModule::new())
+    }
+}
+
+impl WiFiInterface for WiFiSerial {
+    fn is_module_attached(&self) -> bool {
+        self.0.is_attached()
+    }
+
+    fn initialize_module(&self) -> Result<(), crate::drivers::StatusError> {
+        Ok(())
+    }
+
+    fn shutdown_module(&self) {
+        self.0.detach();
+    }
+
+    fn send_packet(&self, _dstmac: Mac, bytes: &[u8]) -> Result<(), crate::drivers::StatusError> {
+        self.0.send_packet(bytes).ok_or(StatusError::ModuleDetached)
+    }
+
+    fn recv_packet(&self) -> Result<WiFiPacket, crate::drivers::StatusError> {
+        self.0
+            .recv_packet()
+            .map(|data| WiFiPacket {
+                from: Mac::bcast(),
+                data,
+            })
+            .ok_or(StatusError::ModuleDetached)
     }
 }

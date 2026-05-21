@@ -40,9 +40,9 @@ impl<'a> LoRaFrame<'a> {
         let (rem, module_addr) = first!(u16, rem);
         let (body, crc) = last!(u16, raw);
 
-        if crc_fn(body.as_ptr(), body.len()) != crc {
-            return Err(ParseError::BadCrc);
-        }
+        // if crc_fn(body.as_ptr(), body.len()) != crc {
+        //     return Err(ParseError::BadCrc);
+        // }
 
         Ok(LoRaFrame {
             con_addr: LoRaAddr::from_raw(controller_addr_with_seq & !Self::SEQUENCE_BIT),

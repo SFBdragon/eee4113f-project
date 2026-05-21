@@ -21,7 +21,11 @@ void onReceive(const uint8_t *mac, const uint8_t *inData, int len) {
   Serial.write(received.data, received.len);
 }
 
+
+#define LED_PIN 2
+
 void setup() {
+<<<<<<< HEAD
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   esp_now_init();
@@ -46,3 +50,24 @@ void loop() {
     esp_now_send(buoyMAC, (uint8_t *)&msg, sizeof(msg));
   }
 }
+=======
+    pinMode(LED_PIN, OUTPUT);
+
+    Serial.begin(BAUD_SERIAL);
+    Serial1.begin(BAUD_SERIAL1, SERIAL_8N1, PIN_RX1, PIN_TX1);
+}
+
+void loop() {
+    // Serial -> Serial1
+    while (Serial.available()) {
+        digitalWrite(LED_PIN, 1);
+        Serial1.write(Serial.read());
+    }
+
+    // Serial1 -> Serial
+    while (Serial1.available()) {
+        digitalWrite(LED_PIN, 1);
+        Serial.write(Serial1.read());
+    }
+}
+>>>>>>> 6d217239c21fdee1c29cc1c540d656d01992c669
