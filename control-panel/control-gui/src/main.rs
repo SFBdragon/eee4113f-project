@@ -69,7 +69,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let controller = control_core::Controller::demo();
+    let controller = control_core::Controller::subsystem();
 
     info!(%controller.addr, "Controller address selected.");
 

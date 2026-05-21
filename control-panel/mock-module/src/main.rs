@@ -11,19 +11,19 @@ mod state;
 use std::net::UdpSocket;
 use std::time::Duration;
 
-const WIFI_RELIABILITY_TEST: bool = false;
-const WIFI_RECV_DROP_RATE: f64 = 0.33;
-const WIFI_SEND_DROP_RATE: f64 = 0.33;
+const WIFI_RELIABILITY_TEST: bool = true;
+const WIFI_RECV_DROP_RATE: f64 = 0.2;
+const WIFI_SEND_DROP_RATE: f64 = 0.2;
 
-const WIFI_CORRUPT_TEST: bool = false;
-const WIFI_RECV_BITFLIP_RATE: f64 = 0.0001;
-const WIFI_SEND_BITFLIP_RATE: f64 = 0.0001;
+const WIFI_CORRUPT_TEST: bool = true;
+const WIFI_RECV_BITFLIP_RATE: f64 = 0.0002;
+const WIFI_SEND_BITFLIP_RATE: f64 = 0.0002;
 
-const LORA_RELIABILITY_TEST: bool = false;
-const LORA_RECV_DROP_RATE: f64 = 0.33;
-const LORA_SEND_DROP_RATE: f64 = 0.33;
+const LORA_RELIABILITY_TEST: bool = true;
+const LORA_RECV_DROP_RATE: f64 = 0.1;
+const LORA_SEND_DROP_RATE: f64 = 0.1;
 
-const LORA_CORRUPT_TEST: bool = false;
+const LORA_CORRUPT_TEST: bool = true;
 const LORA_RECV_BITFLIP_RATE: f64 = 0.0001;
 const LORA_SEND_BITFLIP_RATE: f64 = 0.0001;
 
@@ -53,15 +53,15 @@ fn main() {
         let mut state = lock.lock().unwrap();
 
         let block = (0..200u8).into_iter().collect::<Vec<_>>();
-        for i in 0..100 {
+        for i in 0..30 {
             state.append_block(&block).unwrap();
         }
-    }
+        for i in 60..70 {
+            state.append_block(&block).unwrap();
+        }
 
-    eprintln!("[stm32_sim] calling protocol_init()");
-    unsafe { ffi::protocol_init() };
-    eprintln!("[stm32_sim] protocol_init() returned — entering event loop");
-    println!("Type 'help' for commands.");
+        state.write_head = 100;
+    }
 
     let poll_interval = Duration::from_millis(10);
 

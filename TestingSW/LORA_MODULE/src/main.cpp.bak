@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <stdint.h>
+#include <string.h>
 #include <esp_now.h>
 
 #define SERIAL_TX_PIN 21
@@ -30,30 +32,12 @@
 //                  Received ESP-NOW datagrams are forwarded to serial with SLIP framing.
 
 // Comment out for embedded-side build
-#define LAPTOP_SIDE
 
 // #define EMBEDDED_SIDE_DEBUG
 
 uint8_t MAC_A[] = {0x08, 0x92, 0x72, 0x85, 0x8B, 0xF0}; // "08:92:72:85:8B:F0"
 uint8_t MAC_B[] = {0x08, 0x92, 0x72, 0x85, 0x0B, 0xB8};
-
-#ifdef LAPTOP_SIDE
-  #define CorrectSerial Serial
-  #define SETUP_SERIAL (Serial.begin(BAUD_RATE))
-  #define PEER_MAC MAC_B
-#else
-  #ifdef EMBEDDED_SIDE_DEBUG
-    #define CorrectSerial Serial
-    #define SETUP_SERIAL (Serial.begin(BAUD_RATE))
-  #else
-    #define CorrectSerial Serial1
-    #define SETUP_SERIAL (Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN))
-  #endif
-  #define PEER_MAC MAC_A
-#endif
-
-
-
+uint8_t PEER_MAC[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
 #define LED_PIN 8
 #define LED_ON  0
@@ -63,24 +47,32 @@ uint8_t MAC_B[] = {0x08, 0x92, 0x72, 0x85, 0x0B, 0xB8};
 
 // Write one SLIP-framed packet to serial.
 // Leading END flushes any partial garbage the receiver may have accumulated.
-void slip_send(const uint8_t *data, size_t len) {
+void slip_send(const uint8_t *data, size_t len, void (*write_fn)(const uint8_t*)) {
     uint8_t b;
 
-    b = SLIP_END; CorrectSerial.write(&b, 1);          // leading END (line flush)
+    b = SLIP_END; write_fn(&b);
 
     for (size_t i = 0; i < len; i++) {
         if (data[i] == SLIP_END) {
-            b = SLIP_ESC; CorrectSerial.write(&b, 1);
-            b = SLIP_ESC_END; CorrectSerial.write(&b, 1);
+            b = SLIP_ESC; write_fn(&b);
+            b = SLIP_ESC_END; write_fn(&b);
         } else if (data[i] == SLIP_ESC) {
-            b = SLIP_ESC; CorrectSerial.write(&b, 1);
-            b = SLIP_ESC_ESC; CorrectSerial.write(&b, 1);
+            b = SLIP_ESC; write_fn(&b);
+            b = SLIP_ESC_ESC; write_fn(&b);
         } else {
-            CorrectSerial.write(&data[i], 1);
+            b = data[i]; write_fn(&b);
         }
     }
 
-    b = SLIP_END; CorrectSerial.write(&b, 1);          // trailing END
+    b = SLIP_END; write_fn(&b);
+}
+
+void send_serial(const uint8_t *byte) {
+    Serial.write(byte, 1);
+}
+
+void send_serial1(const uint8_t *byte) {
+    Serial1.write(byte, 1);
 }
 
 // ── Callbacks ─────────────────────────────────────────────────────────────────
@@ -89,29 +81,37 @@ void onSent(const uint8_t *mac, esp_now_send_status_t status) {
     // See original note: avoid writing to CorrectSerial here.
 }
 
+uint32_t on_receive_flag = 0;
+
 // Received a packet over ESP-NOW → SLIP-frame it and write to local serial
 void onRecv(const uint8_t *mac_addr, const uint8_t *data, int len) {
     if (len <= 0 || len > MAX_PAYLOAD) return;
-    slip_send(data, (size_t)len);
+    slip_send(data, (size_t)len, send_serial);
+    slip_send(data, (size_t)len, send_serial1);
+    on_receive_flag = 1;
 }
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
 
 void setup() {
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, LED_OFF);
+    Serial.begin(BAUD_RATE);
+    Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-    digitalWrite(LED_PIN, LED_ON);
-    
+    // uint8_t mac[6];
+    // esp_read_mac(mac, ESP_MAC_WIFI_STA);
 
+    // if (!memcmp(MAC_A, mac, 6)) {
+    //     memcpy(PEER_MAC, MAC_B, 6);
+    // } else {
+    //     memcpy(PEER_MAC, MAC_A, 6);
+    // }
 
-    SETUP_SERIAL;
 
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
 
     if (esp_now_init() != ESP_OK) {
-        while (true) delay(1000);
+        while (true) delay(200);
     }
 
     esp_now_register_send_cb(onSent);
@@ -123,8 +123,11 @@ void setup() {
     peer.encrypt = false;
 
     if (esp_now_add_peer(&peer) != ESP_OK) {
-        while (true) delay(1000);
+        while (true) delay(200);
     }
+
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LED_ON);
 }
 
 // ── Loop ──────────────────────────────────────────────────────────────────────
@@ -141,63 +144,78 @@ static size_t  rx_count = 0;
 // Called when a complete SLIP packet has been received into rx_buf[0..len-1]
 static void dispatch_packet(size_t len) {
     if (len == 0) return;   // zero-length packet: valid SLIP, nothing to send
+    esp_now_send(PEER_MAC, rx_buf, len);
 
     for (int i = 0; i < 3; i++) {
-        digitalWrite(LED_PIN, LED_ON);
-        delay(100);
         digitalWrite(LED_PIN, LED_OFF);
         delay(100);
+        digitalWrite(LED_PIN, LED_ON);
+        delay(100);
     }
-
-    esp_now_send(PEER_MAC, rx_buf, len);
 }
 
 void loop() {
-    while (CorrectSerial.available()) {
-        uint8_t b = (uint8_t)CorrectSerial.read();
+    if (on_receive_flag) {
+        on_receive_flag = 0;
 
-        switch (rx_state) {
-
-            case IDLE:
-                if (b == SLIP_END) {
-                    // Another END while idle: still idle (double-END gap packet)
-                    break;
-                }
-                // First non-END byte starts a packet
-                rx_count = 0;
-                if (b == SLIP_ESC) {
-                    rx_state = IN_ESC;
-                } else {
-                    if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = b;
-                    rx_state = IN_PACKET;
-                }
-                break;
-
-            case IN_PACKET:
-                if (b == SLIP_END) {
-                    dispatch_packet(rx_count);
-                    rx_count = 0;
-                    rx_state = IDLE;
-                } else if (b == SLIP_ESC) {
-                    rx_state = IN_ESC;
-                } else {
-                    if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = b;
-                    // silently drop bytes beyond MAX_PAYLOAD; packet will be truncated
-                }
-                break;
-
-            case IN_ESC:
-                if (b == SLIP_ESC_END) {
-                    if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = SLIP_END;
-                } else if (b == SLIP_ESC_END) {
-                    if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = SLIP_ESC;
-                } else {
-                    // Protocol violation: ESC followed by non-escape byte.
-                    // RFC 1055 doesn't specify; discard the ESC, treat byte literally.
-                    if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = b;
-                }
-                rx_state = IN_PACKET;
-                break;
+        for (int i = 0; i < 3; i++) {
+            digitalWrite(LED_PIN, LED_OFF);
+            delay(100);
+            digitalWrite(LED_PIN, LED_ON);
+            delay(100);
         }
+    }
+
+    uint8_t b;
+    if (Serial.available()) {
+        b = (uint8_t)Serial.read();
+    } else if (Serial1.available()) {
+        b = (uint8_t)Serial1.read();
+    } else {
+        return;
+    }
+
+    switch (rx_state) {
+
+        case IDLE:
+            if (b == SLIP_END) {
+                // Another END while idle: still idle (double-END gap packet)
+                break;
+            }
+            // First non-END byte starts a packet
+            rx_count = 0;
+            if (b == SLIP_ESC) {
+                rx_state = IN_ESC;
+            } else {
+                if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = b;
+                rx_state = IN_PACKET;
+            }
+            break;
+
+        case IN_PACKET:
+            if (b == SLIP_END) {
+                dispatch_packet(rx_count);
+                rx_count = 0;
+                rx_state = IDLE;
+            } else if (b == SLIP_ESC) {
+                rx_state = IN_ESC;
+            } else {
+                if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = b;
+                // silently drop bytes beyond MAX_PAYLOAD; packet will be truncated
+            }
+            break;
+
+        case IN_ESC:
+            if (b == SLIP_ESC_END) {
+                if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = SLIP_END;
+            } else if (b == SLIP_ESC_ESC) {
+                if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = SLIP_ESC;
+            } else {
+                // Protocol violation: ESC followed by non-escape byte.
+                // RFC 1055 doesn't specify; discard the ESC, treat byte literally.
+                if (rx_count < MAX_PAYLOAD) rx_buf[rx_count++] = b;
+            }
+            rx_state = IN_PACKET;
+            break;
     }
 }

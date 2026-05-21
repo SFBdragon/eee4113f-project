@@ -65,7 +65,7 @@ impl Controller {
         }
     }
 
-    pub fn mock() -> Self {
+    pub fn internal() -> Self {
         let addr = LoRaAddr::from_raw(0x1CAD);
         let mock_module = Arc::new(MockModule::new());
 
@@ -83,7 +83,7 @@ impl Controller {
         }
     }
 
-    pub fn mocked2() -> (Self, Arc<UdpMockRadios>) {
+    pub fn subsystem() -> Self {
         let addr = LoRaAddr::from_raw(0x1CAD);
         let mock_module = Arc::new(UdpMockRadios::new());
 
@@ -92,15 +92,12 @@ impl Controller {
         let (lora_commands, lora_events) =
             lora::start_lora_thread_with_hal(addr, mock_module.clone());
 
-        (
-            Self {
-                addr,
-                wifi_hal: mock_module.clone(),
-                wifi_receiver,
-                lora_commands,
-                lora_events,
-            },
-            mock_module.clone(),
-        )
+        Self {
+            addr,
+            wifi_hal: mock_module.clone(),
+            wifi_receiver,
+            lora_commands,
+            lora_events,
+        }
     }
 }
