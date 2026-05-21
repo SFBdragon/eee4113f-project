@@ -221,16 +221,12 @@ Discarded input sections
                 0x00000000      0x135 build/debug/main.o
  .text.SD_SpeedTest
                 0x00000000      0x188 build/debug/main.o
- .text.crc16_old
-                0x00000000       0x14 build/debug/main.o
  .text.UART_DumpBuffer
                 0x00000000       0x6c build/debug/main.o
  .rodata.read_block.str1.4
                 0x00000000       0x39 build/debug/main.o
  .text.read_block
                 0x00000000       0x50 build/debug/main.o
- .text.shaun_debug
-                0x00000000       0x10 build/debug/main.o
  .bss.largeTestBuf
                 0x00000000      0x400 build/debug/main.o
  .bss.uart_active
@@ -276,6 +272,21 @@ Discarded input sections
  .text          0x00000000        0x0 build/debug/slow_crc.o
  .data          0x00000000        0x0 build/debug/slow_crc.o
  .bss           0x00000000        0x0 build/debug/slow_crc.o
+ .text.crc16    0x00000000       0x44 build/debug/slow_crc.o
+ .debug_info    0x00000000      0x15b build/debug/slow_crc.o
+ .debug_abbrev  0x00000000       0xad build/debug/slow_crc.o
+ .debug_loclists
+                0x00000000       0x85 build/debug/slow_crc.o
+ .debug_aranges
+                0x00000000       0x20 build/debug/slow_crc.o
+ .debug_rnglists
+                0x00000000       0x2b build/debug/slow_crc.o
+ .debug_line    0x00000000      0x204 build/debug/slow_crc.o
+ .debug_str     0x00000000      0x1cb build/debug/slow_crc.o
+ .comment       0x00000000       0x3a build/debug/slow_crc.o
+ .debug_frame   0x00000000       0x28 build/debug/slow_crc.o
+ .ARM.attributes
+                0x00000000       0x34 build/debug/slow_crc.o
  .text          0x00000000        0x0 build/debug/ssd1306.o
  .data          0x00000000        0x0 build/debug/ssd1306.o
  .bss           0x00000000        0x0 build/debug/ssd1306.o
@@ -481,10 +492,6 @@ Discarded input sections
  .text          0x00000000        0x0 build/debug/stm32l4xx_hal_crc.o
  .data          0x00000000        0x0 build/debug/stm32l4xx_hal_crc.o
  .bss           0x00000000        0x0 build/debug/stm32l4xx_hal_crc.o
- .text.CRC_Handle_8
-                0x00000000       0x96 build/debug/stm32l4xx_hal_crc.o
- .text.CRC_Handle_16
-                0x00000000       0x3c build/debug/stm32l4xx_hal_crc.o
  .text.HAL_CRC_MspInit
                 0x00000000        0x2 build/debug/stm32l4xx_hal_crc.o
  .text.HAL_CRC_MspDeInit
@@ -493,8 +500,6 @@ Discarded input sections
                 0x00000000       0x34 build/debug/stm32l4xx_hal_crc.o
  .text.HAL_CRC_Accumulate
                 0x00000000       0x42 build/debug/stm32l4xx_hal_crc.o
- .text.HAL_CRC_Calculate
-                0x00000000       0x50 build/debug/stm32l4xx_hal_crc.o
  .text.HAL_CRC_GetState
                 0x00000000        0x4 build/debug/stm32l4xx_hal_crc.o
  .text          0x00000000        0x0 build/debug/stm32l4xx_hal_crc_ex.o
@@ -5811,198 +5816,207 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
  .text.lora_send
                 0x080007ec       0x28 build/debug/main.o
                 0x080007ec                lora_send
+ .text.crc16    0x08000814       0x14 build/debug/main.o
+                0x08000814                crc16
  .text.PackBlocks
-                0x08000814       0x7c build/debug/main.o
-                0x08000814                PackBlocks
+                0x08000828       0x7c build/debug/main.o
+                0x08000828                PackBlocks
  .text.call_after_n_ms
-                0x08000890       0x24 build/debug/main.o
-                0x08000890                call_after_n_ms
+                0x080008a4       0x24 build/debug/main.o
+                0x080008a4                call_after_n_ms
  .text.cancel_timeout
-                0x080008b4       0x18 build/debug/main.o
-                0x080008b4                cancel_timeout
+                0x080008c8       0x18 build/debug/main.o
+                0x080008c8                cancel_timeout
  .text.call_repeatedly_after_n_ms_wifi_ping
-                0x080008cc       0x24 build/debug/main.o
-                0x080008cc                call_repeatedly_after_n_ms_wifi_ping
+                0x080008e0       0x24 build/debug/main.o
+                0x080008e0                call_repeatedly_after_n_ms_wifi_ping
  .text.cancel_timeout_wifi_ping
-                0x080008f0       0x18 build/debug/main.o
-                0x080008f0                cancel_timeout_wifi_ping
+                0x08000904       0x18 build/debug/main.o
+                0x08000904                cancel_timeout_wifi_ping
  .text.get_time_since_epoch_ms
-                0x08000908       0x6c build/debug/main.o
-                0x08000908                get_time_since_epoch_ms
+                0x0800091c       0x6c build/debug/main.o
+                0x0800091c                get_time_since_epoch_ms
  .text.set_lora_recv_window
-                0x08000974       0x1c build/debug/main.o
-                0x08000974                set_lora_recv_window
+                0x08000988       0x1c build/debug/main.o
+                0x08000988                set_lora_recv_window
  .text.reset_active
-                0x08000990       0x30 build/debug/main.o
-                0x08000990                reset_active
+                0x080009a4       0x30 build/debug/main.o
+                0x080009a4                reset_active
  .text.storage_total_blocks
-                0x080009c0       0x20 build/debug/main.o
-                0x080009c0                storage_total_blocks
+                0x080009d4       0x20 build/debug/main.o
+                0x080009d4                storage_total_blocks
  .text.allow_overwrite
-                0x080009e0       0x14 build/debug/main.o
-                0x080009e0                allow_overwrite
+                0x080009f4        0x2 build/debug/main.o
+                0x080009f4                allow_overwrite
  .text.storage_first_readable_block
-                0x080009f4        0x8 build/debug/main.o
-                0x080009f4                storage_first_readable_block
+                0x080009f6        0x8 build/debug/main.o
+                0x080009f6                storage_first_readable_block
  .text.storage_first_protected_block
-                0x080009fc        0x6 build/debug/main.o
-                0x080009fc                storage_first_protected_block
+                0x080009fe        0x6 build/debug/main.o
+                0x080009fe                storage_first_protected_block
  .text.storage_last_readable_block
-                0x08000a02        0x6 build/debug/main.o
-                0x08000a02                storage_last_readable_block
+                0x08000a04        0x6 build/debug/main.o
+                0x08000a04                storage_last_readable_block
+ *fill*         0x08000a0a        0x2 
  .text.send_lora_packet
-                0x08000a08       0xc8 build/debug/main.o
-                0x08000a08                send_lora_packet
+                0x08000a0c       0x2c build/debug/main.o
+                0x08000a0c                send_lora_packet
  .text.power_up_wifi
-                0x08000ad0       0x24 build/debug/main.o
-                0x08000ad0                power_up_wifi
+                0x08000a38       0x14 build/debug/main.o
+                0x08000a38                power_up_wifi
  .text.power_down_wifi
-                0x08000af4       0x24 build/debug/main.o
-                0x08000af4                power_down_wifi
+                0x08000a4c       0x14 build/debug/main.o
+                0x08000a4c                power_down_wifi
  .text.send_wifi_packet
-                0x08000b18       0x18 build/debug/main.o
-                0x08000b18                send_wifi_packet
+                0x08000a60        0x4 build/debug/main.o
+                0x08000a60                send_wifi_packet
  .text.set_overwrite_policy
-                0x08000b30        0x2 build/debug/main.o
-                0x08000b30                set_overwrite_policy
- *fill*         0x08000b32        0x2 
+                0x08000a64        0x2 build/debug/main.o
+                0x08000a64                set_overwrite_policy
+ *fill*         0x08000a66        0x2 
  .text.HAL_LPTIM_AutoReloadMatchCallback
-                0x08000b34       0x64 build/debug/main.o
-                0x08000b34                HAL_LPTIM_AutoReloadMatchCallback
+                0x08000a68       0x44 build/debug/main.o
+                0x08000a68                HAL_LPTIM_AutoReloadMatchCallback
  .text.Error_Handler
-                0x08000b98        0x4 build/debug/main.o
-                0x08000b98                Error_Handler
+                0x08000aac        0x4 build/debug/main.o
+                0x08000aac                Error_Handler
  .text.MX_LPUART1_UART_Init
-                0x08000b9c       0x34 build/debug/main.o
+                0x08000ab0       0x34 build/debug/main.o
  .text.MX_USART2_UART_Init
-                0x08000bd0       0x38 build/debug/main.o
+                0x08000ae4       0x38 build/debug/main.o
  .text.MX_USART3_UART_Init
-                0x08000c08       0x38 build/debug/main.o
+                0x08000b1c       0x38 build/debug/main.o
  .text.MX_SPI1_Init
-                0x08000c40       0x48 build/debug/main.o
+                0x08000b54       0x48 build/debug/main.o
  .text.MX_RTC_Init
-                0x08000c88       0x80 build/debug/main.o
+                0x08000b9c       0x80 build/debug/main.o
  .text.MX_I2C2_Init
-                0x08000d08       0x54 build/debug/main.o
+                0x08000c1c       0x54 build/debug/main.o
  .text.MX_USART1_UART_Init
-                0x08000d5c       0x38 build/debug/main.o
+                0x08000c70       0x38 build/debug/main.o
  .text.MX_CRC_Init
-                0x08000d94       0x44 build/debug/main.o
+                0x08000ca8       0x44 build/debug/main.o
  .text.MX_LPTIM1_Init
-                0x08000dd8       0x34 build/debug/main.o
+                0x08000cec       0x34 build/debug/main.o
  .text.MX_LPTIM2_Init
-                0x08000e0c       0x34 build/debug/main.o
+                0x08000d20       0x34 build/debug/main.o
  .text.MX_SDMMC1_SD_Init
-                0x08000e40       0x74 build/debug/main.o
+                0x08000d54       0x74 build/debug/main.o
  .text.flush_block_buffer_to_disk
-                0x08000eb4       0xac build/debug/main.o
-                0x08000eb4                flush_block_buffer_to_disk
+                0x08000dc8       0xac build/debug/main.o
+                0x08000dc8                flush_block_buffer_to_disk
  .text.SystemClock_Config
-                0x08000f60       0x84 build/debug/main.o
-                0x08000f60                SystemClock_Config
- .text.main     0x08000fe4      0x6f8 build/debug/main.o
-                0x08000fe4                main
+                0x08000e74       0x84 build/debug/main.o
+                0x08000e74                SystemClock_Config
+ .text.main     0x08000ef8      0x6f8 build/debug/main.o
+                0x08000ef8                main
  .text.read_u64_le
-                0x080016dc       0x2c build/debug/protocol.o
+                0x080015f0       0x2c build/debug/protocol.o
  .text.write_u64_le
-                0x08001708       0x26 build/debug/protocol.o
- *fill*         0x0800172e        0x2 
+                0x0800161c       0x26 build/debug/protocol.o
+ *fill*         0x08001642        0x2 
  .text.apply_cmd_cancel_data_dump
-                0x08001730       0x1c build/debug/protocol.o
+                0x08001644       0x1c build/debug/protocol.o
  .text.get_gps_info
-                0x0800174c        0x8 build/debug/protocol.o
+                0x08001660        0x8 build/debug/protocol.o
  .text.wifi_ping_arm
-                0x08001754       0x14 build/debug/protocol.o
+                0x08001668       0x14 build/debug/protocol.o
  .text.apply_cmd_enable_wifi
-                0x08001768       0x2c build/debug/protocol.o
+                0x0800167c       0x2c build/debug/protocol.o
  .text.wifi_ping_handler
-                0x08001794       0x28 build/debug/protocol.o
+                0x080016a8       0x34 build/debug/protocol.o
  .text.apply_cmd_disable_wifi
-                0x080017bc       0x2c build/debug/protocol.o
+                0x080016dc       0x2c build/debug/protocol.o
  .text.wifi_timer_set
-                0x080017e8       0x10 build/debug/protocol.o
+                0x08001708       0x10 build/debug/protocol.o
  .text.wifi_do_send_next
-                0x080017f8       0x28 build/debug/protocol.o
+                0x08001718       0x28 build/debug/protocol.o
  .text.apply_cmd_start_data_dump
-                0x08001820       0x9c build/debug/protocol.o
+                0x08001740       0x9c build/debug/protocol.o
  .text.wifi_timeout_handler
-                0x080018bc       0x10 build/debug/protocol.o
+                0x080017dc       0x10 build/debug/protocol.o
  .text.apply_cmd_set_lora_recv_window
-                0x080018cc       0x24 build/debug/protocol.o
+                0x080017ec       0x24 build/debug/protocol.o
  .text.apply_cmd_set_overwritable
-                0x080018f0       0x22 build/debug/protocol.o
- *fill*         0x08001912        0x2 
+                0x08001810       0x22 build/debug/protocol.o
+ *fill*         0x08001832        0x2 
  .text.apply_cmd_set_storage_policy
-                0x08001914       0x28 build/debug/protocol.o
+                0x08001834       0x28 build/debug/protocol.o
  .text.process_lora_command
-                0x0800193c       0xdc build/debug/protocol.o
+                0x0800185c       0xdc build/debug/protocol.o
  .text.serialise_module_state
-                0x08001a18       0xe4 build/debug/protocol.o
+                0x08001938       0xe4 build/debug/protocol.o
  .text.lora_send_reply
-                0x08001afc       0x40 build/debug/protocol.o
+                0x08001a1c       0x40 build/debug/protocol.o
  .text.recv_lora_packet
-                0x08001b3c       0x3e build/debug/protocol.o
-                0x08001b3c                recv_lora_packet
- .text.crc16    0x08001b7a       0x44 build/debug/slow_crc.o
-                0x08001b7a                crc16
- *fill*         0x08001bbe        0x2 
+                0x08001a5c       0x3e build/debug/protocol.o
+                0x08001a5c                recv_lora_packet
+ *fill*         0x08001a9a        0x2 
  .text.HAL_InitTick
-                0x08001bc0       0x50 build/debug/stm32l4xx_hal.o
-                0x08001bc0                HAL_InitTick
+                0x08001a9c       0x50 build/debug/stm32l4xx_hal.o
+                0x08001a9c                HAL_InitTick
  .text.HAL_Init
-                0x08001c10       0x20 build/debug/stm32l4xx_hal.o
-                0x08001c10                HAL_Init
+                0x08001aec       0x20 build/debug/stm32l4xx_hal.o
+                0x08001aec                HAL_Init
  .text.HAL_IncTick
-                0x08001c30       0x18 build/debug/stm32l4xx_hal.o
-                0x08001c30                HAL_IncTick
+                0x08001b0c       0x18 build/debug/stm32l4xx_hal.o
+                0x08001b0c                HAL_IncTick
  .text.HAL_GetTick
-                0x08001c48        0xc build/debug/stm32l4xx_hal.o
-                0x08001c48                HAL_GetTick
+                0x08001b24        0xc build/debug/stm32l4xx_hal.o
+                0x08001b24                HAL_GetTick
  .text.HAL_Delay
-                0x08001c54       0x28 build/debug/stm32l4xx_hal.o
-                0x08001c54                HAL_Delay
+                0x08001b30       0x28 build/debug/stm32l4xx_hal.o
+                0x08001b30                HAL_Delay
  .text.HAL_SuspendTick
-                0x08001c7c        0xe build/debug/stm32l4xx_hal.o
-                0x08001c7c                HAL_SuspendTick
+                0x08001b58        0xe build/debug/stm32l4xx_hal.o
+                0x08001b58                HAL_SuspendTick
  .text.HAL_ResumeTick
-                0x08001c8a        0xe build/debug/stm32l4xx_hal.o
-                0x08001c8a                HAL_ResumeTick
+                0x08001b66        0xe build/debug/stm32l4xx_hal.o
+                0x08001b66                HAL_ResumeTick
  .text.HAL_DBGMCU_EnableDBGSleepMode
-                0x08001c98       0x10 build/debug/stm32l4xx_hal.o
-                0x08001c98                HAL_DBGMCU_EnableDBGSleepMode
+                0x08001b74       0x10 build/debug/stm32l4xx_hal.o
+                0x08001b74                HAL_DBGMCU_EnableDBGSleepMode
  .text.HAL_DBGMCU_EnableDBGStopMode
-                0x08001ca8       0x10 build/debug/stm32l4xx_hal.o
-                0x08001ca8                HAL_DBGMCU_EnableDBGStopMode
+                0x08001b84       0x10 build/debug/stm32l4xx_hal.o
+                0x08001b84                HAL_DBGMCU_EnableDBGStopMode
  .text.HAL_DBGMCU_EnableDBGStandbyMode
-                0x08001cb8       0x10 build/debug/stm32l4xx_hal.o
-                0x08001cb8                HAL_DBGMCU_EnableDBGStandbyMode
+                0x08001b94       0x10 build/debug/stm32l4xx_hal.o
+                0x08001b94                HAL_DBGMCU_EnableDBGStandbyMode
  .text.__NVIC_EnableIRQ
-                0x08001cc8       0x1c build/debug/stm32l4xx_hal_cortex.o
+                0x08001ba4       0x1c build/debug/stm32l4xx_hal_cortex.o
  .text.__NVIC_DisableIRQ
-                0x08001ce4       0x24 build/debug/stm32l4xx_hal_cortex.o
+                0x08001bc0       0x24 build/debug/stm32l4xx_hal_cortex.o
  .text.__NVIC_SetPriority
-                0x08001d08       0x28 build/debug/stm32l4xx_hal_cortex.o
+                0x08001be4       0x28 build/debug/stm32l4xx_hal_cortex.o
  .text.NVIC_EncodePriority
-                0x08001d30       0x46 build/debug/stm32l4xx_hal_cortex.o
- *fill*         0x08001d76        0x2 
+                0x08001c0c       0x46 build/debug/stm32l4xx_hal_cortex.o
+ *fill*         0x08001c52        0x2 
  .text.HAL_NVIC_SetPriorityGrouping
-                0x08001d78       0x24 build/debug/stm32l4xx_hal_cortex.o
-                0x08001d78                HAL_NVIC_SetPriorityGrouping
+                0x08001c54       0x24 build/debug/stm32l4xx_hal_cortex.o
+                0x08001c54                HAL_NVIC_SetPriorityGrouping
  .text.HAL_NVIC_SetPriority
-                0x08001d9c       0x20 build/debug/stm32l4xx_hal_cortex.o
-                0x08001d9c                HAL_NVIC_SetPriority
+                0x08001c78       0x20 build/debug/stm32l4xx_hal_cortex.o
+                0x08001c78                HAL_NVIC_SetPriority
  .text.HAL_NVIC_EnableIRQ
-                0x08001dbc        0x8 build/debug/stm32l4xx_hal_cortex.o
-                0x08001dbc                HAL_NVIC_EnableIRQ
+                0x08001c98        0x8 build/debug/stm32l4xx_hal_cortex.o
+                0x08001c98                HAL_NVIC_EnableIRQ
  .text.HAL_NVIC_DisableIRQ
-                0x08001dc4        0x8 build/debug/stm32l4xx_hal_cortex.o
-                0x08001dc4                HAL_NVIC_DisableIRQ
+                0x08001ca0        0x8 build/debug/stm32l4xx_hal_cortex.o
+                0x08001ca0                HAL_NVIC_DisableIRQ
  .text.HAL_SYSTICK_Config
-                0x08001dcc       0x28 build/debug/stm32l4xx_hal_cortex.o
-                0x08001dcc                HAL_SYSTICK_Config
+                0x08001ca8       0x28 build/debug/stm32l4xx_hal_cortex.o
+                0x08001ca8                HAL_SYSTICK_Config
+ .text.CRC_Handle_8
+                0x08001cd0       0x96 build/debug/stm32l4xx_hal_crc.o
+ .text.CRC_Handle_16
+                0x08001d66       0x3c build/debug/stm32l4xx_hal_crc.o
+ *fill*         0x08001da2        0x2 
  .text.HAL_CRC_Init
-                0x08001df4       0x80 build/debug/stm32l4xx_hal_crc.o
-                0x08001df4                HAL_CRC_Init
+                0x08001da4       0x80 build/debug/stm32l4xx_hal_crc.o
+                0x08001da4                HAL_CRC_Init
+ .text.HAL_CRC_Calculate
+                0x08001e24       0x50 build/debug/stm32l4xx_hal_crc.o
+                0x08001e24                HAL_CRC_Calculate
  .text.HAL_CRCEx_Polynomial_Set
                 0x08001e74       0x66 build/debug/stm32l4xx_hal_crc_ex.o
                 0x08001e74                HAL_CRCEx_Polynomial_Set
@@ -6739,221 +6753,209 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
 .iplt           0x08008be0        0x0
  .iplt          0x08008be0        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.rodata         0x08008be0      0x7c8
+.rodata         0x08008be0      0x740
                 0x08008be0                        . = ALIGN (0x8)
  *(.rodata)
  *(.rodata*)
  .rodata.HAL_SD_ErrorCallback.str1.4
-                0x08008be0      0x586 build/debug/SD_IO.o
+                0x08008be0      0x4fe build/debug/SD_IO.o
                                   0xf (size before relaxing)
  .rodata.SD_IO_Init.str1.4
-                0x08009166        0x0 build/debug/SD_IO.o
+                0x080090de        0x0 build/debug/SD_IO.o
                                   0xe (size before relaxing)
  .rodata.SD_Stream_Init.str1.4
-                0x08009166        0x0 build/debug/SD_Stream.o
+                0x080090de        0x0 build/debug/SD_Stream.o
                                  0x12 (size before relaxing)
  .rodata.SD_Stream_WriteBlock.str1.4
-                0x08009166        0x0 build/debug/SD_Stream.o
+                0x080090de        0x0 build/debug/SD_Stream.o
                                  0x3f (size before relaxing)
  .rodata.SD_Stream_ReadDebug.str1.4
-                0x08009166        0x0 build/debug/SD_Stream.o
+                0x080090de        0x0 build/debug/SD_Stream.o
                                  0xa6 (size before relaxing)
  .rodata.SD_Stream_ReadDebug_Last_Line.str1.4
-                0x08009166        0x0 build/debug/SD_Stream.o
+                0x080090de        0x0 build/debug/SD_Stream.o
                                  0x6b (size before relaxing)
  .rodata.Print_SD_Details.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                  0x90 (size before relaxing)
  .rodata.HAL_UARTEx_RxEventCallback.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                   0x6 (size before relaxing)
  .rodata.UART_DumpBuffer.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                   0xb (size before relaxing)
  .rodata.reset_active.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                  0x12 (size before relaxing)
- .rodata.allow_overwrite.str1.4
-                0x08009166        0x0 build/debug/main.o
-                                 0x19 (size before relaxing)
  .rodata.send_lora_packet.str1.4
-                0x08009166        0x0 build/debug/main.o
-                                 0x2d (size before relaxing)
- .rodata.power_up_wifi.str1.4
-                0x08009166        0x0 build/debug/main.o
-                                 0x16 (size before relaxing)
- .rodata.power_down_wifi.str1.4
-                0x08009166        0x0 build/debug/main.o
-                                 0x18 (size before relaxing)
- .rodata.send_wifi_packet.str1.4
-                0x08009166        0x0 build/debug/main.o
-                                 0x19 (size before relaxing)
- .rodata.HAL_LPTIM_AutoReloadMatchCallback.str1.4
-                0x08009166        0x0 build/debug/main.o
-                                 0x23 (size before relaxing)
+                0x080090de        0x0 build/debug/main.o
+                                 0x11 (size before relaxing)
  .rodata.MX_SDMMC1_SD_Init.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                   0xf (size before relaxing)
  .rodata.flush_block_buffer_to_disk.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                  0x4d (size before relaxing)
  .rodata.main.str1.4
-                0x08009166        0x0 build/debug/main.o
+                0x080090de        0x0 build/debug/main.o
                                 0x1d7 (size before relaxing)
+ .rodata.wifi_ping_handler.str1.4
+                0x080090de        0x0 build/debug/protocol.o
+                                 0x1e (size before relaxing)
  .rodata.HardFault_Handler.str1.4
-                0x08009166        0x0 build/debug/stm32l4xx_it.o
+                0x080090de        0x0 build/debug/stm32l4xx_it.o
                                  0x56 (size before relaxing)
- *fill*         0x08009166        0x2 
+ *fill*         0x080090de        0x2 
  .rodata.MSIRangeTable
-                0x08009168       0x30 build/debug/system_stm32l4xx.o
-                0x08009168                MSIRangeTable
+                0x080090e0       0x30 build/debug/system_stm32l4xx.o
+                0x080090e0                MSIRangeTable
  .rodata.APBPrescTable
-                0x08009198        0x8 build/debug/system_stm32l4xx.o
-                0x08009198                APBPrescTable
+                0x08009110        0x8 build/debug/system_stm32l4xx.o
+                0x08009110                APBPrescTable
  .rodata.AHBPrescTable
-                0x080091a0       0x10 build/debug/system_stm32l4xx.o
-                0x080091a0                AHBPrescTable
+                0x08009118       0x10 build/debug/system_stm32l4xx.o
+                0x08009118                AHBPrescTable
  .rodata._svfprintf_r.str1.1
-                0x080091b0      0x148 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-svfprintf.o)
+                0x08009128      0x148 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-svfprintf.o)
                                  0x11 (size before relaxing)
  .rodata._printf_i.str1.1
-                0x080092f8        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x08009270        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_i.o)
                                  0x22 (size before relaxing)
  .rodata.str1.1
-                0x080092f8        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009270        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                  0x23 (size before relaxing)
  .rodata..Lanon.bbe6d9f41c45d9836799ba0b8655fc99.1
-                0x080092f8       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009270       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
  .rodata..Lanon.bbe6d9f41c45d9836799ba0b8655fc99.2
-                0x08009308       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009280       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
  .rodata..Lanon.bbe6d9f41c45d9836799ba0b8655fc99.3
-                0x08009318       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009290       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
  .rodata.str1.1
-                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x080092a0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                  0xf2 (size before relaxing)
  .rodata..Lanon.3a8b35e876e8e1d121bed8ad48b16b86.36
-                0x08009328        0xe RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
- *fill*         0x08009336        0x2 
+                0x080092a0        0xe RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+ *fill*         0x080092ae        0x2 
  .rodata..Lanon.3a8b35e876e8e1d121bed8ad48b16b86.38
-                0x08009338       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x080092b0       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
  .rodata..Lanon.3a8b35e876e8e1d121bed8ad48b16b86.39
-                0x08009348       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x080092c0       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
  .rodata..Lanon.3a8b35e876e8e1d121bed8ad48b16b86.40
-                0x08009358       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x080092d0       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
  .rodata..Lanon.3a8b35e876e8e1d121bed8ad48b16b86.41
-                0x08009368       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x080092e0       0x10 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
  .rodata..Lanon.3552e815d4a74654170bac95223e4160.170
-                0x08009378       0x2b RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
-                0x080093a8                        . = ALIGN (0x8)
- *fill*         0x080093a3        0x5 
+                0x080092f0       0x2b RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+                0x08009320                        . = ALIGN (0x8)
+ *fill*         0x0800931b        0x5 
 
-.ARM.extab      0x080093a8        0x0
-                0x080093a8                        . = ALIGN (0x8)
+.ARM.extab      0x08009320        0x0
+                0x08009320                        . = ALIGN (0x8)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x080093a8                        . = ALIGN (0x8)
+                0x08009320                        . = ALIGN (0x8)
 
-.ARM            0x080093a8        0x8
-                0x080093a8                        . = ALIGN (0x8)
-                0x080093a8                        __exidx_start = .
+.ARM            0x08009320        0x8
+                0x08009320                        . = ALIGN (0x8)
+                0x08009320                        __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x080093a8        0x8 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-strlen.o)
- .ARM.exidx     0x080093b0        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memchr.o)
+ .ARM.exidx     0x08009320        0x8 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-strlen.o)
+ .ARM.exidx     0x08009328        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memchr.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text._RNvCsedntS5XRw0e_7___rustc17rust_begin_unwind
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.wifi_connect
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.wifi_on_timeout
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.wifi_ping_write
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.wifi_send_next
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.wifi_sent_all
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text._RNvMNtNtCs2UH2VYvkKzT_16control_protocol4wifi6senderNtB2_6Sender10on_timeout
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text._RNvMNtNtCs2UH2VYvkKzT_16control_protocol4wifi6senderNtB2_6Sender7connect
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text._RNvMNtNtCs2UH2VYvkKzT_16control_protocol4wifi6senderNtB2_6Sender9send_next
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text._RNvNtNtCs2UH2VYvkKzT_16control_protocol4wifi4ping10write_ping
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtNtCs2UH2VYvkKzT_16control_protocol4wifi6sender14default_crc_fn
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtNtCs2UH2VYvkKzT_16control_protocol4wifi6sender16default_get_time
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtNtCs2UH2VYvkKzT_16control_protocol4wifi6sender17default_set_timer
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtNtCs2UH2VYvkKzT_16control_protocol4wifi6sender20default_cancel_timer
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtCsSfRZP7pwoQ_4core6option13unwrap_failed
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtCsSfRZP7pwoQ_4core9panicking5panic
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.unlikely._RNvNtCsSfRZP7pwoQ_4core9panicking9panic_fmt
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.__aeabi_memclr8
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text.__udivmoddi4
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
                                   0x8 (size before relaxing)
  .ARM.exidx.text._RNvNtNtCs5WJDJ1FNATE_17compiler_builtins3int19specialized_div_rem11u64_div_rem
-                0x080093b0        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+                0x08009328        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
                                   0x8 (size before relaxing)
-                0x080093b0                        __exidx_end = .
-                0x080093b0                        . = ALIGN (0x8)
+                0x08009328                        __exidx_end = .
+                0x08009328                        . = ALIGN (0x8)
 
-.preinit_array  0x080093b0        0x0
-                0x080093b0                        . = ALIGN (0x8)
-                0x080093b0                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x08009328        0x0
+                0x08009328                        . = ALIGN (0x8)
+                0x08009328                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x080093b0                        PROVIDE (__preinit_array_end = .)
-                0x080093b0                        . = ALIGN (0x8)
+                0x08009328                        PROVIDE (__preinit_array_end = .)
+                0x08009328                        . = ALIGN (0x8)
 
-.init_array     0x080093b0        0x8
-                0x080093b0                        . = ALIGN (0x8)
-                0x080093b0                        PROVIDE (__init_array_start = .)
+.init_array     0x08009328        0x8
+                0x08009328                        . = ALIGN (0x8)
+                0x08009328                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x080093b0        0x4 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x080093b4                        PROVIDE (__init_array_end = .)
-                0x080093b8                        . = ALIGN (0x8)
- *fill*         0x080093b4        0x4 
+ .init_array    0x08009328        0x4 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x0800932c                        PROVIDE (__init_array_end = .)
+                0x08009330                        . = ALIGN (0x8)
+ *fill*         0x0800932c        0x4 
 
-.fini_array     0x080093b8        0x8
-                0x080093b8                        . = ALIGN (0x8)
-                0x080093b8                        PROVIDE (__fini_array_start = .)
+.fini_array     0x08009330        0x8
+                0x08009330                        . = ALIGN (0x8)
+                0x08009330                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x080093b8        0x4 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x080093bc                        PROVIDE (__fini_array_end = .)
-                0x080093c0                        . = ALIGN (0x8)
- *fill*         0x080093bc        0x4 
-                0x080093c0                        _sidata = LOADADDR (.data)
+ .fini_array    0x08009330        0x4 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x08009334                        PROVIDE (__fini_array_end = .)
+                0x08009338                        . = ALIGN (0x8)
+ *fill*         0x08009334        0x4 
+                0x08009338                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x080093c0        0x0
- .rel.iplt      0x080093c0        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+.rel.dyn        0x08009338        0x0
+ .rel.iplt      0x08009338        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.data           0x20000000     0x4080 load address 0x080093c0
+.data           0x20000000     0x4080 load address 0x08009338
                 0x20000000                        . = ALIGN (0x8)
                 0x20000000                        _sdata = .
  *(.data)
@@ -6997,11 +6999,11 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
                 0x20004080                        . = ALIGN (0x8)
                 0x20004080                        _edata = .
 
-.igot.plt       0x20004080        0x0 load address 0x0800d440
+.igot.plt       0x20004080        0x0 load address 0x0800d3b8
  .igot.plt      0x20004080        0x0 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
                 0x20004080                        . = ALIGN (0x4)
 
-.bss            0x20004080     0x833c load address 0x0800d440
+.bss            0x20004080     0x833c load address 0x0800d3b8
                 0x20004080                        _sbss = .
                 0x20004080                        __bss_start__ = _sbss
  *(.bss)
@@ -7154,7 +7156,7 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
                 0x2000c3bc                        __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x2000c3bc      0x604 load address 0x0800d440
+                0x2000c3bc      0x604 load address 0x0800d3b8
                 0x2000c3c0                        . = ALIGN (0x8)
  *fill*         0x2000c3bc        0x4 
                 [!provide]                        PROVIDE (end = .)
@@ -7190,115 +7192,113 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
  .ARM.attributes
                 0x000000f2       0x34 build/debug/protocol.o
  .ARM.attributes
-                0x00000126       0x34 build/debug/slow_crc.o
+                0x00000126       0x34 build/debug/stm32l4xx_hal.o
  .ARM.attributes
-                0x0000015a       0x34 build/debug/stm32l4xx_hal.o
+                0x0000015a       0x34 build/debug/stm32l4xx_hal_cortex.o
  .ARM.attributes
-                0x0000018e       0x34 build/debug/stm32l4xx_hal_cortex.o
+                0x0000018e       0x34 build/debug/stm32l4xx_hal_crc.o
  .ARM.attributes
-                0x000001c2       0x34 build/debug/stm32l4xx_hal_crc.o
+                0x000001c2       0x34 build/debug/stm32l4xx_hal_crc_ex.o
  .ARM.attributes
-                0x000001f6       0x34 build/debug/stm32l4xx_hal_crc_ex.o
+                0x000001f6       0x34 build/debug/stm32l4xx_hal_dma.o
  .ARM.attributes
-                0x0000022a       0x34 build/debug/stm32l4xx_hal_dma.o
+                0x0000022a       0x34 build/debug/stm32l4xx_hal_gpio.o
  .ARM.attributes
-                0x0000025e       0x34 build/debug/stm32l4xx_hal_gpio.o
+                0x0000025e       0x34 build/debug/stm32l4xx_hal_i2c.o
  .ARM.attributes
-                0x00000292       0x34 build/debug/stm32l4xx_hal_i2c.o
+                0x00000292       0x34 build/debug/stm32l4xx_hal_i2c_ex.o
  .ARM.attributes
-                0x000002c6       0x34 build/debug/stm32l4xx_hal_i2c_ex.o
+                0x000002c6       0x34 build/debug/stm32l4xx_hal_lptim.o
  .ARM.attributes
-                0x000002fa       0x34 build/debug/stm32l4xx_hal_lptim.o
+                0x000002fa       0x34 build/debug/stm32l4xx_hal_msp.o
  .ARM.attributes
-                0x0000032e       0x34 build/debug/stm32l4xx_hal_msp.o
+                0x0000032e       0x34 build/debug/stm32l4xx_hal_pwr.o
  .ARM.attributes
-                0x00000362       0x34 build/debug/stm32l4xx_hal_pwr.o
+                0x00000362       0x34 build/debug/stm32l4xx_hal_pwr_ex.o
  .ARM.attributes
-                0x00000396       0x34 build/debug/stm32l4xx_hal_pwr_ex.o
+                0x00000396       0x34 build/debug/stm32l4xx_hal_rcc.o
  .ARM.attributes
-                0x000003ca       0x34 build/debug/stm32l4xx_hal_rcc.o
+                0x000003ca       0x34 build/debug/stm32l4xx_hal_rcc_ex.o
  .ARM.attributes
-                0x000003fe       0x34 build/debug/stm32l4xx_hal_rcc_ex.o
+                0x000003fe       0x34 build/debug/stm32l4xx_hal_rtc.o
  .ARM.attributes
-                0x00000432       0x34 build/debug/stm32l4xx_hal_rtc.o
+                0x00000432       0x34 build/debug/stm32l4xx_hal_rtc_ex.o
  .ARM.attributes
-                0x00000466       0x34 build/debug/stm32l4xx_hal_rtc_ex.o
+                0x00000466       0x34 build/debug/stm32l4xx_hal_sd.o
  .ARM.attributes
-                0x0000049a       0x34 build/debug/stm32l4xx_hal_sd.o
+                0x0000049a       0x34 build/debug/stm32l4xx_hal_spi.o
  .ARM.attributes
-                0x000004ce       0x34 build/debug/stm32l4xx_hal_spi.o
+                0x000004ce       0x34 build/debug/stm32l4xx_hal_uart.o
  .ARM.attributes
-                0x00000502       0x34 build/debug/stm32l4xx_hal_uart.o
+                0x00000502       0x34 build/debug/stm32l4xx_hal_uart_ex.o
  .ARM.attributes
-                0x00000536       0x34 build/debug/stm32l4xx_hal_uart_ex.o
+                0x00000536       0x34 build/debug/stm32l4xx_it.o
  .ARM.attributes
-                0x0000056a       0x34 build/debug/stm32l4xx_it.o
+                0x0000056a       0x34 build/debug/stm32l4xx_ll_sdmmc.o
  .ARM.attributes
-                0x0000059e       0x34 build/debug/stm32l4xx_ll_sdmmc.o
+                0x0000059e       0x34 build/debug/sysmem.o
  .ARM.attributes
-                0x000005d2       0x34 build/debug/sysmem.o
+                0x000005d2       0x34 build/debug/system_stm32l4xx.o
  .ARM.attributes
-                0x00000606       0x34 build/debug/system_stm32l4xx.o
+                0x00000606       0x21 build/debug/startup_stm32l476xx.o
  .ARM.attributes
-                0x0000063a       0x21 build/debug/startup_stm32l476xx.o
+                0x00000627       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-findfp.o)
  .ARM.attributes
-                0x0000065b       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-findfp.o)
+                0x0000065b       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-snprintf.o)
  .ARM.attributes
-                0x0000068f       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-snprintf.o)
+                0x0000068f       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-sprintf.o)
  .ARM.attributes
-                0x000006c3       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-sprintf.o)
+                0x000006c3       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
  .ARM.attributes
-                0x000006f7       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memset.o)
+                0x000006f7       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-reent.o)
  .ARM.attributes
-                0x0000072b       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-reent.o)
+                0x0000072b       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-impure.o)
  .ARM.attributes
-                0x0000075f       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-impure.o)
+                0x0000075f       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-errno.o)
  .ARM.attributes
-                0x00000793       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-errno.o)
+                0x00000793       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-init.o)
  .ARM.attributes
-                0x000007c7       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-init.o)
+                0x000007c7       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-lock.o)
  .ARM.attributes
-                0x000007fb       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-lock.o)
+                0x000007fb       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
  .ARM.attributes
-                0x0000082f       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memcpy-stub.o)
+                0x0000082f       0x17 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-strlen.o)
  .ARM.attributes
-                0x00000863       0x17 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-strlen.o)
+                0x00000846       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-freer.o)
  .ARM.attributes
-                0x0000087a       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-freer.o)
+                0x0000087a       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mallocr.o)
  .ARM.attributes
-                0x000008ae       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mallocr.o)
+                0x000008ae       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mlock.o)
  .ARM.attributes
-                0x000008e2       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-mlock.o)
+                0x000008e2       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-svfprintf.o)
  .ARM.attributes
-                0x00000916       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-svfprintf.o)
+                0x00000916       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_i.o)
  .ARM.attributes
-                0x0000094a       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x0000094a       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memmove.o)
  .ARM.attributes
-                0x0000097e       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memmove.o)
+                0x0000097e       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-sbrkr.o)
  .ARM.attributes
-                0x000009b2       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-sbrkr.o)
+                0x000009b2       0x1c /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memchr.o)
  .ARM.attributes
-                0x000009e6       0x1c /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-memchr.o)
+                0x000009ce       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-reallocr.o)
  .ARM.attributes
-                0x00000a02       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-reallocr.o)
+                0x00000a02       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-msizer.o)
  .ARM.attributes
-                0x00000a36       0x34 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-msizer.o)
+                0x00000a36       0x3a RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
  .ARM.attributes
-                0x00000a6a       0x3a RustLibs/libcontrol_protocol_static.a(control_protocol_static-919a895abdda6bff.control_protocol_static.927649bc3cc8959e-cgu.0.rcgu.o)
+                0x00000a70       0x3a RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
  .ARM.attributes
-                0x00000aa4       0x3a RustLibs/libcontrol_protocol_static.a(control_protocol-d566dc6beed1bd3e.control_protocol.21f233d55fa3a97b-cgu.0.rcgu.o)
+                0x00000aaa       0x38 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
  .ARM.attributes
-                0x00000ade       0x38 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+                0x00000ae2       0x3a RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
  .ARM.attributes
-                0x00000b16       0x3a RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+                0x00000b1c       0x38 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.433.rcgu.o)
  .ARM.attributes
-                0x00000b50       0x38 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.433.rcgu.o)
+                0x00000b54       0x3a RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
  .ARM.attributes
-                0x00000b88       0x3a RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+                0x00000b8e       0x3a RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
  .ARM.attributes
-                0x00000bc2       0x3a RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
- .ARM.attributes
-                0x00000bfc       0x22 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtn.o
+                0x00000bc8       0x22 /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtn.o
 
 .comment        0x00000000       0x6d
  .comment       0x00000000       0x6d /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/thumb/v7e-m+fp/hard/crtbegin.o
@@ -7310,8 +7310,6 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
  .comment       0x0000006d        0x0 build/debug/main.o
                                  0x3a (size before relaxing)
  .comment       0x0000006d        0x0 build/debug/protocol.o
-                                 0x3a (size before relaxing)
- .comment       0x0000006d        0x0 build/debug/slow_crc.o
                                  0x3a (size before relaxing)
  .comment       0x0000006d        0x0 build/debug/stm32l4xx_hal.o
                                  0x3a (size before relaxing)
@@ -7431,412 +7429,400 @@ LOAD /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-
  .note.GNU-stack
                 0x00000000        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
 
-.debug_info     0x00000000    0x4a6d8
+.debug_info     0x00000000    0x4a394
  .debug_info    0x00000000     0x10e1 build/debug/SD_IO.o
  .debug_info    0x000010e1     0x1941 build/debug/SD_Stream.o
- .debug_info    0x00002a22     0x554f build/debug/main.o
- .debug_info    0x00007f71     0x12f6 build/debug/protocol.o
- .debug_info    0x00009267      0x15b build/debug/slow_crc.o
- .debug_info    0x000093c2      0xbec build/debug/stm32l4xx_hal.o
- .debug_info    0x00009fae     0x101d build/debug/stm32l4xx_hal_cortex.o
- .debug_info    0x0000afcb      0x634 build/debug/stm32l4xx_hal_crc.o
- .debug_info    0x0000b5ff      0x3a5 build/debug/stm32l4xx_hal_crc_ex.o
- .debug_info    0x0000b9a4      0x83d build/debug/stm32l4xx_hal_dma.o
- .debug_info    0x0000c1e1      0x7d4 build/debug/stm32l4xx_hal_gpio.o
- .debug_info    0x0000c9b5     0x42ec build/debug/stm32l4xx_hal_i2c.o
- .debug_info    0x00010ca1      0x9c3 build/debug/stm32l4xx_hal_i2c_ex.o
- .debug_info    0x00011664     0x15e5 build/debug/stm32l4xx_hal_lptim.o
- .debug_info    0x00012c49     0x2a57 build/debug/stm32l4xx_hal_msp.o
- .debug_info    0x000156a0      0x9a6 build/debug/stm32l4xx_hal_pwr.o
- .debug_info    0x00016046      0xa7f build/debug/stm32l4xx_hal_pwr_ex.o
- .debug_info    0x00016ac5      0xebd build/debug/stm32l4xx_hal_rcc.o
- .debug_info    0x00017982     0x122c build/debug/stm32l4xx_hal_rcc_ex.o
- .debug_info    0x00018bae     0x117d build/debug/stm32l4xx_hal_rtc.o
- .debug_info    0x00019d2b     0x132f build/debug/stm32l4xx_hal_rtc_ex.o
- .debug_info    0x0001b05a     0x2750 build/debug/stm32l4xx_hal_sd.o
- .debug_info    0x0001d7aa     0x1faa build/debug/stm32l4xx_hal_spi.o
- .debug_info    0x0001f754     0x4c14 build/debug/stm32l4xx_hal_uart.o
- .debug_info    0x00024368      0xff8 build/debug/stm32l4xx_hal_uart_ex.o
- .debug_info    0x00025360     0x1661 build/debug/stm32l4xx_it.o
- .debug_info    0x000269c1     0x199b build/debug/stm32l4xx_ll_sdmmc.o
- .debug_info    0x0002835c      0x176 build/debug/sysmem.o
- .debug_info    0x000284d2      0x5f9 build/debug/system_stm32l4xx.o
- .debug_info    0x00028acb       0x30 build/debug/startup_stm32l476xx.o
- .debug_info    0x00028afb    0x214a5 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
- .debug_info    0x00049fa0      0x1fa RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
- .debug_info    0x0004a19a       0xa1 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
- .debug_info    0x0004a23b      0x49d RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+ .debug_info    0x00002a22     0x5339 build/debug/main.o
+ .debug_info    0x00007d5b     0x1323 build/debug/protocol.o
+ .debug_info    0x0000907e      0xbec build/debug/stm32l4xx_hal.o
+ .debug_info    0x00009c6a     0x101d build/debug/stm32l4xx_hal_cortex.o
+ .debug_info    0x0000ac87      0x634 build/debug/stm32l4xx_hal_crc.o
+ .debug_info    0x0000b2bb      0x3a5 build/debug/stm32l4xx_hal_crc_ex.o
+ .debug_info    0x0000b660      0x83d build/debug/stm32l4xx_hal_dma.o
+ .debug_info    0x0000be9d      0x7d4 build/debug/stm32l4xx_hal_gpio.o
+ .debug_info    0x0000c671     0x42ec build/debug/stm32l4xx_hal_i2c.o
+ .debug_info    0x0001095d      0x9c3 build/debug/stm32l4xx_hal_i2c_ex.o
+ .debug_info    0x00011320     0x15e5 build/debug/stm32l4xx_hal_lptim.o
+ .debug_info    0x00012905     0x2a57 build/debug/stm32l4xx_hal_msp.o
+ .debug_info    0x0001535c      0x9a6 build/debug/stm32l4xx_hal_pwr.o
+ .debug_info    0x00015d02      0xa7f build/debug/stm32l4xx_hal_pwr_ex.o
+ .debug_info    0x00016781      0xebd build/debug/stm32l4xx_hal_rcc.o
+ .debug_info    0x0001763e     0x122c build/debug/stm32l4xx_hal_rcc_ex.o
+ .debug_info    0x0001886a     0x117d build/debug/stm32l4xx_hal_rtc.o
+ .debug_info    0x000199e7     0x132f build/debug/stm32l4xx_hal_rtc_ex.o
+ .debug_info    0x0001ad16     0x2750 build/debug/stm32l4xx_hal_sd.o
+ .debug_info    0x0001d466     0x1faa build/debug/stm32l4xx_hal_spi.o
+ .debug_info    0x0001f410     0x4c14 build/debug/stm32l4xx_hal_uart.o
+ .debug_info    0x00024024      0xff8 build/debug/stm32l4xx_hal_uart_ex.o
+ .debug_info    0x0002501c     0x1661 build/debug/stm32l4xx_it.o
+ .debug_info    0x0002667d     0x199b build/debug/stm32l4xx_ll_sdmmc.o
+ .debug_info    0x00028018      0x176 build/debug/sysmem.o
+ .debug_info    0x0002818e      0x5f9 build/debug/system_stm32l4xx.o
+ .debug_info    0x00028787       0x30 build/debug/startup_stm32l476xx.o
+ .debug_info    0x000287b7    0x214a5 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+ .debug_info    0x00049c5c      0x1fa RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+ .debug_info    0x00049e56       0xa1 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+ .debug_info    0x00049ef7      0x49d RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
 
-.debug_abbrev   0x00000000     0x4dde
+.debug_abbrev   0x00000000     0x4d42
  .debug_abbrev  0x00000000      0x2de build/debug/SD_IO.o
  .debug_abbrev  0x000002de      0x33f build/debug/SD_Stream.o
- .debug_abbrev  0x0000061d      0x548 build/debug/main.o
- .debug_abbrev  0x00000b65      0x3d1 build/debug/protocol.o
- .debug_abbrev  0x00000f36       0xad build/debug/slow_crc.o
- .debug_abbrev  0x00000fe3      0x27e build/debug/stm32l4xx_hal.o
- .debug_abbrev  0x00001261      0x3a7 build/debug/stm32l4xx_hal_cortex.o
- .debug_abbrev  0x00001608      0x24d build/debug/stm32l4xx_hal_crc.o
- .debug_abbrev  0x00001855      0x19d build/debug/stm32l4xx_hal_crc_ex.o
- .debug_abbrev  0x000019f2      0x228 build/debug/stm32l4xx_hal_dma.o
- .debug_abbrev  0x00001c1a      0x217 build/debug/stm32l4xx_hal_gpio.o
- .debug_abbrev  0x00001e31      0x2c4 build/debug/stm32l4xx_hal_i2c.o
- .debug_abbrev  0x000020f5      0x1e6 build/debug/stm32l4xx_hal_i2c_ex.o
- .debug_abbrev  0x000022db      0x295 build/debug/stm32l4xx_hal_lptim.o
- .debug_abbrev  0x00002570      0x29a build/debug/stm32l4xx_hal_msp.o
- .debug_abbrev  0x0000280a      0x1ec build/debug/stm32l4xx_hal_pwr.o
- .debug_abbrev  0x000029f6      0x22c build/debug/stm32l4xx_hal_pwr_ex.o
- .debug_abbrev  0x00002c22      0x2c2 build/debug/stm32l4xx_hal_rcc.o
- .debug_abbrev  0x00002ee4      0x2c2 build/debug/stm32l4xx_hal_rcc_ex.o
- .debug_abbrev  0x000031a6      0x245 build/debug/stm32l4xx_hal_rtc.o
- .debug_abbrev  0x000033eb      0x25a build/debug/stm32l4xx_hal_rtc_ex.o
- .debug_abbrev  0x00003645      0x2d3 build/debug/stm32l4xx_hal_sd.o
- .debug_abbrev  0x00003918      0x29b build/debug/stm32l4xx_hal_spi.o
- .debug_abbrev  0x00003bb3      0x32e build/debug/stm32l4xx_hal_uart.o
- .debug_abbrev  0x00003ee1      0x32c build/debug/stm32l4xx_hal_uart_ex.o
- .debug_abbrev  0x0000420d      0x248 build/debug/stm32l4xx_it.o
- .debug_abbrev  0x00004455      0x24f build/debug/stm32l4xx_ll_sdmmc.o
- .debug_abbrev  0x000046a4       0xf0 build/debug/sysmem.o
- .debug_abbrev  0x00004794      0x135 build/debug/system_stm32l4xx.o
- .debug_abbrev  0x000048c9       0x24 build/debug/startup_stm32l476xx.o
- .debug_abbrev  0x000048ed      0x312 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
- .debug_abbrev  0x00004bff       0xb2 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
- .debug_abbrev  0x00004cb1       0x5f RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
- .debug_abbrev  0x00004d10       0xce RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+ .debug_abbrev  0x0000061d      0x559 build/debug/main.o
+ .debug_abbrev  0x00000b76      0x3d1 build/debug/protocol.o
+ .debug_abbrev  0x00000f47      0x27e build/debug/stm32l4xx_hal.o
+ .debug_abbrev  0x000011c5      0x3a7 build/debug/stm32l4xx_hal_cortex.o
+ .debug_abbrev  0x0000156c      0x24d build/debug/stm32l4xx_hal_crc.o
+ .debug_abbrev  0x000017b9      0x19d build/debug/stm32l4xx_hal_crc_ex.o
+ .debug_abbrev  0x00001956      0x228 build/debug/stm32l4xx_hal_dma.o
+ .debug_abbrev  0x00001b7e      0x217 build/debug/stm32l4xx_hal_gpio.o
+ .debug_abbrev  0x00001d95      0x2c4 build/debug/stm32l4xx_hal_i2c.o
+ .debug_abbrev  0x00002059      0x1e6 build/debug/stm32l4xx_hal_i2c_ex.o
+ .debug_abbrev  0x0000223f      0x295 build/debug/stm32l4xx_hal_lptim.o
+ .debug_abbrev  0x000024d4      0x29a build/debug/stm32l4xx_hal_msp.o
+ .debug_abbrev  0x0000276e      0x1ec build/debug/stm32l4xx_hal_pwr.o
+ .debug_abbrev  0x0000295a      0x22c build/debug/stm32l4xx_hal_pwr_ex.o
+ .debug_abbrev  0x00002b86      0x2c2 build/debug/stm32l4xx_hal_rcc.o
+ .debug_abbrev  0x00002e48      0x2c2 build/debug/stm32l4xx_hal_rcc_ex.o
+ .debug_abbrev  0x0000310a      0x245 build/debug/stm32l4xx_hal_rtc.o
+ .debug_abbrev  0x0000334f      0x25a build/debug/stm32l4xx_hal_rtc_ex.o
+ .debug_abbrev  0x000035a9      0x2d3 build/debug/stm32l4xx_hal_sd.o
+ .debug_abbrev  0x0000387c      0x29b build/debug/stm32l4xx_hal_spi.o
+ .debug_abbrev  0x00003b17      0x32e build/debug/stm32l4xx_hal_uart.o
+ .debug_abbrev  0x00003e45      0x32c build/debug/stm32l4xx_hal_uart_ex.o
+ .debug_abbrev  0x00004171      0x248 build/debug/stm32l4xx_it.o
+ .debug_abbrev  0x000043b9      0x24f build/debug/stm32l4xx_ll_sdmmc.o
+ .debug_abbrev  0x00004608       0xf0 build/debug/sysmem.o
+ .debug_abbrev  0x000046f8      0x135 build/debug/system_stm32l4xx.o
+ .debug_abbrev  0x0000482d       0x24 build/debug/startup_stm32l476xx.o
+ .debug_abbrev  0x00004851      0x312 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+ .debug_abbrev  0x00004b63       0xb2 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+ .debug_abbrev  0x00004c15       0x5f RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+ .debug_abbrev  0x00004c74       0xce RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
 
 .debug_loclists
-                0x00000000    0x1160f
+                0x00000000    0x1145e
  .debug_loclists
                 0x00000000      0x128 build/debug/SD_IO.o
  .debug_loclists
                 0x00000128      0x511 build/debug/SD_Stream.o
  .debug_loclists
-                0x00000639      0x9cb build/debug/main.o
+                0x00000639      0x89f build/debug/main.o
  .debug_loclists
-                0x00001004      0x882 build/debug/protocol.o
+                0x00000ed8      0x882 build/debug/protocol.o
  .debug_loclists
-                0x00001886       0x85 build/debug/slow_crc.o
+                0x0000175a      0x14d build/debug/stm32l4xx_hal.o
  .debug_loclists
-                0x0000190b      0x14d build/debug/stm32l4xx_hal.o
+                0x000018a7      0x500 build/debug/stm32l4xx_hal_cortex.o
  .debug_loclists
-                0x00001a58      0x500 build/debug/stm32l4xx_hal_cortex.o
+                0x00001da7      0x37b build/debug/stm32l4xx_hal_crc.o
  .debug_loclists
-                0x00001f58      0x37b build/debug/stm32l4xx_hal_crc.o
+                0x00002122      0x162 build/debug/stm32l4xx_hal_crc_ex.o
  .debug_loclists
-                0x000022d3      0x162 build/debug/stm32l4xx_hal_crc_ex.o
+                0x00002284      0x596 build/debug/stm32l4xx_hal_dma.o
  .debug_loclists
-                0x00002435      0x596 build/debug/stm32l4xx_hal_dma.o
+                0x0000281a      0x298 build/debug/stm32l4xx_hal_gpio.o
  .debug_loclists
-                0x000029cb      0x298 build/debug/stm32l4xx_hal_gpio.o
+                0x00002ab2     0x3aef build/debug/stm32l4xx_hal_i2c.o
  .debug_loclists
-                0x00002c63     0x3aef build/debug/stm32l4xx_hal_i2c.o
+                0x000065a1      0x129 build/debug/stm32l4xx_hal_i2c_ex.o
  .debug_loclists
-                0x00006752      0x129 build/debug/stm32l4xx_hal_i2c_ex.o
+                0x000066ca      0x75f build/debug/stm32l4xx_hal_lptim.o
  .debug_loclists
-                0x0000687b      0x75f build/debug/stm32l4xx_hal_lptim.o
+                0x00006e29      0x276 build/debug/stm32l4xx_hal_msp.o
  .debug_loclists
-                0x00006fda      0x276 build/debug/stm32l4xx_hal_msp.o
+                0x0000709f      0x147 build/debug/stm32l4xx_hal_pwr.o
  .debug_loclists
-                0x00007250      0x147 build/debug/stm32l4xx_hal_pwr.o
+                0x000071e6      0x785 build/debug/stm32l4xx_hal_pwr_ex.o
  .debug_loclists
-                0x00007397      0x785 build/debug/stm32l4xx_hal_pwr_ex.o
+                0x0000796b      0x55f build/debug/stm32l4xx_hal_rcc.o
  .debug_loclists
-                0x00007b1c      0x55f build/debug/stm32l4xx_hal_rcc.o
+                0x00007eca     0x16e2 build/debug/stm32l4xx_hal_rcc_ex.o
  .debug_loclists
-                0x0000807b     0x16e2 build/debug/stm32l4xx_hal_rcc_ex.o
+                0x000095ac      0x9bd build/debug/stm32l4xx_hal_rtc.o
  .debug_loclists
-                0x0000975d      0x9bd build/debug/stm32l4xx_hal_rtc.o
+                0x00009f69      0xab1 build/debug/stm32l4xx_hal_rtc_ex.o
  .debug_loclists
-                0x0000a11a      0xab1 build/debug/stm32l4xx_hal_rtc_ex.o
+                0x0000aa1a     0x1858 build/debug/stm32l4xx_hal_sd.o
  .debug_loclists
-                0x0000abcb     0x1858 build/debug/stm32l4xx_hal_sd.o
+                0x0000c272     0x1625 build/debug/stm32l4xx_hal_spi.o
  .debug_loclists
-                0x0000c423     0x1625 build/debug/stm32l4xx_hal_spi.o
+                0x0000d897     0x27cf build/debug/stm32l4xx_hal_uart.o
  .debug_loclists
-                0x0000da48     0x27cf build/debug/stm32l4xx_hal_uart.o
+                0x00010066      0x755 build/debug/stm32l4xx_hal_uart_ex.o
  .debug_loclists
-                0x00010217      0x755 build/debug/stm32l4xx_hal_uart_ex.o
+                0x000107bb       0x58 build/debug/stm32l4xx_it.o
  .debug_loclists
-                0x0001096c       0x58 build/debug/stm32l4xx_it.o
+                0x00010813      0xb44 build/debug/stm32l4xx_ll_sdmmc.o
  .debug_loclists
-                0x000109c4      0xb44 build/debug/stm32l4xx_ll_sdmmc.o
+                0x00011357       0x52 build/debug/sysmem.o
  .debug_loclists
-                0x00011508       0x52 build/debug/sysmem.o
- .debug_loclists
-                0x0001155a       0xb5 build/debug/system_stm32l4xx.o
+                0x000113a9       0xb5 build/debug/system_stm32l4xx.o
 
-.debug_aranges  0x00000000     0x2a48
+.debug_aranges  0x00000000     0x2a20
  .debug_aranges
                 0x00000000       0x50 build/debug/SD_IO.o
  .debug_aranges
                 0x00000050       0x68 build/debug/SD_Stream.o
  .debug_aranges
-                0x000000b8      0x188 build/debug/main.o
+                0x000000b8      0x180 build/debug/main.o
  .debug_aranges
-                0x00000240       0xc0 build/debug/protocol.o
+                0x00000238       0xc0 build/debug/protocol.o
  .debug_aranges
-                0x00000300       0x20 build/debug/slow_crc.o
+                0x000002f8      0x130 build/debug/stm32l4xx_hal.o
  .debug_aranges
-                0x00000320      0x130 build/debug/stm32l4xx_hal.o
+                0x00000428       0xf0 build/debug/stm32l4xx_hal_cortex.o
  .debug_aranges
-                0x00000450       0xf0 build/debug/stm32l4xx_hal_cortex.o
+                0x00000518       0x60 build/debug/stm32l4xx_hal_crc.o
  .debug_aranges
-                0x00000540       0x60 build/debug/stm32l4xx_hal_crc.o
+                0x00000578       0x30 build/debug/stm32l4xx_hal_crc_ex.o
  .debug_aranges
-                0x000005a0       0x30 build/debug/stm32l4xx_hal_crc_ex.o
+                0x000005a8       0x80 build/debug/stm32l4xx_hal_dma.o
  .debug_aranges
-                0x000005d0       0x80 build/debug/stm32l4xx_hal_dma.o
+                0x00000628       0x58 build/debug/stm32l4xx_hal_gpio.o
  .debug_aranges
-                0x00000650       0x58 build/debug/stm32l4xx_hal_gpio.o
+                0x00000680      0x2a0 build/debug/stm32l4xx_hal_i2c.o
  .debug_aranges
-                0x000006a8      0x2a0 build/debug/stm32l4xx_hal_i2c.o
+                0x00000920       0x48 build/debug/stm32l4xx_hal_i2c_ex.o
  .debug_aranges
-                0x00000948       0x48 build/debug/stm32l4xx_hal_i2c_ex.o
+                0x00000968      0x168 build/debug/stm32l4xx_hal_lptim.o
  .debug_aranges
-                0x00000990      0x168 build/debug/stm32l4xx_hal_lptim.o
+                0x00000ad0       0x90 build/debug/stm32l4xx_hal_msp.o
  .debug_aranges
-                0x00000af8       0x90 build/debug/stm32l4xx_hal_msp.o
+                0x00000b60       0x98 build/debug/stm32l4xx_hal_pwr.o
  .debug_aranges
-                0x00000b88       0x98 build/debug/stm32l4xx_hal_pwr.o
+                0x00000bf8      0x160 build/debug/stm32l4xx_hal_pwr_ex.o
  .debug_aranges
-                0x00000c20      0x160 build/debug/stm32l4xx_hal_pwr_ex.o
+                0x00000d58       0x90 build/debug/stm32l4xx_hal_rcc.o
  .debug_aranges
-                0x00000d80       0x90 build/debug/stm32l4xx_hal_rcc.o
+                0x00000de8       0xc0 build/debug/stm32l4xx_hal_rcc_ex.o
  .debug_aranges
-                0x00000e10       0xc0 build/debug/stm32l4xx_hal_rcc_ex.o
+                0x00000ea8       0xe8 build/debug/stm32l4xx_hal_rtc.o
  .debug_aranges
-                0x00000ed0       0xe8 build/debug/stm32l4xx_hal_rtc.o
+                0x00000f90      0x140 build/debug/stm32l4xx_hal_rtc_ex.o
  .debug_aranges
-                0x00000fb8      0x140 build/debug/stm32l4xx_hal_rtc_ex.o
+                0x000010d0      0x168 build/debug/stm32l4xx_hal_sd.o
  .debug_aranges
-                0x000010f8      0x168 build/debug/stm32l4xx_hal_sd.o
+                0x00001238      0x1d8 build/debug/stm32l4xx_hal_spi.o
  .debug_aranges
-                0x00001260      0x1d8 build/debug/stm32l4xx_hal_spi.o
+                0x00001410      0x228 build/debug/stm32l4xx_hal_uart.o
  .debug_aranges
-                0x00001438      0x228 build/debug/stm32l4xx_hal_uart.o
+                0x00001638       0x80 build/debug/stm32l4xx_hal_uart_ex.o
  .debug_aranges
-                0x00001660       0x80 build/debug/stm32l4xx_hal_uart_ex.o
+                0x000016b8       0xc0 build/debug/stm32l4xx_it.o
  .debug_aranges
-                0x000016e0       0xc0 build/debug/stm32l4xx_it.o
+                0x00001778      0x190 build/debug/stm32l4xx_ll_sdmmc.o
  .debug_aranges
-                0x000017a0      0x190 build/debug/stm32l4xx_ll_sdmmc.o
+                0x00001908       0x20 build/debug/sysmem.o
  .debug_aranges
-                0x00001930       0x20 build/debug/sysmem.o
+                0x00001928       0x28 build/debug/system_stm32l4xx.o
  .debug_aranges
-                0x00001950       0x28 build/debug/system_stm32l4xx.o
+                0x00001950       0x28 build/debug/startup_stm32l476xx.o
  .debug_aranges
-                0x00001978       0x28 build/debug/startup_stm32l476xx.o
+                0x00001978     0x1040 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
  .debug_aranges
-                0x000019a0     0x1040 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+                0x000029b8       0x20 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
  .debug_aranges
-                0x000029e0       0x20 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+                0x000029d8       0x20 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
  .debug_aranges
-                0x00002a00       0x20 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
- .debug_aranges
-                0x00002a20       0x28 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+                0x000029f8       0x28 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
 
 .debug_rnglists
-                0x00000000     0x14ec
+                0x00000000     0x14ae
  .debug_rnglists
                 0x00000000       0x39 build/debug/SD_IO.o
  .debug_rnglists
                 0x00000039       0xf0 build/debug/SD_Stream.o
  .debug_rnglists
-                0x00000129      0x1a1 build/debug/main.o
+                0x00000129      0x18e build/debug/main.o
  .debug_rnglists
-                0x000002ca       0x9e build/debug/protocol.o
+                0x000002b7       0x9e build/debug/protocol.o
  .debug_rnglists
-                0x00000368       0x2b build/debug/slow_crc.o
+                0x00000355       0xdf build/debug/stm32l4xx_hal.o
  .debug_rnglists
-                0x00000393       0xdf build/debug/stm32l4xx_hal.o
+                0x00000434       0xaf build/debug/stm32l4xx_hal_cortex.o
  .debug_rnglists
-                0x00000472       0xaf build/debug/stm32l4xx_hal_cortex.o
+                0x000004e3       0x45 build/debug/stm32l4xx_hal_crc.o
  .debug_rnglists
-                0x00000521       0x45 build/debug/stm32l4xx_hal_crc.o
+                0x00000528       0x1f build/debug/stm32l4xx_hal_crc_ex.o
  .debug_rnglists
-                0x00000566       0x1f build/debug/stm32l4xx_hal_crc_ex.o
+                0x00000547       0x5f build/debug/stm32l4xx_hal_dma.o
  .debug_rnglists
-                0x00000585       0x5f build/debug/stm32l4xx_hal_dma.o
+                0x000005a6       0x3f build/debug/stm32l4xx_hal_gpio.o
  .debug_rnglists
-                0x000005e4       0x3f build/debug/stm32l4xx_hal_gpio.o
+                0x000005e5      0x21c build/debug/stm32l4xx_hal_i2c.o
  .debug_rnglists
-                0x00000623      0x21c build/debug/stm32l4xx_hal_i2c.o
+                0x00000801       0x31 build/debug/stm32l4xx_hal_i2c_ex.o
  .debug_rnglists
-                0x0000083f       0x31 build/debug/stm32l4xx_hal_i2c_ex.o
+                0x00000832      0x112 build/debug/stm32l4xx_hal_lptim.o
  .debug_rnglists
-                0x00000870      0x112 build/debug/stm32l4xx_hal_lptim.o
+                0x00000944       0x6c build/debug/stm32l4xx_hal_msp.o
  .debug_rnglists
-                0x00000982       0x6c build/debug/stm32l4xx_hal_msp.o
+                0x000009b0       0x6e build/debug/stm32l4xx_hal_pwr.o
  .debug_rnglists
-                0x000009ee       0x6e build/debug/stm32l4xx_hal_pwr.o
+                0x00000a1e      0x109 build/debug/stm32l4xx_hal_pwr_ex.o
  .debug_rnglists
-                0x00000a5c      0x109 build/debug/stm32l4xx_hal_pwr_ex.o
+                0x00000b27       0x7c build/debug/stm32l4xx_hal_rcc.o
  .debug_rnglists
-                0x00000b65       0x7c build/debug/stm32l4xx_hal_rcc.o
+                0x00000ba3       0xa3 build/debug/stm32l4xx_hal_rcc_ex.o
  .debug_rnglists
-                0x00000be1       0xa3 build/debug/stm32l4xx_hal_rcc_ex.o
+                0x00000c46       0xcd build/debug/stm32l4xx_hal_rtc.o
  .debug_rnglists
-                0x00000c84       0xcd build/debug/stm32l4xx_hal_rtc.o
+                0x00000d13       0xf3 build/debug/stm32l4xx_hal_rtc_ex.o
  .debug_rnglists
-                0x00000d51       0xf3 build/debug/stm32l4xx_hal_rtc_ex.o
+                0x00000e06      0x11b build/debug/stm32l4xx_hal_sd.o
  .debug_rnglists
-                0x00000e44      0x11b build/debug/stm32l4xx_hal_sd.o
+                0x00000f21      0x171 build/debug/stm32l4xx_hal_spi.o
  .debug_rnglists
-                0x00000f5f      0x171 build/debug/stm32l4xx_hal_spi.o
+                0x00001092      0x1ba build/debug/stm32l4xx_hal_uart.o
  .debug_rnglists
-                0x000010d0      0x1ba build/debug/stm32l4xx_hal_uart.o
+                0x0000124c       0x68 build/debug/stm32l4xx_hal_uart_ex.o
  .debug_rnglists
-                0x0000128a       0x68 build/debug/stm32l4xx_hal_uart_ex.o
+                0x000012b4       0x8b build/debug/stm32l4xx_it.o
  .debug_rnglists
-                0x000012f2       0x8b build/debug/stm32l4xx_it.o
+                0x0000133f      0x129 build/debug/stm32l4xx_ll_sdmmc.o
  .debug_rnglists
-                0x0000137d      0x129 build/debug/stm32l4xx_ll_sdmmc.o
+                0x00001468       0x13 build/debug/sysmem.o
  .debug_rnglists
-                0x000014a6       0x13 build/debug/sysmem.o
+                0x0000147b       0x1a build/debug/system_stm32l4xx.o
  .debug_rnglists
-                0x000014b9       0x1a build/debug/system_stm32l4xx.o
- .debug_rnglists
-                0x000014d3       0x19 build/debug/startup_stm32l476xx.o
+                0x00001495       0x19 build/debug/startup_stm32l476xx.o
 
-.debug_line     0x00000000    0x3e99e
+.debug_line     0x00000000    0x3e697
  .debug_line    0x00000000      0x64a build/debug/SD_IO.o
  .debug_line    0x0000064a      0xaf7 build/debug/SD_Stream.o
- .debug_line    0x00001141     0x1b1f build/debug/main.o
- .debug_line    0x00002c60      0xa67 build/debug/protocol.o
- .debug_line    0x000036c7      0x204 build/debug/slow_crc.o
- .debug_line    0x000038cb      0x748 build/debug/stm32l4xx_hal.o
- .debug_line    0x00004013      0x8b4 build/debug/stm32l4xx_hal_cortex.o
- .debug_line    0x000048c7      0x605 build/debug/stm32l4xx_hal_crc.o
- .debug_line    0x00004ecc      0x342 build/debug/stm32l4xx_hal_crc_ex.o
- .debug_line    0x0000520e      0xa97 build/debug/stm32l4xx_hal_dma.o
- .debug_line    0x00005ca5      0x792 build/debug/stm32l4xx_hal_gpio.o
- .debug_line    0x00006437     0x4eea build/debug/stm32l4xx_hal_i2c.o
- .debug_line    0x0000b321      0x465 build/debug/stm32l4xx_hal_i2c_ex.o
- .debug_line    0x0000b786     0x11bd build/debug/stm32l4xx_hal_lptim.o
- .debug_line    0x0000c943      0xb00 build/debug/stm32l4xx_hal_msp.o
- .debug_line    0x0000d443      0x4ba build/debug/stm32l4xx_hal_pwr.o
- .debug_line    0x0000d8fd      0xb7e build/debug/stm32l4xx_hal_pwr_ex.o
- .debug_line    0x0000e47b     0x104e build/debug/stm32l4xx_hal_rcc.o
- .debug_line    0x0000f4c9     0x1681 build/debug/stm32l4xx_hal_rcc_ex.o
- .debug_line    0x00010b4a     0x1172 build/debug/stm32l4xx_hal_rtc.o
- .debug_line    0x00011cbc     0x12cc build/debug/stm32l4xx_hal_rtc_ex.o
- .debug_line    0x00012f88     0x290c build/debug/stm32l4xx_hal_sd.o
- .debug_line    0x00015894     0x2980 build/debug/stm32l4xx_hal_spi.o
- .debug_line    0x00018214     0x3fcb build/debug/stm32l4xx_hal_uart.o
- .debug_line    0x0001c1df      0xa16 build/debug/stm32l4xx_hal_uart_ex.o
- .debug_line    0x0001cbf5      0x6c4 build/debug/stm32l4xx_it.o
- .debug_line    0x0001d2b9     0x11d7 build/debug/stm32l4xx_ll_sdmmc.o
- .debug_line    0x0001e490      0x298 build/debug/sysmem.o
- .debug_line    0x0001e728      0x362 build/debug/system_stm32l4xx.o
- .debug_line    0x0001ea8a       0x76 build/debug/startup_stm32l476xx.o
- .debug_line    0x0001eb00    0x1f3f5 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
- .debug_line    0x0003def5      0x310 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
- .debug_line    0x0003e205      0x12b RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
- .debug_line    0x0003e330      0x66e RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+ .debug_line    0x00001141     0x1a19 build/debug/main.o
+ .debug_line    0x00002b5a      0xa6a build/debug/protocol.o
+ .debug_line    0x000035c4      0x748 build/debug/stm32l4xx_hal.o
+ .debug_line    0x00003d0c      0x8b4 build/debug/stm32l4xx_hal_cortex.o
+ .debug_line    0x000045c0      0x605 build/debug/stm32l4xx_hal_crc.o
+ .debug_line    0x00004bc5      0x342 build/debug/stm32l4xx_hal_crc_ex.o
+ .debug_line    0x00004f07      0xa97 build/debug/stm32l4xx_hal_dma.o
+ .debug_line    0x0000599e      0x792 build/debug/stm32l4xx_hal_gpio.o
+ .debug_line    0x00006130     0x4eea build/debug/stm32l4xx_hal_i2c.o
+ .debug_line    0x0000b01a      0x465 build/debug/stm32l4xx_hal_i2c_ex.o
+ .debug_line    0x0000b47f     0x11bd build/debug/stm32l4xx_hal_lptim.o
+ .debug_line    0x0000c63c      0xb00 build/debug/stm32l4xx_hal_msp.o
+ .debug_line    0x0000d13c      0x4ba build/debug/stm32l4xx_hal_pwr.o
+ .debug_line    0x0000d5f6      0xb7e build/debug/stm32l4xx_hal_pwr_ex.o
+ .debug_line    0x0000e174     0x104e build/debug/stm32l4xx_hal_rcc.o
+ .debug_line    0x0000f1c2     0x1681 build/debug/stm32l4xx_hal_rcc_ex.o
+ .debug_line    0x00010843     0x1172 build/debug/stm32l4xx_hal_rtc.o
+ .debug_line    0x000119b5     0x12cc build/debug/stm32l4xx_hal_rtc_ex.o
+ .debug_line    0x00012c81     0x290c build/debug/stm32l4xx_hal_sd.o
+ .debug_line    0x0001558d     0x2980 build/debug/stm32l4xx_hal_spi.o
+ .debug_line    0x00017f0d     0x3fcb build/debug/stm32l4xx_hal_uart.o
+ .debug_line    0x0001bed8      0xa16 build/debug/stm32l4xx_hal_uart_ex.o
+ .debug_line    0x0001c8ee      0x6c4 build/debug/stm32l4xx_it.o
+ .debug_line    0x0001cfb2     0x11d7 build/debug/stm32l4xx_ll_sdmmc.o
+ .debug_line    0x0001e189      0x298 build/debug/sysmem.o
+ .debug_line    0x0001e421      0x362 build/debug/system_stm32l4xx.o
+ .debug_line    0x0001e783       0x76 build/debug/startup_stm32l476xx.o
+ .debug_line    0x0001e7f9    0x1f3f5 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+ .debug_line    0x0003dbee      0x310 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+ .debug_line    0x0003defe      0x12b RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+ .debug_line    0x0003e029      0x66e RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
 
-.debug_str      0x00000000    0x449d1
- .debug_str     0x00000000    0x449d1 build/debug/SD_IO.o
+.debug_str      0x00000000    0x449a9
+ .debug_str     0x00000000    0x449a9 build/debug/SD_IO.o
                                 0x988 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/SD_Stream.o
+ .debug_str     0x000449a9        0x0 build/debug/SD_Stream.o
                                 0xa8c (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/main.o
-                               0x2a4f (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/protocol.o
-                                0x871 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/slow_crc.o
-                                0x1cb (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal.o
+ .debug_str     0x000449a9        0x0 build/debug/main.o
+                               0x2a39 (size before relaxing)
+ .debug_str     0x000449a9        0x0 build/debug/protocol.o
+                                0x87d (size before relaxing)
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal.o
                                 0xd0c (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_cortex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_cortex.o
                                 0xc54 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_crc.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_crc.o
                                 0x498 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_crc_ex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_crc_ex.o
                                 0x452 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_dma.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_dma.o
                                 0x657 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_gpio.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_gpio.o
                                 0x554 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_i2c.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_i2c.o
                                 0xfdb (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_i2c_ex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_i2c_ex.o
                                 0x8e8 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_lptim.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_lptim.o
                                 0xa32 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_msp.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_msp.o
                                0x1c56 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_pwr.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_pwr.o
                                 0x6b0 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_pwr_ex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_pwr_ex.o
                                 0x851 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_rcc.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_rcc.o
                                 0x89e (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_rcc_ex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_rcc_ex.o
                                 0xacf (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_rtc.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_rtc.o
                                 0x866 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_rtc_ex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_rtc_ex.o
                                 0xb81 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_sd.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_sd.o
                                0x1093 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_spi.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_spi.o
                                 0xbdd (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_uart.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_uart.o
                                0x1016 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_hal_uart_ex.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_hal_uart_ex.o
                                 0x937 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_it.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_it.o
                                 0xf3c (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/stm32l4xx_ll_sdmmc.o
+ .debug_str     0x000449a9        0x0 build/debug/stm32l4xx_ll_sdmmc.o
                                 0x837 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/sysmem.o
+ .debug_str     0x000449a9        0x0 build/debug/sysmem.o
                                 0x214 (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/system_stm32l4xx.o
+ .debug_str     0x000449a9        0x0 build/debug/system_stm32l4xx.o
                                 0x3db (size before relaxing)
- .debug_str     0x000449d1        0x0 build/debug/startup_stm32l476xx.o
+ .debug_str     0x000449a9        0x0 build/debug/startup_stm32l476xx.o
                                  0x6d (size before relaxing)
- .debug_str     0x000449d1        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+ .debug_str     0x000449a9        0x0 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
                               0x3deeb (size before relaxing)
- .debug_str     0x000449d1        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+ .debug_str     0x000449a9        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
                                 0x56a (size before relaxing)
- .debug_str     0x000449d1        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+ .debug_str     0x000449a9        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
                                 0x203 (size before relaxing)
- .debug_str     0x000449d1        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+ .debug_str     0x000449a9        0x0 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
                                 0x57b (size before relaxing)
 
-.debug_frame    0x00000000     0x8afc
+.debug_frame    0x00000000     0x8aa4
  .debug_frame   0x00000000       0xc0 build/debug/SD_IO.o
  .debug_frame   0x000000c0      0x184 build/debug/SD_Stream.o
- .debug_frame   0x00000244      0x4fc build/debug/main.o
- .debug_frame   0x00000740      0x22c build/debug/protocol.o
- .debug_frame   0x0000096c       0x28 build/debug/slow_crc.o
- .debug_frame   0x00000994      0x274 build/debug/stm32l4xx_hal.o
- .debug_frame   0x00000c08      0x204 build/debug/stm32l4xx_hal_cortex.o
- .debug_frame   0x00000e0c       0xec build/debug/stm32l4xx_hal_crc.o
- .debug_frame   0x00000ef8       0x40 build/debug/stm32l4xx_hal_crc_ex.o
- .debug_frame   0x00000f38      0x12c build/debug/stm32l4xx_hal_dma.o
- .debug_frame   0x00001064       0xd0 build/debug/stm32l4xx_hal_gpio.o
- .debug_frame   0x00001134      0x92c build/debug/stm32l4xx_hal_i2c.o
- .debug_frame   0x00001a60       0x80 build/debug/stm32l4xx_hal_i2c_ex.o
- .debug_frame   0x00001ae0      0x3cc build/debug/stm32l4xx_hal_lptim.o
- .debug_frame   0x00001eac      0x1c0 build/debug/stm32l4xx_hal_msp.o
- .debug_frame   0x0000206c      0x120 build/debug/stm32l4xx_hal_pwr.o
- .debug_frame   0x0000218c      0x2b8 build/debug/stm32l4xx_hal_pwr_ex.o
- .debug_frame   0x00002444      0x19c build/debug/stm32l4xx_hal_rcc.o
- .debug_frame   0x000025e0      0x1f8 build/debug/stm32l4xx_hal_rcc_ex.o
- .debug_frame   0x000027d8      0x278 build/debug/stm32l4xx_hal_rtc.o
- .debug_frame   0x00002a50      0x374 build/debug/stm32l4xx_hal_rtc_ex.o
- .debug_frame   0x00002dc4      0x4ac build/debug/stm32l4xx_hal_sd.o
- .debug_frame   0x00003270      0x5c8 build/debug/stm32l4xx_hal_spi.o
- .debug_frame   0x00003838      0x5e4 build/debug/stm32l4xx_hal_uart.o
- .debug_frame   0x00003e1c      0x164 build/debug/stm32l4xx_hal_uart_ex.o
- .debug_frame   0x00003f80      0x1cc build/debug/stm32l4xx_it.o
- .debug_frame   0x0000414c      0x4ec build/debug/stm32l4xx_ll_sdmmc.o
- .debug_frame   0x00004638       0x28 build/debug/sysmem.o
- .debug_frame   0x00004660       0x30 build/debug/system_stm32l4xx.o
- .debug_frame   0x00004690     0x43a4 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
- .debug_frame   0x00008a34       0x30 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
- .debug_frame   0x00008a64       0x30 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
- .debug_frame   0x00008a94       0x68 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
+ .debug_frame   0x00000244      0x4cc build/debug/main.o
+ .debug_frame   0x00000710      0x22c build/debug/protocol.o
+ .debug_frame   0x0000093c      0x274 build/debug/stm32l4xx_hal.o
+ .debug_frame   0x00000bb0      0x204 build/debug/stm32l4xx_hal_cortex.o
+ .debug_frame   0x00000db4       0xec build/debug/stm32l4xx_hal_crc.o
+ .debug_frame   0x00000ea0       0x40 build/debug/stm32l4xx_hal_crc_ex.o
+ .debug_frame   0x00000ee0      0x12c build/debug/stm32l4xx_hal_dma.o
+ .debug_frame   0x0000100c       0xd0 build/debug/stm32l4xx_hal_gpio.o
+ .debug_frame   0x000010dc      0x92c build/debug/stm32l4xx_hal_i2c.o
+ .debug_frame   0x00001a08       0x80 build/debug/stm32l4xx_hal_i2c_ex.o
+ .debug_frame   0x00001a88      0x3cc build/debug/stm32l4xx_hal_lptim.o
+ .debug_frame   0x00001e54      0x1c0 build/debug/stm32l4xx_hal_msp.o
+ .debug_frame   0x00002014      0x120 build/debug/stm32l4xx_hal_pwr.o
+ .debug_frame   0x00002134      0x2b8 build/debug/stm32l4xx_hal_pwr_ex.o
+ .debug_frame   0x000023ec      0x19c build/debug/stm32l4xx_hal_rcc.o
+ .debug_frame   0x00002588      0x1f8 build/debug/stm32l4xx_hal_rcc_ex.o
+ .debug_frame   0x00002780      0x278 build/debug/stm32l4xx_hal_rtc.o
+ .debug_frame   0x000029f8      0x374 build/debug/stm32l4xx_hal_rtc_ex.o
+ .debug_frame   0x00002d6c      0x4ac build/debug/stm32l4xx_hal_sd.o
+ .debug_frame   0x00003218      0x5c8 build/debug/stm32l4xx_hal_spi.o
+ .debug_frame   0x000037e0      0x5e4 build/debug/stm32l4xx_hal_uart.o
+ .debug_frame   0x00003dc4      0x164 build/debug/stm32l4xx_hal_uart_ex.o
+ .debug_frame   0x00003f28      0x1cc build/debug/stm32l4xx_it.o
+ .debug_frame   0x000040f4      0x4ec build/debug/stm32l4xx_ll_sdmmc.o
+ .debug_frame   0x000045e0       0x28 build/debug/sysmem.o
+ .debug_frame   0x00004608       0x30 build/debug/system_stm32l4xx.o
+ .debug_frame   0x00004638     0x43a4 RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
+ .debug_frame   0x000089dc       0x30 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.225.rcgu.o)
+ .debug_frame   0x00008a0c       0x30 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.286.rcgu.o)
+ .debug_frame   0x00008a3c       0x68 RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.020.rcgu.o)
 
 .debug_line_str
                 0x00000000       0x51
@@ -9581,10 +9567,8 @@ core::unicode::unicode_data::white_space::WHITESPACE_MAP RustLibs/libcontrol_pro
 core::wtf8::slice_error_fail                      RustLibs/libcontrol_protocol_static.a(core-ce1d396463b54f3b.core.a315ab16bd2e68e-cgu.0.rcgu.o)
 cosf                                              RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.249.rcgu.o)
                                                   build/debug/ssd1306.o
-crc16                                             build/debug/slow_crc.o
+crc16                                             build/debug/main.o
                                                   build/debug/protocol.o
-                                                  build/debug/main.o
-crc16_old                                         build/debug/main.o
 current_sector                                    build/debug/SD_Stream.o
 dataReady                                         build/debug/main.o
 dma_transfer_buffer                               build/debug/main.o
@@ -9695,7 +9679,7 @@ set_lora_recv_window                              build/debug/main.o
                                                   build/debug/protocol.o
 set_overwrite_policy                              build/debug/main.o
                                                   build/debug/protocol.o
-shaun_debug                                       build/debug/main.o
+shaun_debug                                       build/debug/protocol.o
 sinf                                              RustLibs/libcontrol_protocol_static.a(compiler_builtins-8ad0af33baac9bb9.compiler_builtins.4545c5a04d2d8eb4-cgu.218.rcgu.o)
                                                   build/debug/ssd1306.o
 siprintf                                          /home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/15.2.1-1.1.1/.content/bin/../lib/gcc/arm-none-eabi/15.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libc_nano.a(libc_a-sprintf.o)
