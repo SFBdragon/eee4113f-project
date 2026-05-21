@@ -539,6 +539,7 @@ static void wifi_ping_handler()
 
 static void wifi_ping_arm(void)
 {
+  
     call_repeatedly_after_n_ms_wifi_ping(1000, wifi_ping_handler);
 }
 
