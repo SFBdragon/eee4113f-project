@@ -421,6 +421,16 @@ int main(void)
           // TAM / SHAUN TO PROCESS INCOMING WIFI DATA HERE 
           reset_active();
 
+
+                    // DEBUG START - PRINTING RECEIVED RAW DATA
+          UART_SendString(&huart3, "WIFI RAW: \r\n");
+          char hex[8];
+          for (uint16_t i = 0; i < wifi_rx_len; i++) {
+              snprintf(hex, sizeof(hex), "%02X ", wifi_rx_buf[i]);
+              UART_SendString(&huart3, hex);
+          }
+          UART_SendString(&huart3, "\r\n");
+
           // BELOW IS DEBUG CODE TO OUTPUT THE INCOMIGN DATA
          
           wifi_rx_ready = 0; // Reset the flag so we don't process the same data twice
@@ -437,6 +447,8 @@ int main(void)
 
         //SD_Stream_ReadDebug(DATA_START_SECTOR,100 );  // GET THIS TO OUTPUT FILES AND SEND OVER WIFI (SEND_WIFI_FILES WRAPPER)
           // DEBUG END
+          uint64_t mac = 0x444444444444;
+         recv_wifi_packet(&mac,wifi_rx_buf, wifi_rx_len);
         }   
       }
       // ================== LORA ======================
@@ -1629,6 +1641,15 @@ HAL_StatusTypeDef lora_send(uint8_t *pData, uint16_t size) {
     HAL_StatusTypeDef result =  HAL_UART_Transmit(&hlpuart1, pData, size, 100);
 }
 
+
+HAL_StatusTypeDef wifi_send(uint8_t *pData, uint16_t size) {
+  // Wrapper function for sending data over LORA
+    // RE-ASSERT Power to LORA
+    HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, SET);
+    HAL_StatusTypeDef result =  HAL_UART_Transmit(&huart2, pData, size, 100);
+  //  HAL_UART_Transmit(&huart3, pData, size, 100);
+}
+
 void SD_SpeedTest(void) {
     char uart[128];
     uint32_t startTime, endTime, totalTime;
@@ -1714,7 +1735,7 @@ void PackBlocks(const uint8_t *src, uint16_t dataLen) {
         
         // Byte 2-3: CRC of the data
         block[2] = (crc >> 8) & 0xFF;
-        block[3] =  crc            & 0xFF;
+        block[3] =  crc       & 0xFF;
 
         // Write data
         if (currentBlockLen > 0) {
@@ -1738,7 +1759,7 @@ void PackBlocks(const uint8_t *src, uint16_t dataLen) {
     }
 }
 
-uint16_t crc16_old(const uint8_t *data, uintptr_t len){
+uint16_t crc16(const uint8_t *data, uintptr_t len){
     uint32_t crc_result = HAL_CRC_Calculate(&hcrc, (uint32_t*)data, len);
     // HAL HW returns a 32-bit value, return lower 16
     return (uint16_t)crc_result;
@@ -1766,7 +1787,10 @@ void UART_DumpBuffer(uint8_t *data, uint32_t len) {
 
 // Returns the block data length from header, or 0 on error
 uint32_t read_block(uint64_t block_id, uint8_t* buffer) {
-    HAL_StatusTypeDef res = SD_Stream_ReadBlock((uint32_t)block_id, buffer);
+    
+    uint32_t sector = DATA_START_SECTOR + block_id * (SD_BLOCK_SIZE / SD_SECTOR_SIZE); 
+  
+    HAL_StatusTypeDef res = SD_Stream_ReadSectors(sector, SD_BLOCK_SIZE / SD_SECTOR_SIZE, buffer);
 
     if (res != HAL_OK) {
         UART_SendString(&huart3, "read_block: SD read failed\r\n");
@@ -1900,18 +1924,6 @@ void reset_active(void){
 }
 
 
-uint64_t storage_total_blocks() {
-  //Tell me how many blocks in storage
-HAL_SD_CardInfoTypeDef cardInfo;
-    
-    if (HAL_SD_GetCardInfo(&hsd1, &cardInfo) == HAL_OK) {
-        // LogBlockNbr holds the total number of logical blocks on your SD card
-        return (uint64_t)cardInfo.LogBlockNbr;
-    }
-    // Fallback default in case the SD card is not initialized/present
-    return 0; 
-}
-
 
 // TRACK THREE POINTERS - SHAUNS EXPLANATION
 // READABLE BLOCKS (ZERO) 0-16gb zZER
@@ -1928,28 +1940,35 @@ HAL_SD_CardInfoTypeDef cardInfo;
 
 
 void allow_overwrite(uint64_t upto_block) {
-  // set the pointer you can always overwrite up to 
-  UART_SendString(&huart3, "ALLOW OVERWRITE (LC): \r\n");
+    // set the pointer you can always overwrite up to 
+    UART_SendString(&huart3, "ALLOW OVERWRITE (LC): \r\n");
+    SD_Stream_SetProtHead(upto_block);
+}
+void set_overwrite_policy(Policy policy) {
+  // the overwrite policy was set by the user
+  switch (policy)
+  {
+    case STORAGE_POLICY_OVERWRITE:
+      SD_Stream_SetOverwritePolicy(1);
+      break;
+    case STORAGE_POLICY_PRESERVE:
+      SD_Stream_SetOverwritePolicy(0);
+      break;
+  }
+}
+
+uint64_t storage_total_blocks() {
+    return SD_Stream_BlockCount();
 }
 
 uint64_t storage_first_readable_block() {
-   // todo tell me first readable/available block ID
-   // This is defined in the SD_Stream header
-   if (current_sector > DATA_START_SECTOR){
-
-   }
-   return (uint64_t)DATA_START_SECTOR;
+    return SD_Stream_GetReadBase();
 }
-
 uint64_t storage_first_protected_block() {
-  return 0; // todo tell me which block ID you won't overwrite 
-  // (unless storage policy is OVERWRITE)
-  // this is either `storage_first_readable_block`
-  // or what got set by `allow_overwrite`
+    return SD_Stream_GetProtBase();
 }
-
 uint64_t storage_last_readable_block() {
-  return 0; // gimme that last block ID that is readable 
+    return SD_Stream_GetWriteHead(); 
 }
 
 Status send_lora_packet(uint8_t *data, BufLen len) {
@@ -1996,9 +2015,9 @@ Status send_lora_packet(uint8_t *data, BufLen len) {
     for (uint16_t i = 0; i < slip_len; i++) {
         snprintf(hex, sizeof(hex), "%02X ", slip_buf[i]);
         UART_SendString(&huart3, hex);
-}
-UART_SendString(&huart3, "\r\n");
-HAL_StatusTypeDef result = lora_send(slip_buf, (BufLen)slip_len);
+    }
+    UART_SendString(&huart3, "\r\n");
+    HAL_StatusTypeDef result = lora_send(slip_buf, (BufLen)slip_len);
 }
 
 Status power_up_wifi() {
@@ -2019,26 +2038,61 @@ Status power_down_wifi() {
 }
 
 short send_wifi_packet(uint64_t macdst, uint8_t *data, uint16_t len) {
-  // shaun calls this to send a WiFi packet.
-  
 
-  UART_SendString(&huart3, "SEND WIFI PACKET (LC) \r\n");
-  return STATUS_SUCCESS;
-}
+    #define SLIP_END     0xC0
+    #define SLIP_ESC     0xDB
+    #define SLIP_ESC_END 0xDC
+    #define SLIP_ESC_ESC 0xDD
+    #define SLIP_MAX_PACKET 250
 
-void set_overwrite_policy(Policy policy) {
-  // the overwrite policy was set by the user
-  switch (policy)
-  {
-    case STORAGE_POLICY_OVERWRITE:
-      /* if you run out of storage, start replacing oldest blocks */
-      break;
-    case STORAGE_POLICY_PRESERVE:
-      /* if you run out of storage, don't overwrite blocks between
-      storage_first_protected_block and storage_last_readable_block
-      - discard the new measurement data */
-      break;
-  }
+    // Worst case: every byte is escaped (2x) + 2 END bytes
+    uint8_t slip_buf[SLIP_MAX_PACKET * 2 + 2];
+    uint16_t slip_len = 0;
+
+    // Extract MAC bytes from uint64_t (little-endian, lower 6 bytes)
+    uint8_t mac[6];
+    for (int i = 0; i < 6; i++) {
+        mac[i] = (macdst >> (i * 8)) & 0xFF;
+    }
+
+    // Leading END byte (flush line noise per RFC 1055)
+    slip_buf[slip_len++] = SLIP_END;
+
+    for (uint16_t i = 0; i < len; i++) {
+        if (slip_len >= sizeof(slip_buf) - 2) {
+            UART_SendString(&huart3, "SLIP ERR: encode overflow\r\n");
+            return -1;
+        }
+        switch (data[i]) {
+            case SLIP_END:
+                slip_buf[slip_len++] = SLIP_ESC;
+                slip_buf[slip_len++] = SLIP_ESC_END;
+                break;
+            case SLIP_ESC:
+                slip_buf[slip_len++] = SLIP_ESC;
+                slip_buf[slip_len++] = SLIP_ESC_ESC;
+                break;
+            default:
+                slip_buf[slip_len++] = data[i];
+                break;
+        }
+    }
+
+    // Trailing END byte
+    slip_buf[slip_len++] = SLIP_END;
+
+    // Debug print
+    UART_SendString(&huart3, "SENDING WIFI: \r\n");
+    char hex[8];
+    for (uint16_t i = 0; i < slip_len; i++) {
+        snprintf(hex, sizeof(hex), "%02X ", slip_buf[i]);
+        UART_SendString(&huart3, hex);
+    }
+    UART_SendString(&huart3, "\r\n");
+
+  // Send via send_wifi function
+  wifi_send(slip_buf, (BufLen)slip_len);
+    return STATUS_SUCCESS;
 }
 
 // Fires after `n` ms -> reset
