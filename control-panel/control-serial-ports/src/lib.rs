@@ -7,8 +7,8 @@ use serialport::{SerialPort, SerialPortType};
 // Stores the port *name* of the detected LoRa module.
 static LORA_PORT_NAME: Mutex<Option<String>> = Mutex::new(None);
 
-const LORA_SERIAL: &str = "08:92:72:85:8B:F0";
-// const LORA_SERIAL: &str = "08:92:72:85:0B:B8";
+// const LORA_SERIAL: &str = "08:92:72:85:8B:F0";
+const LORA_SERIAL: &str = "08:92:72:85:0B:B8";
 const BAUD_RATE: u32 = 115_200;
 
 // SLIP special bytes
@@ -70,6 +70,7 @@ fn open_lora_port() -> Result<Box<dyn SerialPort>, SerialError> {
         .parity(serialport::Parity::None)
         .stop_bits(serialport::StopBits::One)
         .flow_control(serialport::FlowControl::None)
+        .exclusive(false)
         .open()
         .map_err(|e| match e.kind {
             serialport::ErrorKind::NoDevice => {
@@ -131,6 +132,8 @@ fn slip_recv(port: &mut dyn SerialPort, timeout_ms: u32) -> Result<Vec<u8>, Seri
             Err(e) if e.kind() == io::ErrorKind::TimedOut => return Err(SerialError::Timeout),
             Err(e) => return Err(SerialError::Io(e)),
         }
+
+        dbg!("getting bytes");
 
         let byte = buf[0];
 
