@@ -2,6 +2,8 @@ use std::io;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
+pub mod wifi;
+
 use serialport::{SerialPort, SerialPortType};
 
 // Stores the port *name* of the detected LoRa module.

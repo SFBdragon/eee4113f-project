@@ -30,7 +30,7 @@
 //                  Received ESP-NOW datagrams are forwarded to serial with SLIP framing.
 
 // Comment out for embedded-side build
-// #define LAPTOP_SIDE
+#define LAPTOP_SIDE
 
 // #define EMBEDDED_SIDE_DEBUG
 
@@ -92,8 +92,6 @@ void onSent(const uint8_t *mac, esp_now_send_status_t status) {
 // Received a packet over ESP-NOW → SLIP-frame it and write to local serial
 void onRecv(const uint8_t *mac_addr, const uint8_t *data, int len) {
     if (len <= 0 || len > MAX_PAYLOAD) return;
-    digitalWrite(LED_PIN, LED_ON);
-    
     slip_send(data, (size_t)len);
 }
 
@@ -102,6 +100,10 @@ void onRecv(const uint8_t *mac_addr, const uint8_t *data, int len) {
 void setup() {
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LED_OFF);
+
+    digitalWrite(LED_PIN, LED_ON);
+    
+
 
     SETUP_SERIAL;
 
