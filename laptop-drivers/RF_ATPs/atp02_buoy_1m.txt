@@ -1,0 +1,47 @@
+# WiFi ATP test results (send side)
+<<<<<<< HEAD
+# Generated 2026-05-14 18:26:32
+
+[results]
+mode = send
+timestamp = 2026-05-14 18:26:32
+duration_sec = 25.364
+bytes_sent = 1048576
+bytes_sent_mb = 1.000
+packets_sent = 2073
+=======
+# Generated 2026-05-14 18:12:45
+
+[results]
+mode = send
+timestamp = 2026-05-14 18:12:45
+duration_sec = 15.069
+bytes_sent = 730664
+bytes_sent_mb = 0.697
+packets_sent = 1444
+>>>>>>> 7844522 (buoy side atp02 test results)
+packet_size_bytes = 506
+uart_failures = 0
+esp32_nacks = 376
+pace_us = 10000
+<<<<<<< HEAD
+throughput_mbps = 0.3307
+=======
+throughput_mbps = 0.3879
+>>>>>>> 7844522 (buoy side atp02 test results)
+rssi_samples = 0
+
+[plaintext]
+=== SEND RESULTS ===
+<<<<<<< HEAD
+Duration:        25.36 s (incl. pipeline drain)
+Bytes sent:      1048576 (1.00 MB)
+Packets sent:    2073
+=======
+Duration:        15.07 s (incl. pipeline drain)
+Bytes sent:      730664 (0.70 MB)
+Packets sent:    1444
+>>>>>>> 7844522 (buoy side atp02 test results)
+UART failures:   0
+ESP32 NACKs:     376
+Throughput:      0.388 Mbps
