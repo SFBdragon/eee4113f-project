@@ -1,4 +1,4 @@
-ARM GAS  /tmp/ccAggaCv.s 			page 1
+ARM GAS  /tmp/ccSoVYSy.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
   28:Core/Src/stm32l4xx_it.c **** /* USER CODE END Includes */
   29:Core/Src/stm32l4xx_it.c **** 
   30:Core/Src/stm32l4xx_it.c **** /* Private typedef -----------------------------------------------------------*/
-ARM GAS  /tmp/ccAggaCv.s 			page 2
+ARM GAS  /tmp/ccSoVYSy.s 			page 2
 
 
   31:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN TD */
@@ -118,7 +118,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
   85:Core/Src/stm32l4xx_it.c **** void NMI_Handler(void)
   86:Core/Src/stm32l4xx_it.c **** {
   29              		.loc 1 86 1 view -0
-ARM GAS  /tmp/ccAggaCv.s 			page 3
+ARM GAS  /tmp/ccSoVYSy.s 			page 3
 
 
   30              		.cfi_startproc
@@ -178,7 +178,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
   59              		.cfi_startproc
   60              		@ args = 0, pretend = 0, frame = 128
   61              		@ frame_needed = 0, uses_anonymous_args = 0
-ARM GAS  /tmp/ccAggaCv.s 			page 4
+ARM GAS  /tmp/ccSoVYSy.s 			page 4
 
 
   62 0000 10B5     		push	{r4, lr}
@@ -238,7 +238,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  116:Core/Src/stm32l4xx_it.c ****         (unsigned long)hfsr,
  117:Core/Src/stm32l4xx_it.c ****         (unsigned long)cfsr,
  118:Core/Src/stm32l4xx_it.c ****         (unsigned long)mmfar,
-ARM GAS  /tmp/ccAggaCv.s 			page 5
+ARM GAS  /tmp/ccSoVYSy.s 			page 5
 
 
  119:Core/Src/stm32l4xx_it.c ****         (unsigned long)bfar);
@@ -298,7 +298,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  140              		@ args = 0, pretend = 0, frame = 0
  141              		@ frame_needed = 0, uses_anonymous_args = 0
  142              		@ link register save eliminated.
-ARM GAS  /tmp/ccAggaCv.s 			page 6
+ARM GAS  /tmp/ccSoVYSy.s 			page 6
 
 
  143              	.L9:
@@ -358,7 +358,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  175              		.align	1
  176              		.global	UsageFault_Handler
  177              		.syntax unified
-ARM GAS  /tmp/ccAggaCv.s 			page 7
+ARM GAS  /tmp/ccSoVYSy.s 			page 7
 
 
  178              		.thumb
@@ -418,7 +418,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  182:Core/Src/stm32l4xx_it.c **** 
  183:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SVCall_IRQn 0 */
  184:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SVCall_IRQn 1 */
-ARM GAS  /tmp/ccAggaCv.s 			page 8
+ARM GAS  /tmp/ccSoVYSy.s 			page 8
 
 
  185:Core/Src/stm32l4xx_it.c **** 
@@ -478,7 +478,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  247              		@ frame_needed = 0, uses_anonymous_args = 0
  248              		@ link register save eliminated.
  207:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN PendSV_IRQn 0 */
-ARM GAS  /tmp/ccAggaCv.s 			page 9
+ARM GAS  /tmp/ccSoVYSy.s 			page 9
 
 
  208:Core/Src/stm32l4xx_it.c **** 
@@ -538,7 +538,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  287              	.LFB240:
  228:Core/Src/stm32l4xx_it.c **** 
  229:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
-ARM GAS  /tmp/ccAggaCv.s 			page 10
+ARM GAS  /tmp/ccSoVYSy.s 			page 10
 
 
  230:Core/Src/stm32l4xx_it.c **** /* STM32L4xx Peripheral Interrupt Handlers                                    */
@@ -598,7 +598,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  322              		.global	RCC_IRQHandler
  323              		.syntax unified
  324              		.thumb
-ARM GAS  /tmp/ccAggaCv.s 			page 11
+ARM GAS  /tmp/ccSoVYSy.s 			page 11
 
 
  325              		.thumb_func
@@ -658,7 +658,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  359              	.LVL12:
  274:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
  275:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/ccAggaCv.s 			page 12
+ARM GAS  /tmp/ccSoVYSy.s 			page 12
 
 
  276:Core/Src/stm32l4xx_it.c ****   /* USER CODE END DMA1_Channel5_IRQn 1 */
@@ -718,7 +718,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  401              		.global	USART2_IRQHandler
  402              		.syntax unified
  403              		.thumb
-ARM GAS  /tmp/ccAggaCv.s 			page 13
+ARM GAS  /tmp/ccSoVYSy.s 			page 13
 
 
  404              		.thumb_func
@@ -778,7 +778,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  441              		@ frame_needed = 0, uses_anonymous_args = 0
  442 0000 08B5     		push	{r3, lr}
  443              		.cfi_def_cfa_offset 8
-ARM GAS  /tmp/ccAggaCv.s 			page 14
+ARM GAS  /tmp/ccSoVYSy.s 			page 14
 
 
  444              		.cfi_offset 3, -8
@@ -838,7 +838,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  483 0000 08B5     		push	{r3, lr}
  484              		.cfi_def_cfa_offset 8
  485              		.cfi_offset 3, -8
-ARM GAS  /tmp/ccAggaCv.s 			page 15
+ARM GAS  /tmp/ccSoVYSy.s 			page 15
 
 
  486              		.cfi_offset 14, -4
@@ -898,7 +898,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  350:Core/Src/stm32l4xx_it.c **** }
  521              		.loc 1 350 1 is_stmt 0 view .LVU75
  522 0008 08BD     		pop	{r3, pc}
-ARM GAS  /tmp/ccAggaCv.s 			page 16
+ARM GAS  /tmp/ccSoVYSy.s 			page 16
 
 
  523              	.L47:
@@ -958,7 +958,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  567              	LPTIM1_IRQHandler:
  568              	.LFB249:
  365:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/ccAggaCv.s 			page 17
+ARM GAS  /tmp/ccSoVYSy.s 			page 17
 
 
  366:Core/Src/stm32l4xx_it.c **** /**
@@ -1018,7 +1018,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  606              		.cfi_offset 14, -4
  385:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN LPTIM2_IRQn 0 */
  386:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/ccAggaCv.s 			page 18
+ARM GAS  /tmp/ccSoVYSy.s 			page 18
 
 
  387:Core/Src/stm32l4xx_it.c ****   /* USER CODE END LPTIM2_IRQn 0 */
@@ -1078,7 +1078,7 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  403:Core/Src/stm32l4xx_it.c ****   HAL_UART_IRQHandler(&hlpuart1);
  647              		.loc 1 403 3 is_stmt 1 view .LVU90
  648 000e 0448     		ldr	r0, .L62+8
-ARM GAS  /tmp/ccAggaCv.s 			page 19
+ARM GAS  /tmp/ccSoVYSy.s 			page 19
 
 
  649 0010 FFF7FEFF 		bl	HAL_UART_IRQHandler
@@ -1118,67 +1118,67 @@ ARM GAS  /tmp/ccAggaCv.s 			page 1
  680              		.file 18 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-non
  681              		.file 19 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
  682              		.file 20 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
-ARM GAS  /tmp/ccAggaCv.s 			page 20
+ARM GAS  /tmp/ccSoVYSy.s 			page 20
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_it.c
-     /tmp/ccAggaCv.s:21     .text.NMI_Handler:00000000 $t
-     /tmp/ccAggaCv.s:27     .text.NMI_Handler:00000000 NMI_Handler
-     /tmp/ccAggaCv.s:44     .rodata.HardFault_Handler.str1.4:00000000 $d
-     /tmp/ccAggaCv.s:50     .text.HardFault_Handler:00000000 $t
-     /tmp/ccAggaCv.s:56     .text.HardFault_Handler:00000000 HardFault_Handler
-     /tmp/ccAggaCv.s:122    .text.HardFault_Handler:00000038 $d
-     /tmp/ccAggaCv.s:129    .text.MemManage_Handler:00000000 $t
-     /tmp/ccAggaCv.s:135    .text.MemManage_Handler:00000000 MemManage_Handler
-     /tmp/ccAggaCv.s:152    .text.BusFault_Handler:00000000 $t
-     /tmp/ccAggaCv.s:158    .text.BusFault_Handler:00000000 BusFault_Handler
-     /tmp/ccAggaCv.s:175    .text.UsageFault_Handler:00000000 $t
-     /tmp/ccAggaCv.s:181    .text.UsageFault_Handler:00000000 UsageFault_Handler
-     /tmp/ccAggaCv.s:198    .text.SVC_Handler:00000000 $t
-     /tmp/ccAggaCv.s:204    .text.SVC_Handler:00000000 SVC_Handler
-     /tmp/ccAggaCv.s:217    .text.DebugMon_Handler:00000000 $t
-     /tmp/ccAggaCv.s:223    .text.DebugMon_Handler:00000000 DebugMon_Handler
-     /tmp/ccAggaCv.s:236    .text.PendSV_Handler:00000000 $t
-     /tmp/ccAggaCv.s:242    .text.PendSV_Handler:00000000 PendSV_Handler
-     /tmp/ccAggaCv.s:255    .text.SysTick_Handler:00000000 $t
-     /tmp/ccAggaCv.s:261    .text.SysTick_Handler:00000000 SysTick_Handler
-     /tmp/ccAggaCv.s:280    .text.RTC_WKUP_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:286    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
-     /tmp/ccAggaCv.s:314    .text.RTC_WKUP_IRQHandler:00000014 $d
-     /tmp/ccAggaCv.s:321    .text.RCC_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:327    .text.RCC_IRQHandler:00000000 RCC_IRQHandler
-     /tmp/ccAggaCv.s:340    .text.DMA1_Channel5_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:346    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
-     /tmp/ccAggaCv.s:365    .text.DMA1_Channel5_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:370    .text.USART1_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:376    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
-     /tmp/ccAggaCv.s:395    .text.USART1_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:400    .text.USART2_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:406    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
-     /tmp/ccAggaCv.s:425    .text.USART2_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:430    .text.EXTI15_10_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:436    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
-     /tmp/ccAggaCv.s:465    .text.EXTI15_10_IRQHandler:00000018 $d
-     /tmp/ccAggaCv.s:471    .text.SDMMC1_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:477    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
-     /tmp/ccAggaCv.s:496    .text.SDMMC1_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:501    .text.DMA2_Channel4_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:507    .text.DMA2_Channel4_IRQHandler:00000000 DMA2_Channel4_IRQHandler
-     /tmp/ccAggaCv.s:526    .text.DMA2_Channel4_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:531    .text.DMA2_Channel5_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:537    .text.DMA2_Channel5_IRQHandler:00000000 DMA2_Channel5_IRQHandler
-     /tmp/ccAggaCv.s:556    .text.DMA2_Channel5_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:561    .text.LPTIM1_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:567    .text.LPTIM1_IRQHandler:00000000 LPTIM1_IRQHandler
-     /tmp/ccAggaCv.s:586    .text.LPTIM1_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:591    .text.LPTIM2_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:597    .text.LPTIM2_IRQHandler:00000000 LPTIM2_IRQHandler
-     /tmp/ccAggaCv.s:616    .text.LPTIM2_IRQHandler:0000000c $d
-     /tmp/ccAggaCv.s:621    .text.LPUART1_IRQHandler:00000000 $t
-     /tmp/ccAggaCv.s:627    .text.LPUART1_IRQHandler:00000000 LPUART1_IRQHandler
-     /tmp/ccAggaCv.s:656    .text.LPUART1_IRQHandler:00000018 $d
-ARM GAS  /tmp/ccAggaCv.s 			page 21
+     /tmp/ccSoVYSy.s:21     .text.NMI_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:27     .text.NMI_Handler:00000000 NMI_Handler
+     /tmp/ccSoVYSy.s:44     .rodata.HardFault_Handler.str1.4:00000000 $d
+     /tmp/ccSoVYSy.s:50     .text.HardFault_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:56     .text.HardFault_Handler:00000000 HardFault_Handler
+     /tmp/ccSoVYSy.s:122    .text.HardFault_Handler:00000038 $d
+     /tmp/ccSoVYSy.s:129    .text.MemManage_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:135    .text.MemManage_Handler:00000000 MemManage_Handler
+     /tmp/ccSoVYSy.s:152    .text.BusFault_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:158    .text.BusFault_Handler:00000000 BusFault_Handler
+     /tmp/ccSoVYSy.s:175    .text.UsageFault_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:181    .text.UsageFault_Handler:00000000 UsageFault_Handler
+     /tmp/ccSoVYSy.s:198    .text.SVC_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:204    .text.SVC_Handler:00000000 SVC_Handler
+     /tmp/ccSoVYSy.s:217    .text.DebugMon_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:223    .text.DebugMon_Handler:00000000 DebugMon_Handler
+     /tmp/ccSoVYSy.s:236    .text.PendSV_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:242    .text.PendSV_Handler:00000000 PendSV_Handler
+     /tmp/ccSoVYSy.s:255    .text.SysTick_Handler:00000000 $t
+     /tmp/ccSoVYSy.s:261    .text.SysTick_Handler:00000000 SysTick_Handler
+     /tmp/ccSoVYSy.s:280    .text.RTC_WKUP_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:286    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
+     /tmp/ccSoVYSy.s:314    .text.RTC_WKUP_IRQHandler:00000014 $d
+     /tmp/ccSoVYSy.s:321    .text.RCC_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:327    .text.RCC_IRQHandler:00000000 RCC_IRQHandler
+     /tmp/ccSoVYSy.s:340    .text.DMA1_Channel5_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:346    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
+     /tmp/ccSoVYSy.s:365    .text.DMA1_Channel5_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:370    .text.USART1_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:376    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
+     /tmp/ccSoVYSy.s:395    .text.USART1_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:400    .text.USART2_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:406    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
+     /tmp/ccSoVYSy.s:425    .text.USART2_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:430    .text.EXTI15_10_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:436    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
+     /tmp/ccSoVYSy.s:465    .text.EXTI15_10_IRQHandler:00000018 $d
+     /tmp/ccSoVYSy.s:471    .text.SDMMC1_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:477    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
+     /tmp/ccSoVYSy.s:496    .text.SDMMC1_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:501    .text.DMA2_Channel4_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:507    .text.DMA2_Channel4_IRQHandler:00000000 DMA2_Channel4_IRQHandler
+     /tmp/ccSoVYSy.s:526    .text.DMA2_Channel4_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:531    .text.DMA2_Channel5_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:537    .text.DMA2_Channel5_IRQHandler:00000000 DMA2_Channel5_IRQHandler
+     /tmp/ccSoVYSy.s:556    .text.DMA2_Channel5_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:561    .text.LPTIM1_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:567    .text.LPTIM1_IRQHandler:00000000 LPTIM1_IRQHandler
+     /tmp/ccSoVYSy.s:586    .text.LPTIM1_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:591    .text.LPTIM2_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:597    .text.LPTIM2_IRQHandler:00000000 LPTIM2_IRQHandler
+     /tmp/ccSoVYSy.s:616    .text.LPTIM2_IRQHandler:0000000c $d
+     /tmp/ccSoVYSy.s:621    .text.LPUART1_IRQHandler:00000000 $t
+     /tmp/ccSoVYSy.s:627    .text.LPUART1_IRQHandler:00000000 LPUART1_IRQHandler
+     /tmp/ccSoVYSy.s:656    .text.LPUART1_IRQHandler:00000018 $d
+ARM GAS  /tmp/ccSoVYSy.s 			page 21
 
 
 

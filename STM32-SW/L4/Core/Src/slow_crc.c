@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-int16_t crc16(const uint8_t *data, uintptr_t len)
+int16_t crc16_not(const uint8_t *data, uintptr_t len)
 {
     uint16_t crc = 0xFFFFu;
     for (uintptr_t i = 0; i < len; i++) {

@@ -7,15 +7,42 @@
 #define STRESS_TEST_TOTAL_SIZE (100ULL * 1024 * 1024)
 #define TOTAL_TEST_SIZE ( 1024*1024*1024)//(100ULL * 1024 * 1024)// 1MB total test
 
+
 #include <string.h> // for memcmp
 
 extern SD_HandleTypeDef hsd1;
-uint32_t current_sector = DATA_START_SECTOR;
+
+uint64_t read_base_id = 0;
+uint64_t prot_base_id = 0;
+uint64_t write_head_id = 0;
+uint32_t policy_overwrite = 1;
+
+uint32_t id_to_sector(uint16_t id) {
+    return DATA_START_SECTOR + (id * (SD_BLOCK_SIZE / SD_SECTOR_SIZE)) % FAKE_NUM_BLOCKS;
+}
+
 static UART_HandleTypeDef *_uart = NULL;
 
 static uint8_t write_buf[512] __attribute__((aligned(4)));
 static uint8_t read_buf[512] __attribute__((aligned(4)));
 
+uint32_t SD_Stream_BlockCount() {
+    return FAKE_NUM_BLOCKS;
+    // if (block_count != 0) {
+    //     return block_count;
+    // }
+
+    // HAL_SD_CardInfoTypeDef cardInfo;
+    
+    // if (HAL_SD_GetCardInfo(&hsd1, &cardInfo) == HAL_OK) {
+    //     // LogBlockNbr holds the total number of logical blocks on your SD card
+    //     block_count = cardInfo.LogBlockNbr * (SD_BLOCK_SIZE / SD_SECTOR_SIZE);
+    //     return block_count;
+    // }
+    
+    // // Fallback default in case the SD card is not initialized/present
+    // return 0;
+}
 
 static void Stream_Log(const char *msg) {
     if (_uart) HAL_UART_Transmit(_uart, (uint8_t*)msg, strlen(msg), 200);
@@ -23,19 +50,32 @@ static void Stream_Log(const char *msg) {
 
 void SD_Stream_Init(UART_HandleTypeDef *uartHandle) {
     _uart          = uartHandle;
-    current_sector = DATA_START_SECTOR;
+    read_base_id = 0;
+    prot_base_id = 0;
+    write_head_id = 0;
     Stream_Log("SD_Stream ready\r\n");
+}
+
+uint32_t SD_Stream_GetCurrentSector(void) {
+    return id_to_sector(write_head_id);
 }
 
 // Write a single packed block directly to SD
 HAL_StatusTypeDef SD_Stream_WriteBlock(uint8_t *block) {
     char dbg[80];
 
+    if (write_head_id >= prot_base_id + FAKE_NUM_BLOCKS && !policy_overwrite) {
+        Stream_Log("SD: discarded data\r\n");
+        return HAL_OK;
+    }
+
+    uint32_t sector = id_to_sector(write_head_id);
+
     HAL_StatusTypeDef result = HAL_SD_WriteBlocks(
         &hsd1,
         block,
-        current_sector,
-        1,       // 1 block at a time (512 bytes)
+        sector,
+        SD_BLOCK_SIZE / SD_SECTOR_SIZE,
         5000
     );
 
@@ -52,15 +92,39 @@ HAL_StatusTypeDef SD_Stream_WriteBlock(uint8_t *block) {
         }
     }
 
-    snprintf(dbg, sizeof(dbg), "SD: wrote sector %lu\r\n", (unsigned long)current_sector);
+    snprintf(dbg, sizeof(dbg), "SD: wrote block %lu\r\n", (unsigned long)write_head_id);
     Stream_Log(dbg);
 
-    current_sector++;
+    // Next block ID
+    write_head_id += 1;
+
+    // there can't be more than FAKE_NUM_BLOCKS readable
+    if (read_base_id < write_head_id - FAKE_NUM_BLOCKS) {
+        read_base_id = write_head_id - FAKE_NUM_BLOCKS;
+    }
+
+    // if a block is no longer readable, it's no longer protected
+    if (prot_base_id < read_base_id) {
+        prot_base_id = read_base_id;
+    }
+
     return HAL_OK;
 }
 
-uint32_t SD_Stream_GetCurrentSector(void) {
-    return current_sector;
+uint64_t SD_Stream_GetReadBase(void) {
+    return read_base_id;
+}
+uint64_t SD_Stream_GetProtBase(void) {
+    return prot_base_id;
+}
+uint64_t SD_Stream_GetWriteHead(void) {
+    return write_head_id;
+}
+void SD_Stream_SetProtHead(uint64_t from_block) {
+    prot_base_id = from_block;
+}
+void SD_Stream_SetOverwritePolicy(uint32_t policy) {
+    policy_overwrite = policy;
 }
 
 void SD_Stream_ReadDebug(uint32_t start_sector, uint32_t num_blocks) {
@@ -98,7 +162,7 @@ void SD_Stream_ReadDebug(uint32_t start_sector, uint32_t num_blocks) {
 
 void SD_Stream_ReadDebug_Last_Line(uint32_t start_sector, uint32_t num_blocks) {
     static uint8_t read_buf[512] __attribute__((aligned(4)));
-    char msg[64];
+    char msg[128];
 
     Stream_Log("--- SD READ START ---\r\n");
 
@@ -129,17 +193,17 @@ void SD_Stream_ReadDebug_Last_Line(uint32_t start_sector, uint32_t num_blocks) {
     Stream_Log("--- SD READ END ---\r\n");
 }
 
-HAL_StatusTypeDef SD_Stream_ReadBlock(uint32_t sector, uint8_t* buffer) {
-    HAL_StatusTypeDef res = HAL_SD_ReadBlocks(&hsd1, buffer, sector, 1, 2000);
+HAL_StatusTypeDef SD_Stream_ReadSectors(uint32_t sector, uint32_t count, uint8_t* buffer) {
+    HAL_StatusTypeDef res = HAL_SD_ReadBlocks(&hsd1, buffer, sector, count, 2000);
     if (res != HAL_OK) {
-        Stream_Log("ReadBlock: failed\r\n");
+        Stream_Log("ReadSectors: failed\r\n");
         return res;
     }
 
     uint32_t t = HAL_GetTick();
     while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
         if (HAL_GetTick() - t > 2000) {
-            Stream_Log("ReadBlock: timeout\r\n");
+            Stream_Log("ReadSectors: timeout\r\n");
             return HAL_TIMEOUT;
         }
     }
