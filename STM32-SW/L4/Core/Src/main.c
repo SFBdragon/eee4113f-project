@@ -60,6 +60,9 @@ volatile uint8_t wake_up_flag = 0;
 static uint8_t writeBuf[512];
 static uint8_t readBuf[512];//
 
+static uint32_t lptim2_period = 0;
+static uint8_t wifi_ping_active = 0;
+
 // lora
 
 uint8_t  lora_rx_buf[250];
@@ -790,6 +793,11 @@ int main(void)
 
     UART_SendString(&huart3, "Woke up \r\n");
 
+    if(wake_source==3){
+      wake_source = 0;
+      UART_SendString(&huart3, "Woke from LPTIM2\r\n");
+
+    }
   
       /*
     
@@ -797,11 +805,11 @@ int main(void)
     switch (wake_source) {
       case 1: UART_SendString(&huart3, "Woke from RTC\r\n");      break;
       case 2: UART_SendString(&huart3, "Woke from GPIO\r\n");     break;
+      case 3: UART_SendString(&huart3, "Woke from LPTIM2\r\n");   break;
       default: UART_SendString(&huart3, "Wake source unknown\r\n"); break;
     }
 
     */
-
 
 
     }
@@ -1819,7 +1827,7 @@ void call_after_n_ms(uint32_t n, void (*callback)()) {
     timeout_callback_1 = callback;
     uint32_t period = n * 32; // LSI @ 32kHz: 32 ticks per ms
     HAL_LPTIM_OnePulse_Stop_IT(&hlptim1);          // stop any existing
-    HAL_LPTIM_OnePulse_Start_IT(&hlptim1, period, period); // start neww
+    HAL_LPTIM_OnePulse_Start_IT(&hlptim1, period, 0); // start neww
 }
 
 // Cancel the active `call_after_n_ms` countdown, if there is one.
@@ -1832,19 +1840,22 @@ void cancel_timeout() {
 // RUNNING ON LPTIM2
 // Defined by Glen. Call `callback` every `n` milliseconds.
 void call_repeatedly_after_n_ms_wifi_ping(uint32_t n, void (*callback)()) {
-  timeout_callback_2 = callback;
-  uint32_t period = n * 32; // LSI @ 32kHz: 32 ticks per ms
-  HAL_LPTIM_OnePulse_Stop_IT(&hlptim2);          // stop any existing
-  HAL_LPTIM_TimeOut_Start_IT(&hlptim2, period, period);  // repeats automatically
+    timeout_callback_2 = callback;
+    uint32_t period = ((n * 32768UL) / 1000UL) - 1;
+    wifi_ping_active = 1;
+
+    HAL_LPTIM_PWM_Stop_IT(&hlptim2);
+    HAL_LPTIM_PWM_Start_IT(&hlptim2, period, 0);
 }
 
-// Defined by Glen. Cancel the repeated callback.
+// Defined by Glen. Cancel the 
+
 // Stop doing the callback if you turn WiFi off or otherwise want to stop pinging.
 void cancel_timeout_wifi_ping() {
-    HAL_LPTIM_OnePulse_Stop_IT(&hlptim2);          // stop any existing
+    wifi_ping_active = 0;
     timeout_callback_2 = NULL;
+    HAL_LPTIM_PWM_Stop_IT(&hlptim2);
 }
-
 uint32_t get_time_since_epoch_ms() {
    RTC_TimeTypeDef sTime = {0};
     RTC_DateTypeDef sDate = {0};
@@ -1919,9 +1930,7 @@ HAL_SD_CardInfoTypeDef cardInfo;
 void allow_overwrite(uint64_t upto_block) {
   // set the pointer you can always overwrite up to 
   UART_SendString(&huart3, "ALLOW OVERWRITE (LC): \r\n");
-
 }
-
 
 uint64_t storage_first_readable_block() {
    // todo tell me first readable/available block ID
@@ -2011,6 +2020,8 @@ Status power_down_wifi() {
 
 short send_wifi_packet(uint64_t macdst, uint8_t *data, uint16_t len) {
   // shaun calls this to send a WiFi packet.
+  
+
   UART_SendString(&huart3, "SEND WIFI PACKET (LC) \r\n");
   return STATUS_SUCCESS;
 }
@@ -2032,7 +2043,8 @@ void set_overwrite_policy(Policy policy) {
 
 // Fires after `n` ms -> reset
 void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
-      UART_SendString(&huart3, "LPTIM wakeup \r\n");
+    wake_source = 3;
+  //    UART_SendString(&huart3, "LPTIM wakeup \r\n");
     if (hlptim->Instance == LPTIM1){
       if (timeout_callback_1) {
           void (*cb)(void) = timeout_callback_1;
@@ -2042,20 +2054,19 @@ void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
     }
 
   // Fires after `n` ms -> continues 
-  if (hlptim->Instance == LPTIM2){
-      if (timeout_callback_2) {
-           UART_SendString(&huart3, "repeated wakeup \r\n");
-          void (*cb)(void) = timeout_callback_2;
-          cb();
-      }
+    if (hlptim->Instance == LPTIM2) {
+        if (wifi_ping_active && timeout_callback_2) {
+            timeout_callback_2();
+        }
     }
-}
+    }
 
 
 void shaun_debug(char *msg) {
     UART_SendString(&huart3, msg);
 }
 /* USER CODE END 4 */
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
