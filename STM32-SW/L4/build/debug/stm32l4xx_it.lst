@@ -1,4 +1,4 @@
-ARM GAS  /tmp/ccKnndes.s 			page 1
+ARM GAS  /tmp/ccLJyHae.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
   28:Core/Src/stm32l4xx_it.c **** /* USER CODE END Includes */
   29:Core/Src/stm32l4xx_it.c **** 
   30:Core/Src/stm32l4xx_it.c **** /* Private typedef -----------------------------------------------------------*/
-ARM GAS  /tmp/ccKnndes.s 			page 2
+ARM GAS  /tmp/ccLJyHae.s 			page 2
 
 
   31:Core/Src/stm32l4xx_it.c **** /* USER CODE BEGIN TD */
@@ -118,7 +118,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
   85:Core/Src/stm32l4xx_it.c **** void NMI_Handler(void)
   86:Core/Src/stm32l4xx_it.c **** {
   29              		.loc 1 86 1 view -0
-ARM GAS  /tmp/ccKnndes.s 			page 3
+ARM GAS  /tmp/ccLJyHae.s 			page 3
 
 
   30              		.cfi_startproc
@@ -178,7 +178,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
   59              		.cfi_startproc
   60              		@ args = 0, pretend = 0, frame = 128
   61              		@ frame_needed = 0, uses_anonymous_args = 0
-ARM GAS  /tmp/ccKnndes.s 			page 4
+ARM GAS  /tmp/ccLJyHae.s 			page 4
 
 
   62 0000 10B5     		push	{r4, lr}
@@ -238,7 +238,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  116:Core/Src/stm32l4xx_it.c ****         (unsigned long)hfsr,
  117:Core/Src/stm32l4xx_it.c ****         (unsigned long)cfsr,
  118:Core/Src/stm32l4xx_it.c ****         (unsigned long)mmfar,
-ARM GAS  /tmp/ccKnndes.s 			page 5
+ARM GAS  /tmp/ccLJyHae.s 			page 5
 
 
  119:Core/Src/stm32l4xx_it.c ****         (unsigned long)bfar);
@@ -298,7 +298,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  140              		@ args = 0, pretend = 0, frame = 0
  141              		@ frame_needed = 0, uses_anonymous_args = 0
  142              		@ link register save eliminated.
-ARM GAS  /tmp/ccKnndes.s 			page 6
+ARM GAS  /tmp/ccLJyHae.s 			page 6
 
 
  143              	.L9:
@@ -358,7 +358,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  175              		.align	1
  176              		.global	UsageFault_Handler
  177              		.syntax unified
-ARM GAS  /tmp/ccKnndes.s 			page 7
+ARM GAS  /tmp/ccLJyHae.s 			page 7
 
 
  178              		.thumb
@@ -418,7 +418,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  182:Core/Src/stm32l4xx_it.c **** 
  183:Core/Src/stm32l4xx_it.c ****   /* USER CODE END SVCall_IRQn 0 */
  184:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN SVCall_IRQn 1 */
-ARM GAS  /tmp/ccKnndes.s 			page 8
+ARM GAS  /tmp/ccLJyHae.s 			page 8
 
 
  185:Core/Src/stm32l4xx_it.c **** 
@@ -478,7 +478,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  247              		@ frame_needed = 0, uses_anonymous_args = 0
  248              		@ link register save eliminated.
  207:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN PendSV_IRQn 0 */
-ARM GAS  /tmp/ccKnndes.s 			page 9
+ARM GAS  /tmp/ccLJyHae.s 			page 9
 
 
  208:Core/Src/stm32l4xx_it.c **** 
@@ -538,7 +538,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  287              	.LFB240:
  228:Core/Src/stm32l4xx_it.c **** 
  229:Core/Src/stm32l4xx_it.c **** /******************************************************************************/
-ARM GAS  /tmp/ccKnndes.s 			page 10
+ARM GAS  /tmp/ccLJyHae.s 			page 10
 
 
  230:Core/Src/stm32l4xx_it.c **** /* STM32L4xx Peripheral Interrupt Handlers                                    */
@@ -598,7 +598,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  322              		.global	RCC_IRQHandler
  323              		.syntax unified
  324              		.thumb
-ARM GAS  /tmp/ccKnndes.s 			page 11
+ARM GAS  /tmp/ccLJyHae.s 			page 11
 
 
  325              		.thumb_func
@@ -658,7 +658,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  359              	.LVL12:
  274:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
  275:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/ccKnndes.s 			page 12
+ARM GAS  /tmp/ccLJyHae.s 			page 12
 
 
  276:Core/Src/stm32l4xx_it.c ****   /* USER CODE END DMA1_Channel5_IRQn 1 */
@@ -718,7 +718,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  401              		.global	USART2_IRQHandler
  402              		.syntax unified
  403              		.thumb
-ARM GAS  /tmp/ccKnndes.s 			page 13
+ARM GAS  /tmp/ccLJyHae.s 			page 13
 
 
  404              		.thumb_func
@@ -778,7 +778,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  441              		@ frame_needed = 0, uses_anonymous_args = 0
  442 0000 08B5     		push	{r3, lr}
  443              		.cfi_def_cfa_offset 8
-ARM GAS  /tmp/ccKnndes.s 			page 14
+ARM GAS  /tmp/ccLJyHae.s 			page 14
 
 
  444              		.cfi_offset 3, -8
@@ -838,7 +838,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  483 0000 08B5     		push	{r3, lr}
  484              		.cfi_def_cfa_offset 8
  485              		.cfi_offset 3, -8
-ARM GAS  /tmp/ccKnndes.s 			page 15
+ARM GAS  /tmp/ccLJyHae.s 			page 15
 
 
  486              		.cfi_offset 14, -4
@@ -898,7 +898,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  350:Core/Src/stm32l4xx_it.c **** }
  521              		.loc 1 350 1 is_stmt 0 view .LVU75
  522 0008 08BD     		pop	{r3, pc}
-ARM GAS  /tmp/ccKnndes.s 			page 16
+ARM GAS  /tmp/ccLJyHae.s 			page 16
 
 
  523              	.L47:
@@ -958,7 +958,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  567              	LPTIM1_IRQHandler:
  568              	.LFB249:
  365:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/ccKnndes.s 			page 17
+ARM GAS  /tmp/ccLJyHae.s 			page 17
 
 
  366:Core/Src/stm32l4xx_it.c **** /**
@@ -1018,7 +1018,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  606              		.cfi_offset 14, -4
  385:Core/Src/stm32l4xx_it.c ****   /* USER CODE BEGIN LPTIM2_IRQn 0 */
  386:Core/Src/stm32l4xx_it.c **** 
-ARM GAS  /tmp/ccKnndes.s 			page 18
+ARM GAS  /tmp/ccLJyHae.s 			page 18
 
 
  387:Core/Src/stm32l4xx_it.c ****   /* USER CODE END LPTIM2_IRQn 0 */
@@ -1078,7 +1078,7 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  403:Core/Src/stm32l4xx_it.c ****   HAL_UART_IRQHandler(&hlpuart1);
  647              		.loc 1 403 3 is_stmt 1 view .LVU90
  648 000e 0448     		ldr	r0, .L62+8
-ARM GAS  /tmp/ccKnndes.s 			page 19
+ARM GAS  /tmp/ccLJyHae.s 			page 19
 
 
  649 0010 FFF7FEFF 		bl	HAL_UART_IRQHandler
@@ -1118,67 +1118,67 @@ ARM GAS  /tmp/ccKnndes.s 			page 1
  680              		.file 18 "/home/glen/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-non
  681              		.file 19 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h"
  682              		.file 20 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
-ARM GAS  /tmp/ccKnndes.s 			page 20
+ARM GAS  /tmp/ccLJyHae.s 			page 20
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_it.c
-     /tmp/ccKnndes.s:21     .text.NMI_Handler:00000000 $t
-     /tmp/ccKnndes.s:27     .text.NMI_Handler:00000000 NMI_Handler
-     /tmp/ccKnndes.s:44     .rodata.HardFault_Handler.str1.4:00000000 $d
-     /tmp/ccKnndes.s:50     .text.HardFault_Handler:00000000 $t
-     /tmp/ccKnndes.s:56     .text.HardFault_Handler:00000000 HardFault_Handler
-     /tmp/ccKnndes.s:122    .text.HardFault_Handler:00000038 $d
-     /tmp/ccKnndes.s:129    .text.MemManage_Handler:00000000 $t
-     /tmp/ccKnndes.s:135    .text.MemManage_Handler:00000000 MemManage_Handler
-     /tmp/ccKnndes.s:152    .text.BusFault_Handler:00000000 $t
-     /tmp/ccKnndes.s:158    .text.BusFault_Handler:00000000 BusFault_Handler
-     /tmp/ccKnndes.s:175    .text.UsageFault_Handler:00000000 $t
-     /tmp/ccKnndes.s:181    .text.UsageFault_Handler:00000000 UsageFault_Handler
-     /tmp/ccKnndes.s:198    .text.SVC_Handler:00000000 $t
-     /tmp/ccKnndes.s:204    .text.SVC_Handler:00000000 SVC_Handler
-     /tmp/ccKnndes.s:217    .text.DebugMon_Handler:00000000 $t
-     /tmp/ccKnndes.s:223    .text.DebugMon_Handler:00000000 DebugMon_Handler
-     /tmp/ccKnndes.s:236    .text.PendSV_Handler:00000000 $t
-     /tmp/ccKnndes.s:242    .text.PendSV_Handler:00000000 PendSV_Handler
-     /tmp/ccKnndes.s:255    .text.SysTick_Handler:00000000 $t
-     /tmp/ccKnndes.s:261    .text.SysTick_Handler:00000000 SysTick_Handler
-     /tmp/ccKnndes.s:280    .text.RTC_WKUP_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:286    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
-     /tmp/ccKnndes.s:314    .text.RTC_WKUP_IRQHandler:00000014 $d
-     /tmp/ccKnndes.s:321    .text.RCC_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:327    .text.RCC_IRQHandler:00000000 RCC_IRQHandler
-     /tmp/ccKnndes.s:340    .text.DMA1_Channel5_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:346    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
-     /tmp/ccKnndes.s:365    .text.DMA1_Channel5_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:370    .text.USART1_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:376    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
-     /tmp/ccKnndes.s:395    .text.USART1_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:400    .text.USART2_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:406    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
-     /tmp/ccKnndes.s:425    .text.USART2_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:430    .text.EXTI15_10_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:436    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
-     /tmp/ccKnndes.s:465    .text.EXTI15_10_IRQHandler:00000018 $d
-     /tmp/ccKnndes.s:471    .text.SDMMC1_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:477    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
-     /tmp/ccKnndes.s:496    .text.SDMMC1_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:501    .text.DMA2_Channel4_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:507    .text.DMA2_Channel4_IRQHandler:00000000 DMA2_Channel4_IRQHandler
-     /tmp/ccKnndes.s:526    .text.DMA2_Channel4_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:531    .text.DMA2_Channel5_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:537    .text.DMA2_Channel5_IRQHandler:00000000 DMA2_Channel5_IRQHandler
-     /tmp/ccKnndes.s:556    .text.DMA2_Channel5_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:561    .text.LPTIM1_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:567    .text.LPTIM1_IRQHandler:00000000 LPTIM1_IRQHandler
-     /tmp/ccKnndes.s:586    .text.LPTIM1_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:591    .text.LPTIM2_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:597    .text.LPTIM2_IRQHandler:00000000 LPTIM2_IRQHandler
-     /tmp/ccKnndes.s:616    .text.LPTIM2_IRQHandler:0000000c $d
-     /tmp/ccKnndes.s:621    .text.LPUART1_IRQHandler:00000000 $t
-     /tmp/ccKnndes.s:627    .text.LPUART1_IRQHandler:00000000 LPUART1_IRQHandler
-     /tmp/ccKnndes.s:656    .text.LPUART1_IRQHandler:00000018 $d
-ARM GAS  /tmp/ccKnndes.s 			page 21
+     /tmp/ccLJyHae.s:21     .text.NMI_Handler:00000000 $t
+     /tmp/ccLJyHae.s:27     .text.NMI_Handler:00000000 NMI_Handler
+     /tmp/ccLJyHae.s:44     .rodata.HardFault_Handler.str1.4:00000000 $d
+     /tmp/ccLJyHae.s:50     .text.HardFault_Handler:00000000 $t
+     /tmp/ccLJyHae.s:56     .text.HardFault_Handler:00000000 HardFault_Handler
+     /tmp/ccLJyHae.s:122    .text.HardFault_Handler:00000038 $d
+     /tmp/ccLJyHae.s:129    .text.MemManage_Handler:00000000 $t
+     /tmp/ccLJyHae.s:135    .text.MemManage_Handler:00000000 MemManage_Handler
+     /tmp/ccLJyHae.s:152    .text.BusFault_Handler:00000000 $t
+     /tmp/ccLJyHae.s:158    .text.BusFault_Handler:00000000 BusFault_Handler
+     /tmp/ccLJyHae.s:175    .text.UsageFault_Handler:00000000 $t
+     /tmp/ccLJyHae.s:181    .text.UsageFault_Handler:00000000 UsageFault_Handler
+     /tmp/ccLJyHae.s:198    .text.SVC_Handler:00000000 $t
+     /tmp/ccLJyHae.s:204    .text.SVC_Handler:00000000 SVC_Handler
+     /tmp/ccLJyHae.s:217    .text.DebugMon_Handler:00000000 $t
+     /tmp/ccLJyHae.s:223    .text.DebugMon_Handler:00000000 DebugMon_Handler
+     /tmp/ccLJyHae.s:236    .text.PendSV_Handler:00000000 $t
+     /tmp/ccLJyHae.s:242    .text.PendSV_Handler:00000000 PendSV_Handler
+     /tmp/ccLJyHae.s:255    .text.SysTick_Handler:00000000 $t
+     /tmp/ccLJyHae.s:261    .text.SysTick_Handler:00000000 SysTick_Handler
+     /tmp/ccLJyHae.s:280    .text.RTC_WKUP_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:286    .text.RTC_WKUP_IRQHandler:00000000 RTC_WKUP_IRQHandler
+     /tmp/ccLJyHae.s:314    .text.RTC_WKUP_IRQHandler:00000014 $d
+     /tmp/ccLJyHae.s:321    .text.RCC_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:327    .text.RCC_IRQHandler:00000000 RCC_IRQHandler
+     /tmp/ccLJyHae.s:340    .text.DMA1_Channel5_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:346    .text.DMA1_Channel5_IRQHandler:00000000 DMA1_Channel5_IRQHandler
+     /tmp/ccLJyHae.s:365    .text.DMA1_Channel5_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:370    .text.USART1_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:376    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
+     /tmp/ccLJyHae.s:395    .text.USART1_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:400    .text.USART2_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:406    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
+     /tmp/ccLJyHae.s:425    .text.USART2_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:430    .text.EXTI15_10_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:436    .text.EXTI15_10_IRQHandler:00000000 EXTI15_10_IRQHandler
+     /tmp/ccLJyHae.s:465    .text.EXTI15_10_IRQHandler:00000018 $d
+     /tmp/ccLJyHae.s:471    .text.SDMMC1_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:477    .text.SDMMC1_IRQHandler:00000000 SDMMC1_IRQHandler
+     /tmp/ccLJyHae.s:496    .text.SDMMC1_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:501    .text.DMA2_Channel4_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:507    .text.DMA2_Channel4_IRQHandler:00000000 DMA2_Channel4_IRQHandler
+     /tmp/ccLJyHae.s:526    .text.DMA2_Channel4_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:531    .text.DMA2_Channel5_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:537    .text.DMA2_Channel5_IRQHandler:00000000 DMA2_Channel5_IRQHandler
+     /tmp/ccLJyHae.s:556    .text.DMA2_Channel5_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:561    .text.LPTIM1_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:567    .text.LPTIM1_IRQHandler:00000000 LPTIM1_IRQHandler
+     /tmp/ccLJyHae.s:586    .text.LPTIM1_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:591    .text.LPTIM2_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:597    .text.LPTIM2_IRQHandler:00000000 LPTIM2_IRQHandler
+     /tmp/ccLJyHae.s:616    .text.LPTIM2_IRQHandler:0000000c $d
+     /tmp/ccLJyHae.s:621    .text.LPUART1_IRQHandler:00000000 $t
+     /tmp/ccLJyHae.s:627    .text.LPUART1_IRQHandler:00000000 LPUART1_IRQHandler
+     /tmp/ccLJyHae.s:656    .text.LPUART1_IRQHandler:00000018 $d
+ARM GAS  /tmp/ccLJyHae.s 			page 21
 
 
 

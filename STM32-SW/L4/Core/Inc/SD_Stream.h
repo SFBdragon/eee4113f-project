@@ -13,7 +13,7 @@
 #define REMAINDER_BYTES   ((RX_BUF_SIZE / 2) % BLOCK_DATA_SIZE)
 
 /* ── SD addressing ──────────────────────────────────────────── */
-#define DATA_START_SECTOR 5000
+#define DATA_START_SECTOR 10000
 
 
 extern uint32_t current_sector;

@@ -220,6 +220,7 @@ HAL_StatusTypeDef lora_send(uint8_t *pData, uint16_t size);
 void PackBlocks(const uint8_t *src, uint16_t startBlockNum) ;
 
 void reset_active(void);
+void shaun_debug(char *msg);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -1729,7 +1730,7 @@ void PackBlocks(const uint8_t *src, uint16_t dataLen) {
     }
 }
 
-uint16_t crc16(const uint8_t *data, uintptr_t len){
+uint16_t crc16_old(const uint8_t *data, uintptr_t len){
     uint32_t crc_result = HAL_CRC_Calculate(&hcrc, (uint32_t*)data, len);
     // HAL HW returns a 32-bit value, return lower 16
     return (uint16_t)crc_result;
@@ -1917,6 +1918,7 @@ HAL_SD_CardInfoTypeDef cardInfo;
 
 void allow_overwrite(uint64_t upto_block) {
   // set the pointer you can always overwrite up to 
+  UART_SendString(&huart3, "ALLOW OVERWRITE (LC): \r\n");
 
 }
 
@@ -1941,34 +1943,75 @@ uint64_t storage_last_readable_block() {
   return 0; // gimme that last block ID that is readable 
 }
 
-
 Status send_lora_packet(uint8_t *data, BufLen len) {
-  // Shaun calls this
-  UART_SendString(&huart3, "SENDING LORE: \r\n");
-    HAL_StatusTypeDef result = lora_send(data, len);
-    switch (result) {
-        case HAL_OK:      return 1;
-        default:          return -1;
+
+    #define SLIP_END     0xC0
+    #define SLIP_ESC     0xDB
+    #define SLIP_ESC_END 0xDC
+    #define SLIP_ESC_ESC 0xDD
+    #define SLIP_MAX_PACKET 250
+
+    // Worst case: every byte is escaped (2x) + 2 END bytes
+    uint8_t slip_buf[SLIP_MAX_PACKET * 2 + 2];
+    uint16_t slip_len = 0;
+
+    // Leading END byte (recommended by RFC 1055 to flush line noise)
+    slip_buf[slip_len++] = SLIP_END;
+
+    for (BufLen i = 0; i < len; i++) {
+        if (slip_len >= sizeof(slip_buf) - 2) {
+            // Not enough room for worst-case next byte + trailing END
+            UART_SendString(&huart3, "SLIP ERR: encode overflow\r\n");
+            return -1;
+        }
+        switch (data[i]) {
+            case SLIP_END:
+                slip_buf[slip_len++] = SLIP_ESC;
+                slip_buf[slip_len++] = SLIP_ESC_END;
+                break;
+            case SLIP_ESC:
+                slip_buf[slip_len++] = SLIP_ESC;
+                slip_buf[slip_len++] = SLIP_ESC_ESC;
+                break;
+            default:
+                slip_buf[slip_len++] = data[i];
+                break;
+        }
     }
+
+    // Trailing END byte — marks end of packet
+    slip_buf[slip_len++] = SLIP_END;
+
+    UART_SendString(&huart3, "SENDING LORA: \r\n");
+    char hex[8];
+    for (uint16_t i = 0; i < slip_len; i++) {
+        snprintf(hex, sizeof(hex), "%02X ", slip_buf[i]);
+        UART_SendString(&huart3, hex);
+}
+UART_SendString(&huart3, "\r\n");
+HAL_StatusTypeDef result = lora_send(slip_buf, (BufLen)slip_len);
 }
 
 Status power_up_wifi() {
   // Shaun calls this to tell WiFi to turn on;
   // Shaun calls WiFi ping timer nonsense separately.
   // Shaun calls block_flush and such separately, later.
+  UART_SendString(&huart3, "POWER UP WIFI (LC) \r\n");
   HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_SET);
 
-  return 1;
+  return STATUS_SUCCESS;
 }
 
 Status power_down_wifi() {
   // Shaun calls this to tell WiFi to turn off.
-   HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_RESET);
-  return 1;
+  UART_SendString(&huart3, "POWER DOWN WIFI (LC) \r\n");
+  HAL_GPIO_WritePin(Wi_PWR_CTRL_GPIO_Port, Wi_PWR_CTRL_Pin, GPIO_PIN_RESET);
+  return STATUS_SUCCESS;
 }
 
 short send_wifi_packet(uint64_t macdst, uint8_t *data, uint16_t len) {
   // shaun calls this to send a WiFi packet.
+  UART_SendString(&huart3, "SEND WIFI PACKET (LC) \r\n");
   return STATUS_SUCCESS;
 }
 
@@ -1989,7 +2032,7 @@ void set_overwrite_policy(Policy policy) {
 
 // Fires after `n` ms -> reset
 void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
-
+      UART_SendString(&huart3, "LPTIM wakeup \r\n");
     if (hlptim->Instance == LPTIM1){
       if (timeout_callback_1) {
           void (*cb)(void) = timeout_callback_1;
@@ -2001,12 +2044,17 @@ void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
   // Fires after `n` ms -> continues 
   if (hlptim->Instance == LPTIM2){
       if (timeout_callback_2) {
+           UART_SendString(&huart3, "repeated wakeup \r\n");
           void (*cb)(void) = timeout_callback_2;
           cb();
       }
     }
 }
 
+
+void shaun_debug(char *msg) {
+    UART_SendString(&huart3, msg);
+}
 /* USER CODE END 4 */
 /**
   * @brief  This function is executed in case of error occurrence.

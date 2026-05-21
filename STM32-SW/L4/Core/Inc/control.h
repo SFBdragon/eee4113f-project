@@ -53,6 +53,10 @@ uint64_t storage_first_protected_block();
 
 uint64_t storage_last_readable_block();
 
+
+void shaun_debug(char *msg);
+
+
 // Read a page between `storage_first_readable_page` and `storage_last_readable_page`.
 // Read the page into `buffer`. `buffer` is `STORAGE_PAGE_SIZE` large.
 //
