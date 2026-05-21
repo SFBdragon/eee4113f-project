@@ -14,6 +14,7 @@ pub mod hal {
 
     use crate::drivers::StatusError;
 
+    #[derive(Debug)]
     pub struct WiFiPacket {
         pub from: Mac,
         pub data: Vec<u8>,
@@ -135,7 +136,7 @@ fn wifi_listener(
             crossbeam_channel::unbounded::<Result<hal::WiFiPacket, StatusError>>();
 
         s.spawn(move || {
-            while let Ok(_) = listen_sender.send(hal.recv_packet()) {
+            while let Ok(_) = listen_sender.send(dbg!(hal.recv_packet())) {
                 tracing::debug!("WiFi: received a packet")
             }
         });
@@ -170,7 +171,10 @@ fn wifi_listener(
                     )
                 }
                 Either::A(Err(status)) => match status {
-                    StatusError::ModuleDetached => return Err(Disconnected),
+                    StatusError::ModuleDetached => {
+                        dbg!();
+                        return Err(Disconnected);
+                    }
                     StatusError::ReceiveTimeout => unreachable!(),
                     StatusError::Unknown(u) => unreachable!("{u}"),
                 },
@@ -179,6 +183,7 @@ fn wifi_listener(
 
             if let Some((mac, ack)) = to_send {
                 if let Err(StatusError::ModuleDetached) = hal.send_packet(mac, &ack) {
+                    dbg!();
                     return Err(Disconnected);
                 }
             }
