@@ -102,7 +102,6 @@ void loop() {
         return;
     }
 
-
     esp_now_send(PEER_MAC, &b, 1);
     for (int i = 0; i < 3; i++) {
         digitalWrite(LED_PIN, LED_OFF);
@@ -111,4 +110,4 @@ void loop() {
         delay(100);
     }
 }
->>>>>>> 6d217239c21fdee1c29cc1c540d656d01992c669
+
