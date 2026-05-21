@@ -45,6 +45,10 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 extern volatile uint8_t wake_source;
+extern volatile uint8_t RTC_WAKE_FLAG;
+extern volatile uint8_t LORA_WAKE_FLAG;
+extern volatile uint8_t DMA_WAKE_FLAG;
+extern volatile uint8_t SHARC_WAKE_FLAG;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,6 +62,8 @@ extern volatile uint8_t wake_source;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern LPTIM_HandleTypeDef hlptim1;
+extern LPTIM_HandleTypeDef hlptim2;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef hlpuart1;
 extern UART_HandleTypeDef huart1;
@@ -233,6 +239,7 @@ void SysTick_Handler(void)
 void RTC_WKUP_IRQHandler(void)
 {
   /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
+  RTC_WAKE_FLAG = 1;
   wake_source = 1;  
   //HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
   /* USER CODE END RTC_WKUP_IRQn 0 */
@@ -305,6 +312,7 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
   
   //HAL_GPIO_TogglePin(Lo_PWR_CTRL_GPIO_Port, Lo_PWR_CTRL_Pin);
+  SHARC_WAKE_FLAG = 1;
   wake_source = 2;
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(D_WAKE_Pin);
@@ -356,12 +364,40 @@ void DMA2_Channel5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles LPTIM1 global interrupt.
+  */
+void LPTIM1_IRQHandler(void)
+{
+  /* USER CODE BEGIN LPTIM1_IRQn 0 */
+
+  /* USER CODE END LPTIM1_IRQn 0 */
+  HAL_LPTIM_IRQHandler(&hlptim1);
+  /* USER CODE BEGIN LPTIM1_IRQn 1 */
+
+  /* USER CODE END LPTIM1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles LPTIM2 global interrupt.
+  */
+void LPTIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN LPTIM2_IRQn 0 */
+
+  /* USER CODE END LPTIM2_IRQn 0 */
+  HAL_LPTIM_IRQHandler(&hlptim2);
+  /* USER CODE BEGIN LPTIM2_IRQn 1 */
+
+  /* USER CODE END LPTIM2_IRQn 1 */
+}
+
+/**
   * @brief This function handles LPUART1 global interrupt.
   */
 void LPUART1_IRQHandler(void)
 {
   /* USER CODE BEGIN LPUART1_IRQn 0 */
-
+  LORA_WAKE_FLAG = 1; // Technically we're processing the recieved data, flag doesnt matter
   wake_source = 3;
   /* USER CODE END LPUART1_IRQn 0 */
   HAL_UART_IRQHandler(&hlpuart1);

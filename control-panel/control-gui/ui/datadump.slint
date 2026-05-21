@@ -15,6 +15,7 @@ export component DataDump inherits HorizontalBox {
     in property <bool> wifi_connected;
     in property <bool> wifi_dumping;
 
+    in property <string> total_available_bytes;
     in property <string> downloaded_bytes;
     in property <string> remote_only_bytes;
 
@@ -32,6 +33,10 @@ export component DataDump inherits HorizontalBox {
         triggered => {
             reclick_dump_secs += 1;
         }
+    }
+
+    public function focus-me() {
+        datasync.focus();
     }
 
     Rectangle {
@@ -74,7 +79,7 @@ export component DataDump inherits HorizontalBox {
 
             HorizontalBox {
 
-                Button {
+                datasync := Button {
                     primary: true;
                     text: wifi_dumping ? "Cancel" : "Start";
                     enabled: enable_control && reclick_dump_secs >= 2;
@@ -137,7 +142,7 @@ export component DataDump inherits HorizontalBox {
                         alignment: center;
                         IconDisplay {
                             icon: IconSet.Download;
-                            stroke: wifi_dumping ? Theme.ok-green : Theme.warn-orange;
+                            stroke: wifi_dumping ? Theme.ok-green : Palette.foreground;
                             stroke-width: 1.5;
                             size: 25pt;
                         }
@@ -153,68 +158,59 @@ export component DataDump inherits HorizontalBox {
             VerticalBox {
 
                 HorizontalLayout {
+                    alignment: space-between;
 
                     Text {
-                        text: "Downloaded Data";
+                        text: "Sync Status";
                         font-weight: Theme.bold-font-weight;
                         vertical-alignment: center;
                     }
 
-                    Rectangle {
-                        horizontal-stretch: 5.0;
-                    }
-
-                    HorizontalLayout {
-                        alignment: start;
-                        spacing: 4pt;
-
-                        Rectangle {
-                            background: Theme.ok-green;
-                            border-radius: 3pt;
-                            width: 1.5rem;
-                        }
-
-                        Text {
-                            text: "Downloaded";
-                            vertical-alignment: center;
-                        }
-                    }
-
-                    HorizontalLayout {
-                        alignment: start;
-                        spacing: 4pt;
-
-                        Rectangle {
-                            background: Theme.err-red;
-                            border-radius: 3pt;
-                            width: 1.5rem;
-                        }
-
-                        Text {
-                            text: "Remote-only";
-                            vertical-alignment: center;
-                        }
-                    }
-
-                    HorizontalLayout {
-                        alignment: start;
-                        spacing: 4pt;
-
-                        Rectangle {
-                            background: Theme.empty-grey;
-                            border-radius: 3pt;
-                            width: 1.5rem;
-                        }
-
-                        Text {
-                            text: "Empty";
-                            vertical-alignment: center;
-                        }
+                    Text {
+                        text: "Total Available: " + total_available_bytes;
+                        font-weight: Theme.bold-font-weight;
+                        vertical-alignment: center;
                     }
                 }
 
                 download-bar := ColorBar {
                     segment-image: download_bar_image;
+                }
+
+                HorizontalLayout {
+                    alignment: space-between;
+
+                    HorizontalLayout {
+                        alignment: start;
+                        spacing: 4pt;
+
+                        Rectangle {
+                            background: Theme.downloaded;
+                            border-radius: 3pt;
+                            width: 1.5rem;
+                        }
+
+                        Text {
+                            text: "Downloaded: " + downloaded_bytes;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: start;
+                        spacing: 4pt;
+
+                        Rectangle {
+                            background: Theme.remote-only;
+                            border-radius: 3pt;
+                            width: 1.5rem;
+                        }
+
+                        Text {
+                            text: "Remote-only: " + remote_only_bytes;
+                            vertical-alignment: center;
+                        }
+                    }
                 }
             }
         }

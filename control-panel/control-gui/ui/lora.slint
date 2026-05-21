@@ -29,6 +29,10 @@ export component LoRa inherits HorizontalBox {
     private property <duration> lora_heartbeat_period_edit: 3s;
     private property <duration> lora_heartbeat_period: 3s;
 
+    public function focus-me() {
+        heartbeat.focus();
+    }
+
     Timer {
         interval: lora_heartbeat_period;
         running: lora_heartbeat;
@@ -142,7 +146,8 @@ export component LoRa inherits HorizontalBox {
                 HorizontalLayout {
                     alignment: center;
                     width: Theme.first-col;
-                    Switch {
+
+                    heartbeat := Switch {
                         enabled: lora_attached;
                         checked: lora_heartbeat;
                         transform-scale: Theme.switch-scale;

@@ -15,7 +15,7 @@ pub struct RttEstimator {
 
 impl RttEstimator {
     pub const fn wifi() -> Self {
-        Self::new(1000, 200, 4_000)
+        Self::new(1000, 50, 4_000)
     }
 
     pub const fn lora() -> Self {

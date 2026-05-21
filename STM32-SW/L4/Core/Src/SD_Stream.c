@@ -1,170 +1,70 @@
-/* SD_Stream.c
- * Ring buffer → SD card pipeline.
- * Receives chunks from UART DMA callbacks, writes to SD in 4KB bursts.
- */
-
 #include "SD_IO.h"
 #include "main.h"
 #include <string.h>
 #include <stdio.h>
 #include "SD_Stream.h"
+#define TEST_BUFFER_SIZE 16384  // 32 sectors (16KB) - larger buffers = better speed
+#define STRESS_TEST_TOTAL_SIZE (100ULL * 1024 * 1024)
+#define TOTAL_TEST_SIZE ( 1024*1024*1024)//(100ULL * 1024 * 1024)// 1MB total test
 
+#include <string.h> // for memcmp
 
-/* ── External handles ───────────────────────────────────────── */
 extern SD_HandleTypeDef hsd1;
-
-/* ── Ring Buffer ────────────────────────────────────────────── */
-static uint8_t ring_buffer[RX_BUF_SIZE];
-static volatile uint32_t rb_head = 0;   // written by ISR context
-static volatile uint32_t rb_tail = 0;   // read  by main loop
-
-/* ── DMA transfer buffer ────────────────────────────────────── */
-// Must be aligned for SD DMA — never use stack buffers
-static uint8_t sd_write_buf[SD_BURST_SIZE] __attribute__((aligned(4)));
-
-/* ── SD sector tracking ─────────────────────────────────────── */
-static uint32_t current_sector = DATA_START_SECTOR;
-
-/* ── UART for logging ───────────────────────────────────────── */
+uint32_t current_sector = DATA_START_SECTOR;
 static UART_HandleTypeDef *_uart = NULL;
+
+static uint8_t write_buf[512] __attribute__((aligned(4)));
+static uint8_t read_buf[512] __attribute__((aligned(4)));
+
 
 static void Stream_Log(const char *msg) {
     if (_uart) HAL_UART_Transmit(_uart, (uint8_t*)msg, strlen(msg), 200);
 }
 
-/* ── Ring Buffer helpers ────────────────────────────────────── */
-
-// How many bytes are available to read
-static uint32_t RB_Available(void) {
-    return (rb_head - rb_tail + RX_BUF_SIZE) % RX_BUF_SIZE;
-}
-
-// How many bytes of free space remain
-static uint32_t RB_Free(void) {
-    return RX_BUF_SIZE - RB_Available() - 1;
-}
-
-// Write bytes into ring buffer — called from ISR context, must be fast
-static void RB_Write(uint8_t *src, uint16_t len) {
-    if (len > RB_Free()) {
-        Stream_Log("RB: OVERFLOW — data lost\r\n");
-        return;
-    }
-
-    for (uint16_t i = 0; i < len; i++) {
-        ring_buffer[rb_head] = src[i];
-        rb_head = (rb_head + 1) % RX_BUF_SIZE;
-    }
-}
-
-// Read a contiguous block out of ring buffer into dst
-static void RB_Read(uint8_t *dst, uint32_t len) {
-    for (uint32_t i = 0; i < len; i++) {
-        dst[i] = ring_buffer[rb_tail];
-        rb_tail = (rb_tail + 1) % RX_BUF_SIZE;
-    }
-}
-
-/* ── Public API ─────────────────────────────────────────────── */
-
 void SD_Stream_Init(UART_HandleTypeDef *uartHandle) {
     _uart          = uartHandle;
-    rb_head        = 0;
-    rb_tail        = 0;
     current_sector = DATA_START_SECTOR;
     Stream_Log("SD_Stream ready\r\n");
 }
 
-// Called from HAL_UART_RXEVENT_HT or HAL_UART_RXEVENT_IDLE
-// src  = rxBuffer (start of first half)
-// len  = number of valid bytes in this chunk
-void SD_Stream_WriteHalf(uint8_t *src, uint16_t len) {
-    Stream_Log("SD_STREAM_HALF_CALL\r\n");
-    RB_Write(src, len);
-}
-
-// Called from HAL_UART_RXEVENT_TC
-// src  = rxBuffer + RX_BUF_SIZE/2 (start of second half)
-// len  = RX_BUF_SIZE/2
-void SD_Stream_WriteSecondHalf(uint8_t *src, uint16_t len) {
-    Stream_Log("SD_STREAM_SECOND_HALF_CALL\r\n");
-    RB_Write(src, len);
-}
-
-// Call this from main loop — drains ring buffer to SD in 4KB bursts
-void SD_Stream_Flush(void) {
-    uint32_t bytes_waiting = RB_Available();  // fix: was never assigned
-
+// Write a single packed block directly to SD
+HAL_StatusTypeDef SD_Stream_WriteBlock(uint8_t *block) {
     char dbg[80];
-    snprintf(dbg, sizeof(dbg), "Flush called | RB available: %lu | Need: %lu\r\n",
-        (unsigned long)bytes_waiting,
-        (unsigned long)SD_BURST_SIZE);
-    //Stream_Log(dbg);
 
-    while (RB_Available() >= SD_BURST_SIZE)
-    {
-        bytes_waiting = RB_Available();  // update each iteration
+    HAL_StatusTypeDef result = HAL_SD_WriteBlocks(
+        &hsd1,
+        block,
+        current_sector,
+        1,       // 1 block at a time (512 bytes)
+        5000
+    );
 
-        // Log first 4 bytes of what we're about to write
-        snprintf(dbg, sizeof(dbg), "Flush: reading %lu bytes from RB, first bytes: %02X %02X %02X %02X\r\n",
-            (unsigned long)SD_BURST_SIZE,
-            sd_write_buf[0], sd_write_buf[1], sd_write_buf[2], sd_write_buf[3]);
-        Stream_Log(dbg);
-
-        // Pull out of ring buffer
-        RB_Read(sd_write_buf, SD_BURST_SIZE);
-
-        // Log what we actually read
-        snprintf(dbg, sizeof(dbg), "Flush: writing to sector %lu | first bytes: %02X %02X %02X %02X\r\n",
-            (unsigned long)current_sector,
-            sd_write_buf[0], sd_write_buf[1], sd_write_buf[2], sd_write_buf[3]);
-        Stream_Log(dbg);
-
-        HAL_StatusTypeDef result = HAL_SD_WriteBlocks(
-            &hsd1,
-            sd_write_buf,
-            current_sector,
-            SD_BURST_BLOCKS,
-            5000
-        );
-
-        if (result != HAL_OK) {
-            Stream_Log("SD Stream: write failed\r\n");
-            return;
-        }
-
-        uint32_t t = HAL_GetTick();
-        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
-            if (HAL_GetTick() - t > 5000) {
-                Stream_Log("SD Stream: card timeout\r\n");
-                return;
-            }
-        }
-
-        snprintf(dbg, sizeof(dbg),
-            "SD: Wrote to sector %lu | Buffer remaining: %lu bytes\r\n",
-            (unsigned long)current_sector,
-            (unsigned long)bytes_waiting);
-        Stream_Log(dbg);
-
-        current_sector += SD_BURST_BLOCKS;
+    if (result != HAL_OK) {
+        Stream_Log("SD: write failed\r\n");
+        return result;
     }
 
-    // Log why we exited the loop
-    snprintf(dbg, sizeof(dbg), "Flush exit | RB available: %lu | Need: %lu\r\n",
-        (unsigned long)RB_Available(),
-        (unsigned long)SD_BURST_SIZE);
-    //Stream_Log(dbg);
-}
-/**
- * @brief Reads data back from SD card starting from a specific sector
- * @param start_sector The sector to begin reading from (e.g., DATA_START_SECTOR)
- * @param num_blocks   How many 512-byte blocks to read
- */
+    uint32_t t = HAL_GetTick();
+    while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+        if (HAL_GetTick() - t > 5000) {
+            Stream_Log("SD: card timeout\r\n");
+            return HAL_TIMEOUT;
+        }
+    }
 
+    snprintf(dbg, sizeof(dbg), "SD: wrote sector %lu\r\n", (unsigned long)current_sector);
+    Stream_Log(dbg);
+
+    current_sector++;
+    return HAL_OK;
+}
+
+uint32_t SD_Stream_GetCurrentSector(void) {
+    return current_sector;
+}
 
 void SD_Stream_ReadDebug(uint32_t start_sector, uint32_t num_blocks) {
-    static uint8_t read_buf[512] __attribute__((aligned(4))); // static = not on stack
+    static uint8_t read_buf[512] __attribute__((aligned(4)));
     char msg[64];
 
     Stream_Log("--- SD READ START ---\r\n");
@@ -180,12 +80,11 @@ void SD_Stream_ReadDebug(uint32_t start_sector, uint32_t num_blocks) {
             if (HAL_GetTick() - t > 2000) { Stream_Log("Timeout\r\n"); return; }
         }
 
-        // Dump all 512 bytes as hex, 16 per line
         for (int row = 0; row < 512; row += 16) {
             int len = snprintf(msg, sizeof(msg),
                 "%04lX: %02X %02X %02X %02X %02X %02X %02X %02X "
                        "%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
-                (unsigned long)(row),
+                (unsigned long)row,
                 read_buf[row+0],  read_buf[row+1],  read_buf[row+2],  read_buf[row+3],
                 read_buf[row+4],  read_buf[row+5],  read_buf[row+6],  read_buf[row+7],
                 read_buf[row+8],  read_buf[row+9],  read_buf[row+10], read_buf[row+11],
@@ -197,6 +96,182 @@ void SD_Stream_ReadDebug(uint32_t start_sector, uint32_t num_blocks) {
 }
 
 
-uint32_t SD_Stream_GetCurrentSector(void) {
-    return current_sector;
+void SD_Stream_ReadDebug_Last_Line(uint32_t start_sector, uint32_t num_blocks) {
+    static uint8_t read_buf[512] __attribute__((aligned(4)));
+    char msg[64];
+
+    Stream_Log("--- SD READ START ---\r\n");
+
+    for (uint32_t i = 0; i < num_blocks; i++) {
+        HAL_StatusTypeDef res = HAL_SD_ReadBlocks(
+            &hsd1, read_buf, start_sector + i, 1, 2000);
+
+        if (res != HAL_OK) { Stream_Log("Read error\r\n"); break; }
+
+        uint32_t t = HAL_GetTick();
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+            if (HAL_GetTick() - t > 2000) { Stream_Log("Timeout\r\n"); return; }
+        }
+
+        // Only print last 16 bytes of the block (offset 0x1F0)
+        int row = 512 - 16;
+        int len = snprintf(msg, sizeof(msg),
+            "Sector %lu [last 16]: %02X %02X %02X %02X %02X %02X %02X %02X "
+                          "%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+            (unsigned long)(start_sector + i),
+            read_buf[row+0],  read_buf[row+1],  read_buf[row+2],  read_buf[row+3],
+            read_buf[row+4],  read_buf[row+5],  read_buf[row+6],  read_buf[row+7],
+            read_buf[row+8],  read_buf[row+9],  read_buf[row+10], read_buf[row+11],
+            read_buf[row+12], read_buf[row+13], read_buf[row+14], read_buf[row+15]);
+        HAL_UART_Transmit(_uart, (uint8_t*)msg, len, 500);
+        Stream_Log("\r\n");
+    }
+    Stream_Log("--- SD READ END ---\r\n");
+}
+
+HAL_StatusTypeDef SD_Stream_ReadBlock(uint32_t sector, uint8_t* buffer) {
+    HAL_StatusTypeDef res = HAL_SD_ReadBlocks(&hsd1, buffer, sector, 1, 2000);
+    if (res != HAL_OK) {
+        Stream_Log("ReadBlock: failed\r\n");
+        return res;
+    }
+
+    uint32_t t = HAL_GetTick();
+    while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+        if (HAL_GetTick() - t > 2000) {
+            Stream_Log("ReadBlock: timeout\r\n");
+            return HAL_TIMEOUT;
+        }
+    }
+
+    return HAL_OK;
+}
+
+
+void SD_Stream_ReadAndForward(uint32_t start_sector, uint32_t num_blocks) {
+    static uint8_t read_buf[512] __attribute__((aligned(4)));
+    char msg[80];
+
+    Stream_Log("--- SD READ AND FORWARD START ---\r\n");
+
+    for (uint32_t i = 0; i < num_blocks; i++) {
+        HAL_StatusTypeDef res = HAL_SD_ReadBlocks(
+            &hsd1, read_buf, start_sector + i, 1, 2000);
+
+        if (res != HAL_OK) { Stream_Log("Read error\r\n"); break; }
+
+        uint32_t t = HAL_GetTick();
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER) {
+            if (HAL_GetTick() - t > 2000) { Stream_Log("Timeout\r\n"); return; }
+        }
+
+        // Print last 16 bytes as hex (debug)
+        int row = 512 - 16;
+        int len = snprintf(msg, sizeof(msg),
+            "Sector %lu [last 16]: %02X %02X %02X %02X %02X %02X %02X %02X "
+                          "%02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+            (unsigned long)(start_sector + i),
+            read_buf[row+0],  read_buf[row+1],  read_buf[row+2],  read_buf[row+3],
+            read_buf[row+4],  read_buf[row+5],  read_buf[row+6],  read_buf[row+7],
+            read_buf[row+8],  read_buf[row+9],  read_buf[row+10], read_buf[row+11],
+            read_buf[row+12], read_buf[row+13], read_buf[row+14], read_buf[row+15]);
+        HAL_UART_Transmit(_uart, (uint8_t*)msg, len, 500);
+        Stream_Log("\r\n");
+
+        // Forward raw 512 bytes over USART3
+        HAL_UART_Transmit(&huart3, read_buf, 512, 5000);
+    }
+
+    Stream_Log("--- SD READ AND FORWARD END ---\r\n");
+}
+
+void SD_BruteSpeedTest(void) {
+    static uint8_t test_buf[TEST_BUFFER_SIZE] __attribute__((aligned(4)));
+    char log[128];
+    
+    // Fill buffer with dummy pattern
+    for(int i=0; i<TEST_BUFFER_SIZE; i++) test_buf[i] = (uint8_t)(i % 256);
+
+    uint32_t start_tick, end_tick, elapsed;
+    uint32_t num_iterations = TOTAL_TEST_SIZE / TEST_BUFFER_SIZE;
+    
+    Stream_Log("\r\n--- SD BRUTE SPEED TEST ---\r\n");
+
+    // --- WRITE TEST ---
+    start_tick = HAL_GetTick();
+    for (uint32_t i = 0; i < num_iterations; i++) {
+        HAL_StatusTypeDef res = HAL_SD_WriteBlocks(&hsd1, test_buf, 
+                                 DATA_START_SECTOR + (i * (TEST_BUFFER_SIZE/512)), 
+                                 TEST_BUFFER_SIZE/512, 10000);
+        
+        if (res != HAL_OK) { Stream_Log("Write Error\r\n"); return; }
+        
+        // Wait for card to be ready
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER);
+    }
+    end_tick = HAL_GetTick();
+    elapsed = end_tick - start_tick;
+    
+    float write_speed = (float)TOTAL_TEST_SIZE / (float)elapsed; // KB/s
+    snprintf(log, sizeof(log), "Write: %lu bytes in %lu ms (%.2f KB/s)\r\n", 
+             (unsigned long)TOTAL_TEST_SIZE, elapsed, write_speed);
+    Stream_Log(log);
+
+    // --- READ TEST ---
+    start_tick = HAL_GetTick();
+    for (uint32_t i = 0; i < num_iterations; i++) {
+        HAL_StatusTypeDef res = HAL_SD_ReadBlocks(&hsd1, test_buf, 
+                                 DATA_START_SECTOR + (i * (TEST_BUFFER_SIZE/512)), 
+                                 TEST_BUFFER_SIZE/512, 10000);
+        
+        if (res != HAL_OK) { Stream_Log("Read Error\r\n"); return; }
+        
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER);
+    }
+    end_tick = HAL_GetTick();
+    elapsed = end_tick - start_tick;
+
+    float read_speed = (float)TOTAL_TEST_SIZE / (float)elapsed; // KB/s
+    snprintf(log, sizeof(log), "Read: %lu bytes in %lu ms (%.2f KB/s)\r\n", 
+             (unsigned long)TOTAL_TEST_SIZE, elapsed, read_speed);
+    Stream_Log(log);
+}
+
+void SD_MassAccuracyTest(uint32_t iterations) {
+    char msg[64];
+    uint32_t errors = 0;
+
+    for (uint32_t i = 0; i < iterations; i++) {
+        // 1. Generate a pattern that changes every iteration
+        // Using (i + j) ensures every block is unique
+        for (int j = 0; j < 512; j++) {
+            write_buf[j] = (uint8_t)(i + j); 
+        }
+
+        // 2. Write to a new sector each time to test the whole card
+        uint32_t target_sector = DATA_START_SECTOR + i;
+        HAL_SD_WriteBlocks(&hsd1, write_buf, target_sector, 1, 1000);
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER);
+
+        // 3. Clear and Read back
+        memset(read_buf, 0, 512);
+        HAL_SD_ReadBlocks(&hsd1, read_buf, target_sector, 1, 1000);
+        while (HAL_SD_GetCardState(&hsd1) != HAL_SD_CARD_TRANSFER);
+
+        // 4. Compare
+        if (memcmp(write_buf, read_buf, 512) != 0) {
+            errors++;
+            snprintf(msg, sizeof(msg), "Error at sector %lu!\r\n", target_sector);
+            Stream_Log(msg);
+        }
+
+        // Heartbeat log every 100 blocks
+        if (i % 100 == 0) {
+            snprintf(msg, sizeof(msg), "Tested %lu blocks...\r\n", i);
+            Stream_Log(msg);
+        }
+    }
+
+    snprintf(msg, sizeof(msg), "TEST FINISHED. Total Errors: %lu\r\n", errors);
+    Stream_Log(msg);
 }

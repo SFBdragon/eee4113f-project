@@ -3,61 +3,71 @@ export component RadioButton inherits HorizontalLayout {
     in property <bool> checked: false;
     in property <bool> enabled: true;
 
-    callback toggled();   // fired when the user selects this button
+    callback toggled();
 
-    // --- Layout ---
     min-height: 28px;
-    // min-width: indicator.width + label.x + label.min-width;
 
-    // --- Interaction ---
-    touch := TouchArea {
-        HorizontalLayout {
-            spacing: 8px;
-            alignment: start;
-            vertical-stretch: 0;
+    public function focus-me() {
+        scope.focus();
+    }
 
-            // --- Outer ring ---
-            indicator := Rectangle {
-                width: 20px;
-                height: 20px;
-                y: (parent.height - self.height) / 2;
+    scope := FocusScope {
+        enabled: root.enabled && !root.checked;
+        focus-on-tab-navigation: root.enabled;
 
-                border-radius: self.width / 2;
-                border-width: checked ? 2px : 1.5px;
-                border-color: !root.enabled ? #aaaaaa : checked ? #3b7ef8 : touch.has-hover ? #555555 : #888888;
-                background: transparent;
-
-                // --- Inner filled dot (visible when checked) ---
-                dot := Rectangle {
-                    x: (parent.width - self.width) / 2;
-                    y: (parent.height - self.height) / 2;
-                    width: checked ? 10px : 0px;
-                    height: checked ? 10px : 0px;
-
-                    border-radius: self.width / 2;
-                    background: root.enabled ? #3b7ef8 : #aaaaaa;
-
-                    animate width, height {
-                        duration: 120ms;
-                        easing: ease-out;
-                    }
-                }
-
-                animate border-color { duration: 80ms; }
+        key-pressed(event) => {
+            if event.text == " " || event.text == "\n" {
+                root.toggled();
+                return accept;
             }
-
-            label := Text {
-                text: root.text;
-                color: root.enabled ? #1a1a1a : #aaaaaa;
-                vertical-alignment: center;
-            }
+            reject
         }
 
-        enabled: root.enabled && !root.checked;   // can't re-select current
-        mouse-cursor: root.enabled && !root.checked ? pointer : default;
+        touch := TouchArea {
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
+                vertical-stretch: 0;
 
-        clicked => {
-            root.toggled();
+                indicator := Rectangle {
+                    width: 20px;
+                    height: 20px;
+                    y: (parent.height - self.height) / 2;
+
+                    border-radius: self.width / 2;
+                    border-width: checked ? 2px : 1.5px;
+                    border-color: !root.enabled ? #aaaaaa : checked ? #3b7ef8 : scope.has-focus ? #3b7ef8   // keyboard focus indicator
+                        : touch.has-hover ? #555555 : #888888;
+                    background: scope.has-focus && !checked ? #3b7ef820 : transparent;
+
+                    dot := Rectangle {
+                        x: (parent.width - self.width) / 2;
+                        y: (parent.height - self.height) / 2;
+                        width: checked ? 10px : 0px;
+                        height: checked ? 10px : 0px;
+                        border-radius: self.width / 2;
+                        background: root.enabled ? #3b7ef8 : #aaaaaa;
+                        animate width, height {
+                            duration: 120ms;
+                            easing: ease-out;
+                        }
+                    }
+
+                    animate border-color { duration: 80ms; }
+                }
+
+                label := Text {
+                    text: root.text;
+                    color: root.enabled ? #1a1a1a : #aaaaaa;
+                    vertical-alignment: center;
+                }
+            }
+
+            enabled: root.enabled && !root.checked;
+            mouse-cursor: root.enabled && !root.checked ? pointer : default;
+            clicked => {
+                root.toggled();
+            }
         }
     }
 }

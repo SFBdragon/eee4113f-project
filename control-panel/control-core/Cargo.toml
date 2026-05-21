@@ -4,13 +4,20 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-control-sys = { path = "../control-sys" }
+# control-data-link = { path = "../control-data-link" }
+control-serial-ports = { path = "../control-serial-ports" }
 control-protocol = { path = "../control-protocol" }
 crc = "3.4.0"
 crossbeam-channel = "0.5.15"
 rand = "0.10.1"
 crc-fast = "1.10.0"
 tracing = "0.1.44"
+rusqlite = { version = "0.31", features = ["bundled"] }
+serde_json = "1.0.149"
+serde = "1.0.228"
+rfd = "0.17.2"
+serde_derive = "1.0.228"
+
 
 [dev-dependencies]
 control-protocol = { path = "../control-protocol", features = ["test-utils"]}

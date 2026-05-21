@@ -10,9 +10,9 @@ mod rx;
 // ------------------------- DEVICE I/O ABSTRACTION ------------------------- //
 
 pub mod hal {
-    use control_protocol::{phy::*, wifi::Mac};
+    use control_protocol::wifi::Mac;
 
-    use crate::drivers::{StatusError, from_ffi};
+    use crate::drivers::StatusError;
 
     pub struct WiFiPacket {
         pub from: Mac,
@@ -23,56 +23,51 @@ pub mod hal {
         fn is_module_attached(&self) -> bool;
         fn initialize_module(&self) -> Result<(), StatusError>;
         fn shutdown_module(&self);
-        fn get_byterate(&self) -> u32;
         fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError>;
         fn recv_packet(&self) -> Result<WiFiPacket, StatusError>;
     }
-    pub struct WiFiModule;
+    pub struct WiFiRadio;
 
-    impl WiFiInterface for WiFiModule {
-        fn is_module_attached(&self) -> bool {
-            control_sys::is_lora_module_attached()
-        }
+    // impl WiFiInterface for WiFiRadio {
+    //     fn is_module_attached(&self) -> bool {
+    //         control_data_link::is_lora_module_attached()
+    //     }
 
-        fn initialize_module(&self) -> Result<(), StatusError> {
-            from_ffi(control_sys::initialize_lora_module())
-        }
+    //     fn initialize_module(&self) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::initialize_wifi_module())
+    //     }
 
-        fn shutdown_module(&self) {
-            control_sys::shutdown_lora_module();
-        }
+    //     fn shutdown_module(&self) {
+    //         control_data_link::shutdown_lora_module();
+    //     }
 
-        fn get_byterate(&self) -> u32 {
-            control_sys::get_lora_byterate()
-        }
+    //     fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError> {
+    //         from_ffi(control_data_link::send_wifi_packet(
+    //             dst_mac.to_u64(),
+    //             bytes.as_ptr(),
+    //             bytes.len() as _,
+    //         ))
+    //     }
 
-        fn send_packet(&self, dst_mac: Mac, bytes: &[u8]) -> Result<(), StatusError> {
-            from_ffi(control_sys::send_wifi_packet(
-                dst_mac.to_u64(),
-                bytes.as_ptr(),
-                bytes.len() as _,
-            ))
-        }
+    //     fn recv_packet(&self) -> Result<WiFiPacket, StatusError> {
+    //         let mut src_mac = 0u64;
+    //         let mut len = 0u16;
+    //         let mut vec = vec![0u8; MAX_WIFI_RECV_PACKET_LEN];
+    //         from_ffi(control_data_link::recv_wifi_packet(
+    //             &mut src_mac,
+    //             vec.as_mut_array::<MAX_WIFI_RECV_PACKET_LEN>().unwrap(),
+    //             &mut len,
+    //         ))
+    //         .map(|_| {
+    //             vec.truncate(len as _);
 
-        fn recv_packet(&self) -> Result<WiFiPacket, StatusError> {
-            let mut src_mac = 0u64;
-            let mut len = 0u16;
-            let mut vec = vec![0u8; MAX_WIFI_RECV_PACKET_LEN];
-            from_ffi(control_sys::recv_wifi_packet(
-                &mut src_mac,
-                vec.as_mut_array::<MAX_WIFI_RECV_PACKET_LEN>().unwrap(),
-                &mut len,
-            ))
-            .map(|_| {
-                vec.truncate(len as _);
-
-                WiFiPacket {
-                    from: Mac::from(src_mac),
-                    data: vec,
-                }
-            })
-        }
-    }
+    //             WiFiPacket {
+    //                 from: Mac::from(src_mac),
+    //                 data: vec,
+    //             }
+    //         })
+    //     }
+    // }
 }
 
 #[derive(Debug)]
@@ -91,10 +86,6 @@ pub enum WiFiEvent {
 
     /// Got a ping over WiFi.
     Ping((Mac, LoRaAddr)),
-}
-
-pub fn start_wifi_listener_thread(controller_addr: LoRaAddr) -> Receiver<WiFiEvent> {
-    start_wifi_listener_thread_with_hal(controller_addr, Arc::new(hal::WiFiModule))
 }
 
 pub fn start_wifi_listener_thread_with_hal(
@@ -158,22 +149,26 @@ fn wifi_listener(
             };
 
             let to_send = match either {
-                Either::A(Ok(packet)) => rx.on_recv(
-                    packet.from,
-                    &packet.data,
-                    |mac| {
-                        let _ = sender.send(WiFiEvent::Connected(mac));
-                    },
-                    |mac| {
-                        let _ = sender.send(WiFiEvent::Disconnected(mac));
-                    },
-                    |m| {
-                        let _ = sender.send(WiFiEvent::ReceiveMessage(m));
-                    },
-                    |(m, a)| {
-                        let _ = sender.send(WiFiEvent::Ping((m, a)));
-                    },
-                ),
+                Either::A(Ok(packet)) => {
+                    tracing::debug!(?packet.data, "Received a packet");
+
+                    rx.on_recv(
+                        packet.from,
+                        &packet.data,
+                        |mac| {
+                            let _ = sender.send(WiFiEvent::Connected(mac));
+                        },
+                        |mac| {
+                            let _ = sender.send(WiFiEvent::Disconnected(mac));
+                        },
+                        |m| {
+                            let _ = sender.send(WiFiEvent::ReceiveMessage(m));
+                        },
+                        |(m, a)| {
+                            let _ = sender.send(WiFiEvent::Ping((m, a)));
+                        },
+                    )
+                }
                 Either::A(Err(status)) => match status {
                     StatusError::ModuleDetached => return Err(Disconnected),
                     StatusError::ReceiveTimeout => unreachable!(),

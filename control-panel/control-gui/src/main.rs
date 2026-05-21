@@ -1,20 +1,20 @@
 use std::{iter, thread};
 
 use control_core::{
+    db, export,
     lora::{LoraCommand, LoraEvent},
     protocol::{
         self, LoRaAddr,
         app::{LoRaModuleState, StartDataDump},
+        encoding::BLOCK_SIZE,
     },
     wifi::WiFiEvent,
 };
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use slint::{ModelRc, ToSharedString, VecModel};
+use slint::{EventLoopError, ModelRc, ToSharedString, VecModel};
 use tracing::{debug, error, info, info_span, warn};
 
 mod colour_bar;
-mod db;
-mod export;
 
 slint::include_modules!();
 
@@ -49,9 +49,17 @@ fn main() {
     match single_instance::SingleInstance::new("comms-module-controller") {
         Ok(si) => {
             if !si.is_single() {
-                error!(
-                    "Another app instance is already running. This is not supported. Quiting..."
-                );
+                error!("Another app instance is already running. This is not supported.");
+
+                let led = LaunchErrorDialog::new().unwrap();
+                led.run().unwrap();
+
+                // let _ = rfd::MessageDialog::new()
+                //     .set_title("Communication Module Control Panel")
+                //     .set_level(rfd::MessageLevel::Error)
+                //     .set_description("Another running instance was detected. Running multiple instances on one computer is unsupported.")
+                //     .set_buttons(rfd::MessageButtons::Ok)
+                //     .show();
 
                 std::process::exit(1);
             } else {
@@ -61,7 +69,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let (controller, mock) = control_core::Controller::mocked();
+    let controller = control_core::Controller::demo();
 
     info!(%controller.addr, "Controller address selected.");
 
@@ -126,7 +134,7 @@ fn main() {
             let block_id = from_block_id(avail_begin);
 
             let db_conn = db::Database::open().unwrap();
-            let last_contiguously_obtained = db_conn.first_missing_after(addr, block_id).unwrap();
+            let last_contiguously_obtained = db_conn.first_missing_from(addr, block_id).unwrap();
 
             tracing::debug!(?last_contiguously_obtained, "Last contiguously obtained");
 
@@ -227,6 +235,9 @@ fn main() {
 
             let missing = db_conn.missing_in_range(addr, begin, end).unwrap();
             let mut missing_runs = db::contiguous_runs(&missing);
+
+            tracing::debug!(?missing_runs, "Requested data dump.");
+
             // Reverse the list so we can treat it as a stack and still grab oldest first.
             missing_runs.reverse();
 
@@ -257,37 +268,37 @@ fn main() {
         });
     }
 
-    {
-        let mock_module = mock.clone();
-        app_window.on_debug_set_lora_module_attached(move |attached| {
-            mock_module.state().is_laptop_lora_module_attached = attached;
-        });
+    // {
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_lora_module_attached(move |attached| {
+    //         mock_module.state().is_laptop_lora_module_attached = attached;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_lora_send_fails(move |failing| {
-            mock_module.state().is_lora_send_failing = failing;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_lora_send_fails(move |failing| {
+    //         mock_module.state().is_lora_send_failing = failing;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_lora_recv_fails(move |failing| {
-            mock_module.state().is_lora_recv_failing = failing;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_lora_recv_fails(move |failing| {
+    //         mock_module.state().is_lora_recv_failing = failing;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_wifi_module_attached(move |attached| {
-            mock_module.state().is_laptop_wifi_module_attached = attached;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_wifi_module_attached(move |attached| {
+    //         mock_module.state().is_laptop_wifi_module_attached = attached;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_wifi_send_fails(move |failing| {
-            mock_module.state().is_wifi_send_failing = failing;
-        });
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_wifi_send_fails(move |failing| {
+    //         mock_module.state().is_wifi_send_failing = failing;
+    //     });
 
-        let mock_module = mock.clone();
-        app_window.on_debug_set_wifi_recv_fails(move |failing| {
-            mock_module.state().is_wifi_recv_failing = failing;
-        });
-    }
+    //     let mock_module = mock.clone();
+    //     app_window.on_debug_set_wifi_recv_fails(move |failing| {
+    //         mock_module.state().is_wifi_recv_failing = failing;
+    //     });
+    // }
 
     {
         let events = controller.lora_events.clone();
@@ -306,13 +317,25 @@ fn main() {
 
     let a = LoRaAddr::from_raw(0x33AD);
     let db_conn = db::Database::open().unwrap();
-    db_conn.add_address(a);
+    db_conn.add_address(a).unwrap();
     for i in 60..80 {
-        db_conn.write_block(a, i, b"hello");
+        db_conn.write_block(a, i, b"hello").unwrap();
     }
     for i in 100..105 {
-        db_conn.write_block(a, i, b"hello");
+        db_conn.write_block(a, i, b"hello").unwrap();
     }
+
+    let a = LoRaAddr::from_raw(0x0001);
+    let dummy_block = (0..200u8).into_iter().collect::<Vec<_>>();
+
+    // // ATP04: don't seed two blocks, 80 and 99. Expect selective retransmission.
+    // db_conn.add_address(a).unwrap();
+    // for i in 0..=79 {
+    //     db_conn.write_block(a, i, &dummy_block).unwrap();
+    // }
+    // for i in 81..=98 {
+    //     db_conn.write_block(a, i, &dummy_block).unwrap();
+    // }
 
     // Initialize the addresses combobox.
     update_addresses(&db_conn, &app_window);
@@ -326,7 +349,7 @@ fn lora_events_handler(
     lora_events: Receiver<LoraEvent>,
     dump_sender: Sender<DumpEvent>,
     ui_handle: slint::Weak<AppWindow>,
-) {
+) -> Result<(), EventLoopError> {
     let _span = info_span!("lora_events_handler").entered();
 
     debug!("Listening for LoRa events.");
@@ -415,15 +438,69 @@ fn lora_events_handler(
                         if state.status_flags & LoRaModuleState::STATUS_WIFI_DUMPING == 0 {
                             ds.send(DumpEvent::ClearToSendDumpRequest(addr));
                         }
+
+                        let total = state.storage_info.total_blocks as u64;
+                        let begin_id = state.storage_info.available_begin;
+                        let overw_id = state.storage_info.overwritable_end;
+                        let end_id = state.storage_info.available_end;
+
+                        let overwritable = overw_id.saturating_sub(begin_id);
+                        let reserved = end_id.saturating_sub(overw_id);
+                        let total_available = overwritable + reserved;
+
+                        let free = total.saturating_sub(end_id.saturating_sub(begin_id));
+
+                        let downloaded = db_conn
+                            .present_ranges(addr, begin_id, end_id)
+                            .unwrap()
+                            .iter()
+                            .map(|r| r.1 - r.0)
+                            .sum::<u64>();
+
+                        let remote_only =
+                            end_id.saturating_sub(begin_id).saturating_sub(downloaded);
+
+                        let total_downloaded = db_conn
+                            .present_ranges(addr, 0, u64::MAX / 2)
+                            .unwrap()
+                            .iter()
+                            .map(|r| r.1 - r.0)
+                            .sum::<u64>();
+
+                        ui.global::<ModuleState>()
+                            .set_downloaded_bytes(format_bytes(downloaded).into());
+                        ui.global::<ModuleState>()
+                            .set_overwritable_bytes(format_bytes(overwritable).into());
+                        ui.global::<ModuleState>()
+                            .set_protocted_bytes(format_bytes(reserved).into());
+                        ui.global::<ModuleState>()
+                            .set_total_bytes(format_bytes(total).into());
+                        ui.global::<ModuleState>()
+                            .set_remote_only_bytes(format_bytes(remote_only).into());
+                        ui.global::<ModuleState>()
+                            .set_total_db_bytes(format_bytes(total_downloaded).into());
+                        ui.global::<ModuleState>()
+                            .set_free_bytes(format_bytes(free).into());
+                        ui.global::<ModuleState>()
+                            .set_total_available_bytes(format_bytes(total_available).into());
+
+                        let lat_lon = format_dms(state.gps_info.lat, true)
+                            + " "
+                            + &format_dms(state.gps_info.lon, false);
+                        ui.global::<ModuleState>().set_lat_lon(lat_lon.into());
                     }
                 }
             }
-        })
-        .unwrap();
+        })?;
     }
+
+    Ok(())
 }
 
-fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWindow>) {
+fn wifi_events_handler(
+    events: Receiver<WiFiEvent>,
+    ui_handle: slint::Weak<AppWindow>,
+) -> Result<(), slint::EventLoopError> {
     let _span = info_span!("wifi_events_handler").entered();
 
     debug!("Listening for WiFi events.");
@@ -472,6 +549,8 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
                             message.split_first_chunk::<{ size_of::<u64>() }>().unwrap();
                         let block_id = u64::from_le_bytes(*block_index);
 
+                        tracing::debug!(%block_id, "block_id received");
+
                         let db_conn = db::Database::open().unwrap();
                         db_conn.write_block(addr, block_id, block).unwrap();
 
@@ -482,9 +561,10 @@ fn wifi_events_handler(events: Receiver<WiFiEvent>, ui_handle: slint::Weak<AppWi
                     }
                 }
             }
-        })
-        .unwrap();
+        })?;
     }
+
+    Ok(())
 }
 
 pub fn to_block_id(blkid: u64) -> BlockId {
@@ -522,44 +602,47 @@ fn redraw_storage_bar(ui_handle: &AppWindow, module: &protocol::app::LoRaModuleS
 
     let readable = module.storage_info.available_end - module.storage_info.available_begin;
 
+    if readable > module.storage_info.total_blocks as u64 {
+        tracing::warn!(
+            %module.storage_info.available_begin,
+            %module.storage_info.available_end,
+            %module.storage_info.total_blocks,
+            "available end - begin > total blocks",
+        );
+    }
+
     let mut empty_grey = ui_handle
         .global::<Theme>()
         .get_empty_grey()
         .as_argb_encoded()
         .to_le_bytes();
     empty_grey.rotate_left(1);
-    let mut warn_orange = ui_handle
+    let mut overwritable_color = ui_handle
         .global::<Theme>()
         .get_warn_orange()
         .as_argb_encoded()
         .to_be_bytes();
-    warn_orange.rotate_left(1);
-    let mut active_blue = ui_handle
+    overwritable_color.rotate_left(1);
+    let mut protected_color = ui_handle
         .global::<Theme>()
         .get_active_blue()
         .as_argb_encoded()
         .to_le_bytes();
-    active_blue.rotate_left(1);
-    let mut ok_green = ui_handle
-        .global::<Theme>()
-        .get_ok_green()
-        .as_argb_encoded()
-        .to_le_bytes();
-    ok_green.rotate_left(1);
+    protected_color.rotate_left(1);
 
     let w = ui_handle.get_storage_bar_width() as usize;
     let mut buf = colour_bar::pixel_buffer(w, empty_grey[0]);
 
     colour_bar::rasterize_range(
         &mut buf,
-        warn_orange,
+        overwritable_color,
         0,
         overwritable,
         module.storage_info.total_blocks as _,
     );
     colour_bar::rasterize_range(
         &mut buf,
-        active_blue,
+        protected_color,
         overwritable,
         readable,
         module.storage_info.total_blocks as _,
@@ -607,24 +690,24 @@ fn redraw_download_bar(ui_handle: &AppWindow, addr: LoRaAddr, db: &db::Database)
 
     let w = ui_handle.get_download_bar_width();
     let empty_grey = ui_handle.global::<Theme>().get_empty_grey();
-    let mut err_red = ui_handle
+    let mut remote_only_color = ui_handle
         .global::<Theme>()
-        .get_err_red()
+        .get_remote_only()
         .as_argb_encoded()
         .to_be_bytes();
-    err_red.rotate_left(1);
-    let mut ok_green = ui_handle
+    remote_only_color.rotate_left(1);
+    let mut downloaded_color = ui_handle
         .global::<Theme>()
-        .get_ok_green()
+        .get_downloaded()
         .as_argb_encoded()
         .to_be_bytes();
-    ok_green.rotate_left(1);
+    downloaded_color.rotate_left(1);
 
     let mut buf = colour_bar::pixel_buffer(w as usize, empty_grey.red());
 
     let blocks = end_id - begin_id;
-    colour_bar::rasterize_range(&mut buf, err_red, 0, blocks, total as _);
-    colour_bar::rasterize_ranges(&mut buf, ok_green, &regions, total as _);
+    colour_bar::rasterize_range(&mut buf, remote_only_color, 0, blocks, total as _);
+    colour_bar::rasterize_ranges(&mut buf, downloaded_color, &regions, total as _);
     let image = colour_bar::pixel_buffer_to_image(&buf);
 
     ui_handle.set_download_bar_image(image);
@@ -679,4 +762,63 @@ fn update_addresses(db_conn: &db::Database, ui: &AppWindow) {
 
     ui.global::<GlobalAppState>()
         .set_none_and_addresses(ModelRc::new(VecModel::from_iter(addresses)));
+}
+
+fn format_bytes(blocks: u64) -> String {
+    const KIB: u64 = 1024;
+    const MIB: u64 = 1024 * KIB;
+    const GIB: u64 = 1024 * MIB;
+
+    let bytes = blocks * BLOCK_SIZE;
+
+    let (value, unit) = if bytes >= GIB {
+        (bytes as f64 / GIB as f64, "GiB")
+    } else if bytes >= MIB {
+        (bytes as f64 / MIB as f64, "MiB")
+    } else if bytes >= KIB {
+        (bytes as f64 / KIB as f64, "KiB")
+    } else {
+        (bytes as f64, "B  ")
+    };
+
+    let formatted = if value >= 100.0 {
+        format!("{:.1}", value)
+    } else if value >= 10.0 {
+        format!("{:.2}", value)
+    } else {
+        format!("{:.3}", value)
+    };
+
+    format!("{} {}", formatted, unit)
+}
+
+/// Formats a fixed-point coordinate (1e-7 degrees/unit) as "DDD° MM' SS.S""
+pub fn format_dms(value: i32, is_lat: bool) -> String {
+    let max = if is_lat {
+        90_0000000i32
+    } else {
+        180_0000000i32
+    };
+    assert!(value.abs() <= max, "coordinate out of range: {}", value);
+
+    let hemi = match (is_lat, value >= 0) {
+        (true, true) => 'N',
+        (true, false) => 'S',
+        (false, true) => 'E',
+        (false, false) => 'W',
+    };
+
+    let abs = value.unsigned_abs();
+    let total_deciseconds = (abs as u64 * 36 / 10_000) as u32;
+
+    let ds = total_deciseconds % 10;
+    let sec = (total_deciseconds / 10) % 60;
+    let min = (total_deciseconds / 600) % 60;
+    let deg = total_deciseconds / 36_000;
+
+    if is_lat {
+        format!("{:02}° {:02}' {:02}.{}\" {}", deg, min, sec, ds, hemi)
+    } else {
+        format!("{:03}° {:02}' {:02}.{}\" {}", deg, min, sec, ds, hemi)
+    }
 }

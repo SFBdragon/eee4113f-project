@@ -78,6 +78,9 @@ C_SOURCES =  \
 Core/Src/SD_IO.c \
 Core/Src/SD_Stream.c \
 Core/Src/main.c \
+Core/Src/protocol.c \
+Core/Src/sd_block.c \
+Core/Src/slow_crc.c \
 Core/Src/stm32l4xx_hal_msp.c \
 Core/Src/stm32l4xx_it.c \
 Core/Src/syscalls.c \
@@ -87,6 +90,8 @@ Drivers/OLED/ssd1306.c \
 Drivers/OLED/ssd1306_fonts.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_crc.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_crc_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c \
@@ -96,6 +101,7 @@ Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c \
+Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_lptim.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_mmc.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_mmc_ex.c \
 Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr.c \
@@ -241,8 +247,9 @@ CXXFLAGS += $(ASSEMBLER_LIST_OUTPUT_FLAG)
 LDSCRIPT = STM32L476XX_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
+LIBS = -lc -lcontrol_protocol_static -lm -lnosys 
 LIBDIR = \
+-LRustLibs
 
 
 # Additional LD Flags from config file

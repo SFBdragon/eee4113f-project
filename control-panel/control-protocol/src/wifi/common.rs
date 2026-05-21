@@ -14,15 +14,15 @@ pub const MAX_DATAGRAM: usize = crate::phy::MAX_WIFI_SEND_PACKET_LEN;
 /// CRC length.
 pub const CRC_LEN: usize = 2;
 /// Number of bytes of overhead per non-ACK datagram.
-pub const DG_OVERHEAD: usize = 1 + size_of::<SeqNumType>() + 1 + CRC_LEN; // flags, seq, len, crc
+pub const DG_OVERHEAD: usize = 1 + size_of::<SeqNumType>() + 2 + CRC_LEN; // flags, seq, len, crc
 /// The maximum application-layer payload size.
 pub const MAX_PAYLOAD: usize = MAX_DATAGRAM - DG_OVERHEAD;
 
 pub type SeqNumType = u8;
 pub const SEQ_SPACE: usize = 1 << SeqNumType::BITS;
 /// Selective-repeat constraint: SEQ_SPACE >= 2 * MAX_WINDOW.
-pub const MAX_WINDOW: usize = 32;
-pub type WindowBitMap = u32;
+pub const WINDOW_LEN: usize = 8;
+pub type WindowBitMap = u8;
 
 pub const PING_PERIOD_MS: usize = 1000;
 pub const PING_MISSED_THRESH: usize = 3;
@@ -88,13 +88,12 @@ pub fn seq_in_window(seq: u8, base: u8, window: u8) -> bool {
 pub struct DataFrame<'a> {
     pub flags: u8,
     pub seq: u8,
-    pub len: u8,
+    pub len: u16,
     pub payload: &'a [u8],
 }
 
 impl<'a> DataFrame<'a> {
     pub const SEQ_OFFSET: usize = 1;
-    pub const LEN_OFFSET: usize = 2;
 
     /// Serialise into `buf`. Returns the number of bytes written, or None if
     /// buf is too small. CRC is appended by this function using `crc_fn`.
@@ -125,7 +124,7 @@ impl<'a> DataFrame<'a> {
         }
 
         let (rem, seq) = first!(u8, rem);
-        let (rem, len) = first!(u8, rem);
+        let (rem, len) = first!(u16, rem);
 
         let expected_len = len as usize + DG_OVERHEAD;
         if buf.len() != expected_len {
@@ -255,15 +254,17 @@ pub enum ParseError {
 
 #[cfg(any(test, feature = "test-utils"))]
 pub mod test_utils {
+    use crate::wifi::sender::test_utils::crc16;
+
     use super::*;
 
-    /// Fake CRC: XOR all bytes into the low byte, high byte always 0xAB.
-    /// Deterministic and collision-free enough for unit tests.
-    pub fn test_crc(data: *const u8, len: usize) -> u16 {
-        let buf = unsafe { std::slice::from_raw_parts(data, len) };
-        let low = buf.iter().fold(0u8, |acc, &b| acc ^ b);
-        0xAB00 | low as u16
-    }
+    // /// Fake CRC: XOR all bytes into the low byte, high byte always 0xAB.
+    // /// Deterministic and collision-free enough for unit tests.
+    // pub extern "C" fn test_crc(data: *const u8, len: usize) -> u16 {
+    //     let buf = unsafe { std::slice::from_raw_parts(data, len) };
+    //     let low = buf.iter().fold(0u8, |acc, &b| acc ^ b);
+    //     0xAB00 | low as u16
+    // }
 
     /// Serialize a DATA frame manually, bypassing the Sender state machine.
     pub fn make_data_frame(seq: u8, flags: u8, payload: &[u8]) -> Vec<u8> {
@@ -271,10 +272,10 @@ pub mod test_utils {
         let frame = DataFrame {
             flags,
             seq,
-            len: payload.len() as u8,
+            len: payload.len() as _,
             payload,
         };
-        let len = frame.serialize(&mut buf, test_crc);
+        let len = frame.serialize(&mut buf, crc16);
         buf[..len].to_vec()
     }
 
@@ -290,15 +291,17 @@ pub mod test_utils {
         }
     }
 
-    pub fn noop_timer_set(_ms: u32) {}
-    pub fn noop_timer_cancel() {}
-    pub fn time_zero() -> u32 {
+    pub extern "C" fn noop_timer_set(_ms: u32) {}
+    pub extern "C" fn noop_timer_cancel() {}
+    pub extern "C" fn time_zero() -> u32 {
         0
     }
 }
 
 #[cfg(test)]
 pub mod tests {
+
+    use crate::wifi::sender::test_utils::crc16;
 
     use super::test_utils::*;
     use super::*;
@@ -360,7 +363,7 @@ pub mod tests {
     fn data_frame_roundtrip_normal() {
         let payload = b"hello world";
         let raw = make_data_frame(42, 0, payload);
-        let parsed = DataFrame::parse(&raw, test_crc).unwrap();
+        let parsed = DataFrame::parse(&raw, crc16).unwrap();
         assert_eq!(parsed.seq, 42);
         assert_eq!(parsed.flags & FLAG_ACK, 0);
         assert_eq!(parsed.payload, payload);
@@ -370,7 +373,7 @@ pub mod tests {
     #[test]
     fn data_frame_roundtrip_empty_payload() {
         let raw = make_data_frame(0, 0, b"");
-        let parsed = DataFrame::parse(&raw, test_crc).unwrap();
+        let parsed = DataFrame::parse(&raw, crc16).unwrap();
         assert_eq!(parsed.payload.len(), 0);
         assert_eq!(parsed.seq, 0);
     }
@@ -379,7 +382,7 @@ pub mod tests {
     fn data_frame_roundtrip_max_payload() {
         let payload = vec![0xAA; MAX_PAYLOAD];
         let raw = make_data_frame(255, 0, &payload);
-        let parsed = DataFrame::parse(&raw, test_crc).unwrap();
+        let parsed = DataFrame::parse(&raw, crc16).unwrap();
         assert_eq!(parsed.payload, payload.as_slice());
     }
 
@@ -388,7 +391,7 @@ pub mod tests {
         for syn in [0, FLAG_SYN] {
             for end in [0, FLAG_END] {
                 let raw = make_data_frame(7, syn | end, b"fin");
-                let parsed = DataFrame::parse(&raw, test_crc).unwrap();
+                let parsed = DataFrame::parse(&raw, crc16).unwrap();
                 assert_eq!(parsed.flags, syn | end);
             }
         }
@@ -400,7 +403,7 @@ pub mod tests {
         let mut raw = make_data_frame(0, 0, b"x");
         raw[0] |= FLAG_ACK;
         // CRC will also be wrong now, but the ACK-bit check comes first
-        assert_eq!(DataFrame::parse(&raw, test_crc), Err(ParseError::WrongType));
+        assert_eq!(DataFrame::parse(&raw, crc16), Err(ParseError::WrongType));
     }
 
     #[test]
@@ -409,7 +412,7 @@ pub mod tests {
         // Corrupt the first CRC byte
         let n = raw.len();
         raw[n - 2] ^= 0xFF;
-        assert_eq!(DataFrame::parse(&raw, test_crc), Err(ParseError::BadCrc));
+        assert_eq!(DataFrame::parse(&raw, crc16), Err(ParseError::BadCrc));
     }
 
     #[test]
@@ -417,7 +420,7 @@ pub mod tests {
         let raw = make_data_frame(0, 0, b"abc");
         // Feed only the header, no payload, no CRC
         assert_eq!(
-            DataFrame::parse(&raw[..3], test_crc),
+            DataFrame::parse(&raw[..3], crc16),
             Err(ParseError::TooShortToParse)
         );
     }
@@ -435,14 +438,14 @@ pub mod tests {
 
     #[test]
     fn ack_frame_roundtrip() {
-        let bitmaps = [0, WindowBitMap::MAX, 0xAAAA_AAAA];
+        let bitmaps = [0, WindowBitMap::MAX, 0xAA];
         let bases = [0, (SEQ_SPACE - 1) as u8, 0xAA];
 
         for bitmap in bitmaps {
             for base in bases {
                 let ack = make_ack_with_base(base, bitmap);
-                let bytes = ack.to_bytes(test_crc);
-                let parsed = AckFrame::parse(&bytes, test_crc).unwrap();
+                let bytes = ack.to_bytes(crc16);
+                let parsed = AckFrame::parse(&bytes, crc16).unwrap();
                 assert_eq!(parsed, ack);
             }
         }
@@ -450,27 +453,24 @@ pub mod tests {
 
     #[test]
     fn ack_frame_parse_rejects_missing_ack_bit() {
-        let mut bytes = make_ack(1).to_bytes(test_crc);
+        let mut bytes = make_ack(1).to_bytes(crc16);
         bytes[0] &= !FLAG_ACK; // clear the ACK bit
         // CRC will also be wrong, but the flags are checked first
-        assert_eq!(
-            AckFrame::parse(&bytes, test_crc),
-            Err(ParseError::WrongType)
-        );
+        assert_eq!(AckFrame::parse(&bytes, crc16), Err(ParseError::WrongType));
     }
 
     #[test]
     fn ack_frame_parse_rejects_bad_crc() {
-        let mut bytes = make_ack(0xFF).to_bytes(test_crc);
+        let mut bytes = make_ack(0xFF).to_bytes(crc16);
         bytes[ACK_SIZE - 1] ^= 0xFF;
-        assert_eq!(AckFrame::parse(&bytes, test_crc), Err(ParseError::BadCrc));
+        assert_eq!(AckFrame::parse(&bytes, crc16), Err(ParseError::BadCrc));
     }
 
     #[test]
     fn ack_frame_parse_rejects_truncated() {
-        let bytes = make_ack(0).to_bytes(test_crc);
+        let bytes = make_ack(0).to_bytes(crc16);
         assert_eq!(
-            AckFrame::parse(&bytes[..(ACK_SIZE - 1)], test_crc),
+            AckFrame::parse(&bytes[..(ACK_SIZE - 1)], crc16),
             Err(ParseError::TooShortToParse)
         );
     }

@@ -1,118 +1,57 @@
 #include <Arduino.h>
 
-#define TRIGGER_PIN   5
-#define ONBOARD_LED   8
-#define BAUD_RATE     115200
+#define TRIGGER_PIN     22
+#define ONBOARD_LED     2
+#define BAUD_RATE       115200
+#define SERIAL_TX_PIN   17
+#define SERIAL_RX_PIN   16
 
-#define SERIAL_TX_PIN 21
-#define SERIAL_RX_PIN 20
+#define PACKET_SIZE     (1024 * 6 / 5)
 
-#define PAYLOAD_SIZE 10
+uint8_t packetData[PACKET_SIZE];
 
-uint8_t txBuffer[PAYLOAD_SIZE];
-
-uint32_t packetNumber = 0;
-
-void setup() {
-
-  pinMode(TRIGGER_PIN, OUTPUT);
-  pinMode(ONBOARD_LED, OUTPUT);
-
-  digitalWrite(TRIGGER_PIN, LOW);
-  digitalWrite(ONBOARD_LED, LOW);
-
-  Serial.begin(BAUD_RATE);
-
-  Serial1.begin(
-    BAUD_RATE,
-    SERIAL_8N1,
-    SERIAL_RX_PIN,
-    SERIAL_TX_PIN
-  );
-
-  Serial.println("UART TX/RX RAW MONITOR");
+void build_packet(uint8_t* buf, uint8_t index) {
+  memset(buf, index, PACKET_SIZE);
+  buf[0] = 0xFF;
+  buf[PACKET_SIZE - 1] = 0xFF;
 }
 
-void buildPacket() {
-
-  // Fill payload with changing pattern
-  for (int i = 0; i < PAYLOAD_SIZE; i++) {
-    txBuffer[i] = 'A' + (packetNumber % 26);
-  }
-
-  // Put packet number into first 4 bytes
-  memcpy(txBuffer, &packetNumber, sizeof(packetNumber));
-}
-
-void sendPacket() {
-
-  uint8_t startFrame[] = {0xAA, 0xAA, 0xAA, 0xAA};
-  uint8_t endFrame[]   = {0xFF, 0xFF, 0x0D, 0x0A};
-
+void write_data(uint8_t* data, size_t len) {
   digitalWrite(TRIGGER_PIN, HIGH);
   digitalWrite(ONBOARD_LED, HIGH);
-
   delay(10);
 
-  // Send framing + payload
-  Serial1.write(startFrame, sizeof(startFrame));
-  Serial1.write(txBuffer, PAYLOAD_SIZE);
-  Serial1.write(endFrame, sizeof(endFrame));
-
+  Serial1.write(data, len);
   Serial1.flush();
 
   digitalWrite(TRIGGER_PIN, LOW);
   digitalWrite(ONBOARD_LED, LOW);
-
-  Serial.print("Sent packet #: ");
-  Serial.println(packetNumber);
 }
 
-void printRawSerial() {
+void setup() {
+  pinMode(TRIGGER_PIN, OUTPUT);
+  pinMode(ONBOARD_LED, OUTPUT);
+  digitalWrite(TRIGGER_PIN, LOW);
+  digitalWrite(ONBOARD_LED, LOW);
 
-  while (Serial1.available()) {
+  Serial.begin(BAUD_RATE);
+  Serial1.begin(BAUD_RATE, SERIAL_8N1, SERIAL_RX_PIN, SERIAL_TX_PIN);
 
-    uint8_t b = Serial1.read();
-
-    // HEX print
-    if (b < 0x10) {
-      Serial.print("0");
-    }
-
-    Serial.print(b, HEX);
-    Serial.print(" ");
-
-    // ASCII print
-    Serial.print("[");
-
-    if (b >= 32 && b <= 126) {
-      Serial.print((char)b);
-    } else {
-      Serial.print(".");
-    }
-
-    Serial.print("] ");
-
-    Serial.println();
-  }
+  Serial.println("ESP32 Ready");
 }
 
 void loop() {
+  static uint8_t index = 0;
 
-  // Print ALL received raw UART bytes
-  printRawSerial();
+  build_packet(packetData, index);
 
-  // Send packet every 2 seconds
-  static uint32_t lastSend = 0;
+  Serial.printf("Sending packet %02X  [FF %02X ... %02X FF]\n",
+                index, index, index);
 
-  if (millis() - lastSend >= 2000) {
+  write_data(packetData, PACKET_SIZE);
 
-    buildPacket();
+  index++;
+  if (index >= 0xFF) index = 0;  // skip FF, reserved as marker
 
-    sendPacket();
-
-    packetNumber++;
-
-    lastSend = millis();
-  }
+  delay(3000);
 }

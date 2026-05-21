@@ -8,22 +8,15 @@
 
 // ------------ Networking ------------ //
 
-
-// - Initializes networking subsystem.
-// - Starts LoRa listening.
-//
-// Defined by Shaun. Called by Glen at startup.
-void initialize_networking();
-
-
 // Call `callback(ctx)` after `n` milliseconds.
 // Defined by Glen. Called by Shaun for delays.
-void call_after_n_ms(uint32_t n, void (*callback)(void *ctx), void *ctx);
-
+void call_after_n_ms(uint32_t n, void (*callback)());
 // Cancel the active `call_after_n_ms` countdown, if there is ine.
 void cancel_timeout();
-
-
+// Defined by Glen.
+void call_repeatedly_after_n_ms_wifi_ping(uint32_t n, void (*callback)());
+// Defined by Glen.
+void cancel_timeout_wifi_ping();
 
 // Return the number of milliseconds from some arbitrary fixed epoch (e.g. since startup).
 // Defined by Glen. Called by Shaun for timing information.
@@ -33,6 +26,9 @@ uint32_t get_time_since_epoch_ms();
 // Units are in seconds.
 // Defined by Glen. Called by Shaun to configure the LoRa receive window.
 void set_lora_recv_window(uint16_t on_period, uint16_t total_period);
+
+// CRC using poly=0xA7D3, init=0xffff, no reflect
+uint16_t crc16(const uint8_t *data, uintptr_t len);
 
 // ------------ Bulk Record/Data Storage Control ------------ //
 
@@ -46,7 +42,7 @@ typedef struct {
 } BlockHeader;
 
 // The size of the data units used by the rest of the API.
-#define STORAGE_BLOCK_SIZE 512
+#define STORAGE_BLOCK_SIZE 1024
 
 // The total number of pages available for record storage.
 uint64_t storage_total_blocks();
@@ -56,6 +52,10 @@ uint64_t storage_first_readable_block();
 uint64_t storage_first_protected_block();
 
 uint64_t storage_last_readable_block();
+
+
+void shaun_debug(char *msg);
+
 
 // Read a page between `storage_first_readable_page` and `storage_last_readable_page`.
 // Read the page into `buffer`. `buffer` is `STORAGE_PAGE_SIZE` large.
@@ -90,15 +90,5 @@ void allow_overwrite(uint64_t upto_block);
 // Defined by Glen, called by Shaun before a WiFi transmission.
 void flush_block_buffer_to_disk();
 
-// ------------ Transmission of Records/Data ------------ //
-
-// The format of record metadata.
-// Defined by Glen.
-typedef struct {
-    uint16_t len;
-    // ?? datetime?
-
-    // [len bytes follow]
-} RecordHeader;
 
 // TODO GPS STUFF ?
