@@ -54,13 +54,6 @@ fn main() {
                 let led = LaunchErrorDialog::new().unwrap();
                 led.run().unwrap();
 
-                // let _ = rfd::MessageDialog::new()
-                //     .set_title("Communication Module Control Panel")
-                //     .set_level(rfd::MessageLevel::Error)
-                //     .set_description("Another running instance was detected. Running multiple instances on one computer is unsupported.")
-                //     .set_buttons(rfd::MessageButtons::Ok)
-                //     .show();
-
                 std::process::exit(1);
             } else {
                 _single = Some(si);
@@ -69,7 +62,7 @@ fn main() {
         Err(err) => warn!(?err, "Failed to check whether this was the only instance."),
     };
 
-    let controller = control_core::Controller::subsystem();
+    let controller = control_core::Controller::demo();
 
     info!(%controller.addr, "Controller address selected.");
 
@@ -454,7 +447,7 @@ fn lora_events_handler(
                             .present_ranges(addr, begin_id, end_id)
                             .unwrap()
                             .iter()
-                            .map(|r| r.1 - r.0)
+                            .map(|r| r.1 - r.0 + 1)
                             .sum::<u64>();
 
                         let remote_only =
